@@ -47,19 +47,23 @@ if (!dryRun && !process.env.HF_TOKEN)
  */
 function ensureSpace() {
   const argv = [
-    'repo', 'create', repo,
+    'repos', 'create', repo,
     '--repo-type', 'space',
-    '--space_sdk', 'static',
+    '--space-sdk', 'static',
+    '--public',
     '--exist-ok',
-    '-y',
   ]
   console.log(`$ hf ${argv.join(' ')}`)
   if (dryRun)
     return
 
   const result = spawnSync('hf', argv, { cwd: repoRoot, stdio: 'inherit' })
+  // A token scoped tightly to one existing repo can be allowed to write to the
+  // Space yet forbidden from creating repos, which would fail here for no good
+  // reason. The upload that follows is the real test, and it fails loudly, so
+  // this stays a warning.
   if (result.status !== 0)
-    throw new Error(`hf repo create failed (exit ${result.status}) — check HF_TOKEN has write access to ${repo}`)
+    console.warn(`  could not create/verify the Space (exit ${result.status}) — continuing; the upload will report the real problem`)
 }
 
 /** One `hf upload` invocation: local path → path inside the Space repo. */

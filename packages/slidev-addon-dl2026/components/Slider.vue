@@ -30,6 +30,19 @@ const model = defineModel<number>({ required: true })
 
 const display = computed(() =>
   props.format ? props.format(model.value) : model.value.toFixed(props.precision))
+
+// Slidev binds the arrow keys to slide navigation on the window. Without this,
+// nudging a focused slider with the keyboard jumps to the next slide instead —
+// which is exactly what happens when someone drives the deck from a lectern.
+const NAV_KEYS = new Set([
+  'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown',
+  'Home', 'End', 'PageUp', 'PageDown', ' ',
+])
+
+function keepKeyLocal(event: KeyboardEvent) {
+  if (NAV_KEYS.has(event.key))
+    event.stopPropagation()
+}
 </script>
 
 <template>
@@ -42,6 +55,7 @@ const display = computed(() =>
       :max="props.max"
       :step="props.step"
       :disabled="props.disabled"
+      @keydown="keepKeyLocal"
     >
     <output class="dl-slider__value">{{ display }}<span v-if="props.unit" class="dl-slider__unit">{{ props.unit }}</span></output>
   </label>

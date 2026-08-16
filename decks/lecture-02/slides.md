@@ -38,6 +38,32 @@ This deck is not published yet — `decks.config.json` has `published: false`.
 
 ---
 layout: interactive
+title: The perceptron learning rule
+---
+
+<PerceptronPlayground />
+
+::aside::
+
+Each step applies the rule to one sample:
+
+$$\Delta w_j = \eta\,(y^{(i)} - \hat{y}^{(i)})\,x_j^{(i)}$$
+
+Turn off **linearly separable** and run a few epochs — the rule never settles.
+
+---
+layout: interactive
+title: How gradient descent works
+---
+
+<GradientDescent1D />
+
+::aside::
+
+Push η past **2.0** and watch the loss climb instead of fall.
+
+---
+layout: interactive
 title: Activation functions
 ---
 

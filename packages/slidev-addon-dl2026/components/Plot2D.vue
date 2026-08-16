@@ -6,7 +6,7 @@
  * Children position themselves in data coordinates via `usePlot()`. Nothing in
  * here is specific to any one lecture.
  */
-import { computed, provide, ref, toRef } from 'vue'
+import { computed, provide, ref, toRef, useId } from 'vue'
 import { PLOT_KEY, formatTick, niceTicks } from '../composables/usePlot'
 
 const props = withDefaults(defineProps<{
@@ -91,6 +91,7 @@ const axisY = computed(() => props.originAxes
   : inner.value.x)
 
 const svg = ref<SVGSVGElement | null>(null)
+const clipId = `dl-plot-clip-${useId()}`
 
 /** Pointer position in data coordinates, for widgets that accept dragging. */
 function dataAt(event: PointerEvent): { x: number, y: number } | null {
@@ -149,8 +150,22 @@ defineExpose({ dataAt, sx, sy, ix, iy })
       </template>
     </g>
 
-    <!-- Marks are drawn above the grid but below the labels. -->
-    <slot />
+    <!--
+      Marks are clipped to the plot area. A decision boundary or a diverging
+      trajectory legitimately runs off the domain, and without this it paints
+      straight across the rest of the slide.
+    -->
+    <defs>
+      <clipPath :id="clipId">
+        <rect :x="inner.x" :y="inner.y" :width="inner.width" :height="inner.height" />
+      </clipPath>
+    </defs>
+    <g :clip-path="`url(#${clipId})`">
+      <slot />
+    </g>
+
+    <!-- Annotations that are allowed to sit outside the axes. -->
+    <slot name="overlay" />
 
     <text
       v-if="props.xLabel"
