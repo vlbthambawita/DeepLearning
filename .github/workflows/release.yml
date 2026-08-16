@@ -119,9 +119,25 @@ jobs:
           fi
           node scripts/publish-hf.mjs "${args[@]}"
 
+      # Every deck exports to <id>/slides.pdf so the in-deck download button can
+      # use a relative URL. Release assets are flat and keyed by filename, so
+      # attaching them directly means a full-site release ships one deck's PDF
+      # and silently drops the rest. Copy them out under their deck id first —
+      # which is also a far better filename for a student to download.
+      - name: Stage the PDFs under their deck names
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          set -euo pipefail
+          mkdir -p release-pdfs
+          for f in dist/*/slides.pdf; do
+            [ -e "$f" ] || continue
+            cp "$f" "release-pdfs/$(basename "$(dirname "$f")").pdf"
+          done
+          ls -l release-pdfs
+
       - name: Attach the PDFs to a GitHub Release
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/**/slides.pdf
+          files: release-pdfs/*.pdf
           generate_release_notes: true
