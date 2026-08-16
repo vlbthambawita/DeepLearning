@@ -56,8 +56,14 @@ function trianglePath(cx: number, cy: number, r: number) {
 </script>
 
 <template>
+  <!--
+    Opacity goes through `style`, never the SVG `opacity` attribute. UnoCSS
+    attributify scans source text, so a literal `opacity="0.85"` anywhere in the
+    project emits `[opacity~="0.85"]{opacity:0.0085}` — and that CSS rule beats
+    the presentation attribute, silently rendering marks all but invisible.
+  -->
   <g class="dl-points">
-    <g v-for="m in marks" :key="m.i" :opacity="props.opacity">
+    <g v-for="m in marks" :key="m.i" :style="{ opacity: props.opacity }">
       <circle
         v-if="m.shape === 'circle'"
         :cx="m.cx" :cy="m.cy" :r="props.radius"

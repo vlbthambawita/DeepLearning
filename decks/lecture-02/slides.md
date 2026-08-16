@@ -64,6 +64,38 @@ Push η past **2.0** and watch the loss climb instead of fall.
 
 ---
 layout: interactive
+title: Feature scaling — standardisation
+---
+
+<FeatureScaling />
+
+::aside::
+
+Same points, different axes. Standardising is what lets a single learning rate
+suit every weight.
+
+---
+layout: interactive
+title: The MLP learning procedure
+---
+
+<MLPDiagram />
+
+::aside::
+
+Forward-propagate → loss → backpropagate → update.
+
+Backpropagation walks the **same** graph in reverse.
+
+---
+layout: interactive
+title: One-hot representation
+---
+
+<OneHotDemo />
+
+---
+layout: interactive
 title: Activation functions
 ---
 

@@ -32,7 +32,7 @@ const stroke = computed(() => props.color ?? 'var(--dl-heading)')
 </script>
 
 <template>
-  <g class="dl-line" :opacity="props.opacity">
+  <g class="dl-line" :style="{ opacity: props.opacity }">
     <defs v-if="props.arrow">
       <marker
         :id="markerId"

@@ -93,7 +93,7 @@ const areaPath = computed(() => {
       v-if="areaPath"
       :d="areaPath"
       :fill="props.color ?? 'var(--dl-accent)'"
-      :opacity="0.12 * props.opacity"
+      :style="{ opacity: 0.12 * props.opacity }"
       stroke="none"
     />
     <path
@@ -103,7 +103,7 @@ const areaPath = computed(() => {
       :stroke="props.color ?? 'var(--dl-accent)'"
       :stroke-width="props.width"
       :stroke-dasharray="props.dashed ? '6 5' : undefined"
-      :opacity="props.opacity"
+      :style="{ opacity: props.opacity }"
       stroke-linecap="round"
       stroke-linejoin="round"
     />
