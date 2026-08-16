@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build all decks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # --all includes decks still marked "published": false, so a broken deck
+      # in progress fails here rather than at release time.
+      - name: Build every deck
+        run: npm run build:all
+
+      - name: Check the build produced what the Space needs
+        run: |
+          test -f dist/index.html || { echo "::error::dist/index.html missing"; exit 1; }
+          test -f dist/README.md  || { echo "::error::dist/README.md missing"; exit 1; }
+          grep -q "^sdk: static" dist/README.md || { echo "::error::Space front matter is wrong"; exit 1; }
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: site
+          path: dist
+          retention-days: 7

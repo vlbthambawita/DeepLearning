@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{COURSE_TITLE}} {{COURSE_YEAR}} — {{COURSE_CODE}}</title>
+<meta name="description" content="Animated, interactive lecture slides for {{COURSE_CODE}} {{COURSE_TITLE}} {{COURSE_YEAR}}.">
+<style>
+  :root {
+    --bg: #ffffff;
+    --surface: #f7f9fa;
+    --border: #e3e8ea;
+    --heading: #111111;
+    --body: #595959;
+    --muted: #8a8a8a;
+    --accent: #0097a7;
+    --accent-soft: #e0f4f6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #2a323d;
+      --heading: #f2f5f7;
+      --body: #c2cad2;
+      --muted: #8b949e;
+      --accent: #2ec9d8;
+      --accent-soft: #123236;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--body);
+    font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 62rem; margin: 0 auto; padding: 4rem 1.5rem 5rem; }
+  .eyebrow {
+    font-size: .78rem; font-weight: 700; letter-spacing: .18em;
+    text-transform: uppercase; color: var(--accent);
+  }
+  h1 { color: var(--heading); font-size: clamp(2.2rem, 6vw, 3.4rem); line-height: 1.05; margin: .6rem 0 .8rem; letter-spacing: -.02em; }
+  .lede { font-size: 1.1rem; max-width: 46ch; margin: 0; }
+  .rule { width: 4.5rem; height: 3px; background: var(--accent); border-radius: 2px; margin: 1.6rem 0 2.4rem; }
+  .meta { font-size: .92rem; color: var(--muted); }
+  .meta a { color: var(--accent); text-decoration: none; }
+  .meta a:hover { text-decoration: underline; }
+
+  h2 { color: var(--heading); font-size: 1.1rem; letter-spacing: .06em; text-transform: uppercase; margin: 3rem 0 1rem; }
+
+  .decks { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr)); }
+  .deck {
+    display: block; padding: 1.2rem 1.3rem; border: 1px solid var(--border);
+    border-left: 3px solid var(--accent); border-radius: 10px; background: var(--surface);
+    text-decoration: none; color: inherit; transition: transform .15s ease, border-color .15s ease;
+  }
+  .deck:hover { transform: translateY(-3px); border-color: var(--accent); }
+  .deck__week { font-size: .72rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
+  .deck__title { color: var(--heading); font-size: 1.22rem; font-weight: 600; margin: .3rem 0 .25rem; }
+  .deck__sub { font-size: .92rem; color: var(--body); }
+  .deck__links { margin-top: .8rem; display: flex; flex-wrap: wrap; gap: .9rem; font-size: .82rem; }
+  .deck__links span, .deck__links a { color: var(--accent); text-decoration: none; }
+
+  .empty { padding: 2rem; border: 1px dashed var(--border); border-radius: 10px; color: var(--muted); text-align: center; }
+
+  footer { margin-top: 4rem; padding-top: 1.5rem; border-top: 1px solid var(--border); font-size: .82rem; color: var(--muted); display: flex; flex-wrap: wrap; gap: 1rem; justify-content: space-between; }
+  footer a { color: var(--accent); text-decoration: none; }
+
+  .tips { margin-top: 2.5rem; padding: 1rem 1.2rem; background: var(--accent-soft); border-radius: 10px; font-size: .9rem; }
+  .tips kbd {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .8em;
+    background: var(--bg); border: 1px solid var(--border); border-bottom-width: 2px;
+    border-radius: 4px; padding: .1rem .35rem;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">{{COURSE_CODE}} · {{COURSE_YEAR}}</div>
+  <h1>{{COURSE_TITLE}}</h1>
+  <p class="lede">Animated, interactive lecture slides. Everything runs in your browser — no install, no account.</p>
+  <div class="rule"></div>
+  <p class="meta">{{INSTRUCTOR}} · <a href="mailto:{{EMAIL}}">{{EMAIL}}</a></p>
+
+  <h2>Lectures</h2>
+  <div class="decks">
+{{DECK_CARDS}}
+  </div>
+
+  <div class="tips">
+    Navigate with <kbd>→</kbd> / <kbd>←</kbd> or <kbd>Space</kbd>. Press <kbd>o</kbd> for the slide overview,
+    <kbd>f</kbd> for fullscreen, <kbd>d</kbd> to toggle dark mode.
+  </div>
+
+  <footer>
+    <span>Built with <a href="https://sli.dev/">Slidev</a> · source on <a href="https://github.com/{{REPO}}">GitHub</a></span>
+    <span>Updated {{BUILD_DATE}}</span>
+  </footer>
+</div>
+</body>
+</html>

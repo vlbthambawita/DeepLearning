@@ -1,0 +1,35 @@
+{
+  "name": "slidev-theme-dl2026",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "description": "Slidev theme for PGR207 Deep Learning 2026 — carries the 2025 course palette forward",
+  "keywords": [
+    "slidev-theme",
+    "slidev"
+  ],
+  "engines": {
+    "node": ">=20.12.0",
+    "slidev": ">=52.0.0"
+  },
+  "slidev": {
+    "defaults": {
+      "aspectRatio": "16/9",
+      "canvasWidth": 980,
+      "colorSchema": "auto",
+      "routerMode": "hash",
+      "download": "./slides.pdf",
+      "transition": "slide-left",
+      "highlighter": "shiki",
+      "lineNumbers": false,
+      "fonts": {
+        "sans": "Inter",
+        "serif": "Source Serif 4",
+        "mono": "JetBrains Mono"
+      },
+      "drawings": {
+        "persist": false
+      }
+    }
+  }
+}

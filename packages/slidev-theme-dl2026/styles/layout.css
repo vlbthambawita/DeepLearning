@@ -1,0 +1,142 @@
+/* Base typography and slide chrome for the DL2026 theme. */
+
+.slidev-layout {
+  --slidev-code-background: var(--dl-code-bg);
+  position: relative;
+  /* Layouts must fill the canvas, not shrink to their content — otherwise the
+     absolutely-positioned footer floats up under short slides. */
+  height: 100%;
+  background: var(--dl-bg);
+  color: var(--dl-body);
+  font-size: var(--dl-fs-body);
+  line-height: 1.5;
+  padding: 2.6rem 3rem 3.2rem;
+}
+
+.slidev-layout h1,
+.slidev-layout h2,
+.slidev-layout h3,
+.slidev-layout h4 {
+  color: var(--dl-heading);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.slidev-layout h1 {
+  font-size: var(--dl-fs-heading);
+  margin-bottom: 1.2rem;
+}
+
+.slidev-layout h2 {
+  font-size: 1.7rem;
+  margin-bottom: 0.8rem;
+}
+
+.slidev-layout h3 {
+  font-size: 1.35rem;
+  margin-bottom: 0.6rem;
+}
+
+.slidev-layout p {
+  margin: 0.5rem 0;
+}
+
+/* UnoCSS's preflight resets list-style to none, so markers have to be put back
+   explicitly or every bullet list renders as unindented prose. */
+.slidev-layout ul {
+  list-style: disc outside;
+  margin: 0.4rem 0;
+  padding-left: 1.35rem;
+}
+
+.slidev-layout ol {
+  list-style: decimal outside;
+  margin: 0.4rem 0;
+  padding-left: 1.6rem;
+}
+
+.slidev-layout ul ul {
+  list-style: circle outside;
+}
+
+.slidev-layout li {
+  margin: 0.42rem 0;
+}
+
+.slidev-layout li::marker {
+  color: var(--dl-accent);
+}
+
+.slidev-layout a {
+  color: var(--dl-accent);
+  text-decoration: none;
+  border-bottom: 1px solid color-mix(in srgb, var(--dl-accent) 40%, transparent);
+  transition: border-color 0.15s ease;
+}
+
+.slidev-layout a:hover {
+  border-bottom-color: var(--dl-accent);
+}
+
+.slidev-layout strong {
+  color: var(--dl-heading);
+  font-weight: 600;
+}
+
+/* The 2025 decks used #ff0000 purely to mark a wrong prediction. Keep the
+   semantic, drop the raw red. */
+.dl-wrong {
+  color: var(--dl-danger);
+  font-weight: 600;
+}
+
+.dl-secondary {
+  font-size: var(--dl-fs-secondary);
+  color: var(--dl-muted);
+}
+
+.slidev-layout table {
+  border-collapse: collapse;
+  font-size: var(--dl-fs-secondary);
+  width: 100%;
+}
+
+.slidev-layout table th {
+  background: var(--dl-table-header);
+  color: var(--dl-heading);
+  font-weight: 600;
+  text-align: left;
+}
+
+.slidev-layout table th,
+.slidev-layout table td {
+  border: 1px solid var(--dl-border);
+  padding: 0.4rem 0.7rem;
+}
+
+.slidev-layout blockquote {
+  border-left: 3px solid var(--dl-accent);
+  background: var(--dl-accent-soft);
+  padding: 0.6rem 1rem;
+  margin: 0.8rem 0;
+  color: var(--dl-body);
+}
+
+/* The teal rule under the title-slide email in the 2025 deck, promoted to a
+   reusable element. */
+.dl-rule {
+  width: 4.5rem;
+  height: 3px;
+  background: var(--dl-accent);
+  border-radius: 2px;
+}
+
+.slidev-layout .katex {
+  color: var(--dl-heading);
+}
+
+.slidev-code-wrapper {
+  border: 1px solid var(--dl-border);
+  border-radius: 6px;
+  overflow: hidden;
+}

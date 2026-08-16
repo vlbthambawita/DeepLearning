@@ -1,0 +1,127 @@
+name: Release to Hugging Face Space
+
+# Publishing is tag-driven, so nothing reaches students until you say so.
+#
+#   git tag lecture-01-v1 && git push origin lecture-01-v1
+#       → rebuilds lecture-01 only, uploads that folder plus a refreshed
+#         landing page. Every other lecture on the Space is left untouched.
+#
+#   git tag site-v1.0.0 && git push origin site-v1.0.0
+#       → rebuilds every deck marked "published": true and replaces the whole
+#         Space, deleting anything no longer in the build.
+#
+# Use the manual trigger with dry_run to rehearse either path without uploading.
+
+on:
+  push:
+    tags:
+      - 'lecture-*-v*'
+      - 'site-v*'
+  workflow_dispatch:
+    inputs:
+      target:
+        description: 'Deck id (e.g. lecture-01) or "site" for a full rebuild'
+        required: true
+        default: site
+      dry_run:
+        description: 'Build and export, but do not upload'
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Work out what this release publishes
+        id: target
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TARGET="${{ inputs.target }}"
+            DRY="${{ inputs.dry_run }}"
+          else
+            TAG="${GITHUB_REF_NAME}"
+            DRY=false
+            case "$TAG" in
+              site-v*)      TARGET="site" ;;
+              lecture-*-v*) TARGET="$(printf '%s' "$TAG" | sed -E 's/^(lecture-[0-9]+)-v.*$/\1/')" ;;
+              *)            echo "::error::Tag '$TAG' matches neither lecture-XX-vN nor site-vX.Y.Z"; exit 1 ;;
+            esac
+          fi
+
+          if [ "$TARGET" = "site" ]; then
+            echo "mode=full" >> "$GITHUB_OUTPUT"
+          else
+            echo "mode=deck" >> "$GITHUB_OUTPUT"
+          fi
+          echo "target=$TARGET" >> "$GITHUB_OUTPUT"
+          echo "dry_run=$DRY" >> "$GITHUB_OUTPUT"
+          echo "Publishing target=$TARGET dry_run=$DRY"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - run: npm ci
+
+      - name: Install the huggingface_hub CLI
+        run: pip install --upgrade huggingface_hub
+
+      # Needed by `slidev export`, which drives a real browser to print slides.
+      - name: Install Chromium for PDF export
+        run: npx playwright install --with-deps chromium
+
+      - name: Build
+        run: |
+          if [ "${{ steps.target.outputs.mode }}" = "full" ]; then
+            node scripts/build-site.mjs
+          else
+            node scripts/build-site.mjs --only "${{ steps.target.outputs.target }}"
+          fi
+
+      - name: Export PDFs
+        run: |
+          if [ "${{ steps.target.outputs.mode }}" = "full" ]; then
+            node scripts/export-pdf.mjs
+          else
+            node scripts/export-pdf.mjs --only "${{ steps.target.outputs.target }}"
+          fi
+
+      - name: Upload to the Space
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          MODE: ${{ steps.target.outputs.mode }}
+          TARGET: ${{ steps.target.outputs.target }}
+          DRY_RUN: ${{ steps.target.outputs.dry_run }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          args=(--mode "$MODE" --message "Release $TAG")
+          if [ "$MODE" = "deck" ]; then
+            args+=(--only "$TARGET")
+          fi
+          if [ "$DRY_RUN" = "true" ]; then
+            args+=(--dry-run)
+          fi
+          node scripts/publish-hf.mjs "${args[@]}"
+
+      - name: Attach the PDFs to a GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/**/slides.pdf
+          generate_release_notes: true

@@ -216,3 +216,18 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# This file started as the Python template, whose "lib/" (packaging output) and
+# "/site" (mkdocs output) rules also swallow scripts/lib/ and site/ — both of
+# which are source here.
+!scripts/lib/
+!site/
+
+# Node / Slidev
+node_modules/
+dist/
+.slidev/
+*.tsbuildinfo
+
+# Extracted reference material from the 2025 PDFs (regenerate with scripts/extract_figures.py)
+old_slides/extracted/

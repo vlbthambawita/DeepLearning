@@ -1,0 +1,31 @@
+{
+  "course": {
+    "code": "PGR207",
+    "year": 2026,
+    "title": "Deep Learning",
+    "instructor": "Vajira Thambawita (PhD)",
+    "email": "vajira@simula.no"
+  },
+  "space": "DeepLearning-VT/DeepLearning_2026",
+  "repo": "vlbthambawita/DeepLearning",
+  "decks": [
+    {
+      "id": "lecture-01",
+      "title": "Introduction to Deep Learning",
+      "subtitle": "Course overview, what deep learning is, and where it is used",
+      "week": 1,
+      "published": true,
+      "notebook": null,
+      "source": "old_slides/2025/Teaching - Deep Leaning - 2025- Lecture 01.pdf"
+    },
+    {
+      "id": "lecture-02",
+      "title": "Basics of Neural Networks",
+      "subtitle": "Artificial neurons, the perceptron, Adaline and gradient descent",
+      "week": 2,
+      "published": false,
+      "notebook": null,
+      "source": "old_slides/2025/Teaching - Deep Leaning - 2025 - Lecture 02 .pdf"
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+/*
+ * DL2026 palette.
+ *
+ * Extracted from the 2025 Google-Slides decks so the 2026 course still reads as
+ * the same course: teal #0097a7 was the hyperlink + title-rule accent, #595959
+ * the body grey, #ff0000 was used only to flag a wrong prediction (Lecture 02,
+ * slides 11 and 15). Dark-mode values are lifted so they hold contrast on the
+ * near-black canvas rather than being reused verbatim.
+ */
+
+:root {
+  --dl-bg: #ffffff;
+  --dl-surface: #f7f9fa;
+  --dl-border: #e3e8ea;
+  --dl-heading: #111111;
+  --dl-body: #595959;
+  --dl-muted: #8a8a8a;
+  --dl-accent: #0097a7;
+  --dl-accent-soft: #e0f4f6;
+  --dl-accent-strong: #00707c;
+  --dl-danger: #d32f2f;
+  --dl-table-header: #eeeeee;
+  --dl-code-bg: #f6f8fa;
+
+  --dl-fs-title: 4.4rem;
+  --dl-fs-section: 3rem;
+  --dl-fs-heading: 2.1rem;
+  --dl-fs-body: 1.5rem;
+  --dl-fs-secondary: 1.17rem;
+  --dl-fs-citation: 0.85rem;
+}
+
+html.dark {
+  --dl-bg: #0d1117;
+  --dl-surface: #161b22;
+  --dl-border: #2a323d;
+  --dl-heading: #f2f5f7;
+  --dl-body: #c2cad2;
+  --dl-muted: #8b949e;
+  --dl-accent: #2ec9d8;
+  --dl-accent-soft: #123236;
+  --dl-accent-strong: #7fe3ee;
+  --dl-danger: #ff7b72;
+  --dl-table-header: #1c2530;
+  --dl-code-bg: #161b22;
+}

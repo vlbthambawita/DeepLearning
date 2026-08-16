@@ -1,0 +1,54 @@
+name: Staging (GitHub Pages)
+
+# Staging environment. Every push to main lands here so slides can be reviewed
+# before a tag pushes them to the public Hugging Face Space.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Install Chromium for PDF export
+        run: npx playwright install --with-deps chromium
+
+      # Pages serves this repo from /<repo>/, unlike the Space which serves from
+      # the domain root — hence the different base prefix.
+      - name: Build published decks for the Pages base path
+        run: node scripts/build-site.mjs --base-prefix "/${{ github.event.repository.name }}/"
+
+      # Staging should match production, and the theme puts a PDF download
+      # button on every deck — without this it would 404 here.
+      - name: Export PDFs
+        run: node scripts/export-pdf.mjs
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+      - id: deployment
+        uses: actions/deploy-pages@v4
