@@ -35,3 +35,18 @@ index: "02"
 # Under construction
 
 This deck is not published yet — `decks.config.json` has `published: false`.
+
+---
+layout: interactive
+title: Activation functions
+---
+
+<ActivationExplorer />
+
+::aside::
+
+The 2025 slide 30 showed this as a table screenshot.
+
+Pick **Unit step** and look at the derivative: flat zero everywhere. That is the
+whole reason Adaline swaps in a **linear** activation before gradient descent
+can be applied.
