@@ -23,7 +23,7 @@
       "title": "Basics of Neural Networks",
       "subtitle": "Artificial neurons, the perceptron, Adaline and gradient descent",
       "week": 2,
-      "published": false,
+      "published": true,
       "notebook": null,
       "source": "old_slides/2025/Teaching - Deep Leaning - 2025 - Lecture 02 .pdf"
     }

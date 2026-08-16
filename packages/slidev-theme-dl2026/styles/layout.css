@@ -197,6 +197,23 @@
   color: var(--dl-heading);
 }
 
+/*
+ * KaTeX renders display math at 1.21em, which overflows a two-column slide as
+ * soon as a summation shows up. Pull it back to body size and give dense
+ * derivations an explicit smaller step.
+ */
+.slidev-layout .katex-display > .katex {
+  font-size: 1em;
+}
+
+.dl-math-sm .katex {
+  font-size: 0.84em;
+}
+
+.dl-math-xs .katex {
+  font-size: 0.72em;
+}
+
 .slidev-code-wrapper {
   border: 1px solid var(--dl-border);
   border-radius: 6px;
