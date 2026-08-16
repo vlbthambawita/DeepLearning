@@ -131,6 +131,68 @@
   border-radius: 2px;
 }
 
+/*
+ * Shared slide furniture.
+ *
+ * These live in the theme rather than in a per-deck <style> block because a
+ * <style> inside a Slidev slide is scoped to that one slide — put them in the
+ * markdown and they silently do nothing on every other slide that uses them.
+ */
+
+/* Emphasised aside: the "we learn this step" kind of remark. */
+.dl-callout {
+  border-left: 3px solid var(--dl-accent);
+  background: var(--dl-accent-soft);
+  padding: 0.7rem 1rem;
+  border-radius: 0 6px 6px 0;
+  font-size: 1.05rem;
+}
+
+/* Captioned image tile, for photo grids. */
+.dl-card {
+  border: 1px solid var(--dl-border);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--dl-surface);
+}
+
+.dl-card img {
+  width: 100%;
+  height: 6.2rem;
+  object-fit: cover;
+  display: block;
+}
+
+/* Logos and diagrams must not be centre-cropped — use this instead of the
+   photo default, which would slice the wordmark in half. */
+.dl-card.is-contain img {
+  object-fit: contain;
+  padding: 0.5rem;
+  background: var(--dl-bg);
+}
+
+.dl-card__cap {
+  font-size: 0.78rem;
+  padding: 0.35rem 0.55rem;
+  color: var(--dl-body);
+}
+
+/* A quoted prompt or question posed to the room. */
+.dl-prompt {
+  font-size: 1.05rem;
+  font-style: italic;
+  color: var(--dl-heading);
+  border-left: 3px solid var(--dl-accent);
+  padding-left: 0.8rem;
+}
+
+/* The punchline of a click-gated reveal. */
+.dl-reveal {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--dl-accent);
+}
+
 .slidev-layout .katex {
   color: var(--dl-heading);
 }

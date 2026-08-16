@@ -1,0 +1,39 @@
+/*
+ * Styles specific to Lecture 01.
+ *
+ * Slidev loads a `style.css` sitting next to the entry markdown as a global
+ * stylesheet. A `<style>` block inside the markdown would be scoped to a single
+ * slide, which is not what these need.
+ *
+ * Anything here that a second lecture wants should move into
+ * packages/slidev-theme-dl2026/styles/layout.css instead.
+ */
+
+/* Hardware comparison cards (CPU / GPU / TPU). */
+.dl-hw {
+  border: 1px solid var(--dl-border);
+  border-radius: 8px;
+  padding: 0.9rem 1rem;
+  background: var(--dl-surface);
+}
+
+.dl-hw.is-primary {
+  border-color: var(--dl-accent);
+  background: var(--dl-accent-soft);
+}
+
+.dl-hw h3 {
+  margin: 0 0 0.35rem;
+  font-size: 1.3rem;
+}
+
+.dl-hw p {
+  margin: 0 0 0.6rem;
+  font-size: 0.92rem;
+}
+
+.dl-hw__vendors {
+  font-size: 0.74rem;
+  color: var(--dl-muted);
+  line-height: 1.5;
+}
