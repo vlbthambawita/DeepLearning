@@ -78,8 +78,11 @@ function writeLanding() {
   const template = readFileSync(join(repoRoot, 'site', 'index.template.html'), 'utf8')
   const listed = config.decks.filter(d => d.published)
 
+  // Link the file, not the directory. GitHub Pages resolves "lecture-01/" to
+  // its index.html; the Hugging Face static Space serves exact paths only and
+  // answers a directory request with its own 404 page.
   const cards = listed.length
-    ? listed.map(deck => `    <a class="deck" href="${deck.id}/">
+    ? listed.map(deck => `    <a class="deck" href="${deck.id}/index.html">
       <div class="deck__week">Week ${escapeHtml(deck.week)}</div>
       <div class="deck__title">${escapeHtml(deck.title)}</div>
       ${deck.subtitle ? `<div class="deck__sub">${escapeHtml(deck.subtitle)}</div>` : ''}
