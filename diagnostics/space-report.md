@@ -73,6 +73,7 @@ total: **400**
 - deck entry bundle: `200` `application/javascript; charset=utf-8` 93087 bytes
     - `cross-origin-opener-policy`: `same-origin`
     - `access-control-allow-origin`: `*`
+    - `etag`: `"1613da1498e67bbc7774ce9679012384bb961a8b"`
 
 ## How the Space page embeds the app
 
