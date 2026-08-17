@@ -1,0 +1,49 @@
+name: Diagnose Space
+
+# Reports what is actually deployed on the Space, so the deployed state can be
+# inspected without anyone handling the Hub token outside CI.
+#
+# Push to the `diagnostics` branch to run it. The report is committed back to
+# that branch with [skip ci] so the workflow does not retrigger itself.
+
+on:
+  push:
+    branches: [diagnostics]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - run: pip install --upgrade huggingface_hub
+
+      - name: Inspect the Space
+        env:
+          # Falls back to the release token if the full-access one is absent.
+          HF_TOKEN: ${{ secrets.HF_FULL_ACCESS_DEEPLEARNING || secrets.HF_TOKEN }}
+        run: python3 scripts/diagnose_space.py diagnostics/space-report.md
+
+      - name: Also drop it in the job summary
+        run: cat diagnostics/space-report.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Commit the report
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add diagnostics/space-report.md
+          if git diff --cached --quiet; then
+            echo "report unchanged"
+          else
+            git commit -m "Space diagnostics report [skip ci]"
+            git push
+          fi
