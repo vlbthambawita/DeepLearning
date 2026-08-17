@@ -180,11 +180,11 @@ title: Workload
 
 <v-clicks>
 
-- **Individual project** — mandatory<br>
-  <span class="dl-secondary">paper + code (notebooks)</span>
-- **Final group project**, 2–3 people — mandatory<br>
-  <span class="dl-secondary">draft paper (report) + code (notebooks)</span>
-- Grades **A–F**
+- **Compulsory assignment** — group of 2–3<br>
+  <span class="dl-secondary">released in week 2</span>
+- **Final assignment** — individual<br>
+  <span class="dl-secondary">released around week 6</span>
+- Both are **mandatory**. Grades **A–F**
 
 </v-clicks>
 
@@ -192,8 +192,65 @@ title: Workload
 </div>
 
 <!--
-The two projects are where the grade comes from. Start thinking about groups
-early — by week 8 the good pairings are already taken.
+Both assignments are mandatory and they are where the grade comes from. Groups
+form in week 2, so raise it now rather than later.
+-->
+
+---
+layout: default
+title: The two assignments
+---
+
+# The two assignments
+
+<div class="grid grid-cols-2 gap-6 mt-3">
+<div v-click class="dl-assignment">
+
+<div class="dl-assignment__when">Released week 2</div>
+
+### Compulsory assignment
+
+<div class="dl-assignment__who">Groups of 2–3 students</div>
+
+<v-clicks>
+
+- A **full project**, not an exercise
+- A **code repository**
+- A corresponding **scientific paper**
+- **Individual contributions** stated explicitly — who did what
+
+</v-clicks>
+
+</div>
+<div v-click class="dl-assignment">
+
+<div class="dl-assignment__when">Released around week 6</div>
+
+### Final assignment
+
+<div class="dl-assignment__who">Individual</div>
+
+<v-clicks>
+
+- Same structure as the compulsory assignment
+- A **code repository**
+- A corresponding **scientific paper**
+- Everything is your own work
+
+</v-clicks>
+
+</div>
+</div>
+
+<div v-click class="mt-6 dl-callout">
+Both are mandatory. The group assignment still has to make each person's
+contribution visible — a shared repository with an honest commit history does
+most of that for you.
+</div>
+
+<!--
+Say plainly what "individual contributions" means: the paper names who did
+what, and the repository history should back it up.
 -->
 
 ---

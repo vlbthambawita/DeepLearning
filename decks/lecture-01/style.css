@@ -37,3 +37,45 @@
   color: var(--dl-muted);
   line-height: 1.5;
 }
+
+/* The two-assignment comparison cards. */
+.dl-assignment {
+  border: 1px solid var(--dl-border);
+  border-left: 3px solid var(--dl-accent);
+  border-radius: 8px;
+  padding: 0.9rem 1.1rem;
+  background: var(--dl-surface);
+}
+
+.dl-assignment__when {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--dl-accent);
+}
+
+.dl-assignment h3 {
+  margin: 0.25rem 0 0.15rem;
+  font-size: 1.35rem;
+}
+
+.dl-assignment p {
+  margin: 0.1rem 0 0.4rem;
+}
+
+.dl-assignment ul {
+  margin: 0.3rem 0 0;
+  font-size: 0.95rem;
+}
+
+.dl-assignment li {
+  margin: 0.3rem 0;
+}
+
+.dl-assignment__who {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--dl-body);
+  margin-bottom: 0.2rem;
+}
