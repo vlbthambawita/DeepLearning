@@ -36,10 +36,10 @@ jobs:
       - name: Install Chromium for PDF export
         run: npx playwright install --with-deps chromium
 
-      # Pages serves this repo from /<repo>/, unlike the Space which serves from
-      # the domain root — hence the different base prefix.
-      - name: Build published decks for the Pages base path
-        run: node scripts/build-site.mjs --base-prefix "/${{ github.event.repository.name }}/"
+      # Decks are built with a relative base, so the same output works at the
+      # Pages sub-path and at the Space root — no base prefix needed.
+      - name: Build published decks
+        run: node scripts/build-site.mjs
 
       # Staging should match production, and the theme puts a PDF download
       # button on every deck — without this it would 404 here.

@@ -5,20 +5,25 @@
  * The result is exactly what gets uploaded to the Hugging Face Space, so it
  * deliberately contains no source: no slides.md, no old_slides/, no .github/.
  *
- *   node scripts/build-site.mjs                       # published decks, base "/"
+ *   node scripts/build-site.mjs                       # published decks
  *   node scripts/build-site.mjs --all                 # include unpublished (CI)
  *   node scripts/build-site.mjs --only lecture-01     # one deck (incremental release)
- *   node scripts/build-site.mjs --base-prefix /DeepLearning/   # GitHub Pages
+ *
+ * Every deck is built with a RELATIVE base ("./"), so its assets resolve against
+ * whatever URL the deck's own index.html was served from. An absolute base such
+ * as "/lecture-01/" only works when the site sits at the host root: the private
+ * Hugging Face Space is not served from the root, so every asset 404'd and the
+ * deck rendered as a blank page. Relative works at the root and under any
+ * prefix, which also makes the GitHub Pages base path a non-issue.
  *
  * The in-deck PDF download button comes from the theme's `download` default
- * ("./slides.pdf"), which resolves relative to the deck's own base path and so
- * works unchanged on both the Space and GitHub Pages. Run `export-pdf.mjs`
- * after this on anything you actually deploy, or that button 404s.
+ * ("./slides.pdf"), likewise relative. Run `export-pdf.mjs` after this on
+ * anything you actually deploy, or that button 404s.
  */
 import { spawnSync } from 'node:child_process'
 import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { loadConfig, normalizeBase, parseArgs, repoRoot, selectDecks } from './lib/config.mjs'
+import { loadConfig, parseArgs, repoRoot, selectDecks } from './lib/config.mjs'
 import { installErrorHandler } from './lib/fail.mjs'
 
 installErrorHandler()
@@ -27,7 +32,6 @@ const args = parseArgs()
 const config = loadConfig()
 
 const outDir = join(repoRoot, args.out ?? 'dist')
-const basePrefix = args['base-prefix'] ?? '/'
 const decks = selectDecks(config, { all: !!args.all, only: args.only ?? null })
 
 // --only builds into an existing dist without wiping the other decks; a full
@@ -36,21 +40,20 @@ if (!args.only && !args['no-clean'])
   rmSync(outDir, { recursive: true, force: true })
 mkdirSync(outDir, { recursive: true })
 
-console.log(`Building ${decks.length} deck(s) into ${outDir} with base "${basePrefix}"`)
+console.log(`Building ${decks.length} deck(s) into ${outDir}`)
 
 for (const deck of decks) {
-  const base = normalizeBase(basePrefix, deck.id)
   const deckOut = join(outDir, deck.id)
 
   const slidevArgs = [
     'slidev',
     'build', deck.entry,
-    '--base', base,
+    '--base', './',
     '--out', deckOut,
     '--without-notes',
   ]
 
-  console.log(`\n→ ${deck.id}  (base ${base})`)
+  console.log(`\n→ ${deck.id}`)
   const result = spawnSync('npx', slidevArgs, { cwd: repoRoot, stdio: 'inherit' })
   if (result.status !== 0)
     throw new Error(`slidev build failed for ${deck.id} (exit ${result.status})`)

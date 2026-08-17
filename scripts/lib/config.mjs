@@ -57,12 +57,3 @@ export function parseArgs(argv = process.argv.slice(2)) {
   }
   return out
 }
-
-/**
- * Normalise a base path for Slidev, which requires a leading *and* trailing
- * slash. Getting this wrong is the classic "blank page on GitHub Pages" bug.
- */
-export function normalizeBase(prefix, id) {
-  const clean = String(prefix ?? '/').replace(/^\/*/, '/').replace(/\/*$/, '/')
-  return `${clean}${id}/`
-}
