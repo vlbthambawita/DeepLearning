@@ -62,3 +62,16 @@ total: **400**
 
 - referenced assets missing from the repo: none
 
+## Serving layer
+
+- app index.html: `200` `text/html` 5131 bytes
+- deck index.html: `200` `text/html` 3406 bytes
+- deck entry bundle: `200` `application/javascript; charset=utf-8` 93087 bytes
+
+## How the Space page embeds the app
+
+- Space page HTML: `HTTP 401` Unauthorized
+- iframe tags found in server HTML: **0**
+- page HTML mentions `sandbox=`: **False**
+- page HTML mentions `static.hf.space`: **False**
+
