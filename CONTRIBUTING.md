@@ -115,6 +115,11 @@ own value. `Slider` stops the propagation; any new keyboard control must too.
 If a slide still overflows, it is usually too full — split it rather than
 shrinking further.
 
+**Never nest `<v-clicks>` inside a `v-click` element.** Slidev numbers the
+children before their container, so the children are "revealed" while the
+container is still hidden — the clicks advance the counter and nothing happens
+on screen. Reveal the container as a whole, or drop the container's `v-click`.
+
 **Check for overflow before you tag.** Nothing warns you that a slide runs off
 the canvas. Open the deck, press `o` for the overview, and look.
 

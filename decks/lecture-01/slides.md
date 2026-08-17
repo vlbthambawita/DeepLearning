@@ -203,6 +203,13 @@ title: The two assignments
 
 # The two assignments
 
+<!--
+Each card reveals whole. Do not wrap the bullets in <v-clicks> inside a
+v-click card: Slidev numbers the children before their container, so the
+bullets would be "revealed" while the card is still hidden and those clicks
+would do nothing on screen.
+-->
+
 <div class="grid grid-cols-2 gap-6 mt-3">
 <div v-click class="dl-assignment">
 
@@ -212,14 +219,10 @@ title: The two assignments
 
 <div class="dl-assignment__who">Groups of 2–3 students</div>
 
-<v-clicks>
-
 - A **full project**, not an exercise
 - A **code repository**
 - A corresponding **scientific paper**
 - **Individual contributions** stated explicitly — who did what
-
-</v-clicks>
 
 </div>
 <div v-click class="dl-assignment">
@@ -230,14 +233,10 @@ title: The two assignments
 
 <div class="dl-assignment__who">Individual</div>
 
-<v-clicks>
-
 - Same structure as the compulsory assignment
 - A **code repository**
 - A corresponding **scientific paper**
 - Everything is your own work
-
-</v-clicks>
 
 </div>
 </div>
