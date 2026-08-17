@@ -129,6 +129,16 @@ def main() -> None:
                 body = r.read()
                 lines.append(f"- {note}: `{r.status}` `{r.headers.get('content-type')}` "
                              f"{len(body)} bytes")
+                # A restrictive policy on the served content would block the
+                # module script and blank the deck, so surface the headers that
+                # could do that.
+                for h in ("content-security-policy", "content-security-policy-report-only",
+                          "x-frame-options", "cross-origin-resource-policy",
+                          "cross-origin-embedder-policy", "cross-origin-opener-policy",
+                          "access-control-allow-origin"):
+                    v = r.headers.get(h)
+                    if v:
+                        lines.append(f"    - `{h}`: `{v[:300]}`")
                 return body
         except urllib.error.HTTPError as e:
             lines.append(f"- {note}: `HTTP {e.code}` {e.reason}")
