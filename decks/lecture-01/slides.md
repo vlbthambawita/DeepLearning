@@ -346,19 +346,33 @@ combinations exists in any training set.
 -->
 
 ---
-layout: figure
-title: Large language models
+layout: interactive
+title: Three years of language and multimodal models
+aside-width: 15rem
 ---
 
-<img src="./figures/llm-evolutionary-tree.jpeg" alt="Evolutionary tree of large language models from 2019 to 2023">
+<ModelLandscape />
 
-::caption::
+::aside::
 
-Five years of large language models. Almost everything here is a **transformer** — which we cover in week 7.
+The lanes are **architectures**.
 
-::citation::
+Nearly everything recent is **decoder-only**. Encoder-only moved into retrieval;
+encoder–decoder is now a deliberate minority.
 
-<Citation source="Yang et al., Harnessing the Power of LLMs in Practice" url="https://arxiv.org/abs/2304.13712" />
+All of it is the **transformer** of week 7.
+
+<div class="mt-3 dl-secondary">Open weights only.</div>
+
+<!--
+Every model plotted here is open-weights with a paper you can read, and each
+arXiv link was checked against arxiv.org.
+
+Closed frontier models — GPT, Gemini, Claude — are deliberately absent. They
+publish no paper to link and no verifiable release date, so putting them on a
+timeline would be presenting guesses as fact. Mention them out loud; the point
+of the slide is the architecture lanes, not the leaderboard.
+-->
 
 ---
 layout: interactive
@@ -438,35 +452,17 @@ index: "04"
 ---
 layout: default
 title: Some applications of DL
+clicks: 8
 ---
 
 # Some applications of DL
 
-<div class="grid grid-cols-[1fr_auto] gap-8">
-<div>
+<ApplicationGallery />
 
-<v-clicks>
-
-- Computer vision
-- Natural language processing
-- Self-driving cars <span class="dl-secondary">(more than computer vision)</span>
-- Healthcare
-- Entertainment
-- Composing music
-- Robotics
-- Fraud detection
-- E-commerce
-
-</v-clicks>
-
-</div>
-<div class="grid grid-cols-2 gap-2 w-72 self-start">
-  <img v-click src="./figures/application-1.jpeg" alt="Deep learning application" class="rounded w-full">
-  <img v-click src="./figures/application-2.jpeg" alt="Deep learning application" class="rounded w-full">
-  <img v-click src="./figures/application-3.jpeg" alt="Deep learning application" class="rounded w-full">
-  <img v-click src="./figures/application-4.jpeg" alt="Deep learning application" class="rounded w-full">
-</div>
-</div>
+<!--
+One category per press of space. The illustration reads input on the left,
+output on the right — so each name lands as something a model actually does.
+-->
 
 ---
 layout: interactive

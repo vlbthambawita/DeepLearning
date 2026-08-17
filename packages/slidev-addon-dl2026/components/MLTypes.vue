@@ -104,30 +104,43 @@ const CLUSTER_COLORS = { 0: 'var(--dl-accent)', 1: 'var(--dl-heading)', 2: 'var(
         <PlotPoints :points="clusters" :colors="CLUSTER_COLORS" :radius="4.5" :opacity="0.9" />
       </Plot2D>
 
-      <!-- Reinforcement: the agent/environment loop. -->
+      <!--
+        Reinforcement: the agent/environment loop.
+
+        Geometry is orthogonal and every arrow starts on one box edge and ends
+        on another. Environment spans x 280-430, y 20-64; Agent spans x 30-180,
+        y 132-176. Reward and state come down onto the agent's top edge at
+        x = 80 and x = 140, both inside the box; the action arrow leaves the
+        agent's right edge and returns to the environment's bottom edge.
+      -->
       <svg v-else viewBox="0 0 460 200" class="dl-mltypes__svg">
-        <g class="box is-strong">
-          <rect x="286" y="18" width="140" height="42" rx="5" />
-          <text x="356" y="44">Environment</text>
-        </g>
-        <g class="box is-strong">
-          <rect x="34" y="140" width="140" height="42" rx="5" />
-          <text x="104" y="166">Agent</text>
-        </g>
-        <g class="arrows">
-          <path d="M290,39 L104,39 L104,136" marker-end="url(#dl-ml-arrow2)" />
-          <path d="M330,62 L200,62 L200,136" marker-end="url(#dl-ml-arrow2)" />
-          <path d="M178,161 L392,161 L392,64" marker-end="url(#dl-ml-arrow2)" />
-        </g>
         <defs>
           <marker id="dl-ml-arrow2" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
             <path d="M0,0 L7,3.5 L0,7 Z" fill="var(--dl-muted)" />
           </marker>
         </defs>
+
+        <g class="box is-strong">
+          <rect x="280" y="20" width="150" height="44" rx="5" />
+        </g>
+        <g class="box is-strong">
+          <rect x="30" y="132" width="150" height="44" rx="5" />
+        </g>
+
+        <g class="arrows">
+          <path d="M310,64 V96 H80 V128" marker-end="url(#dl-ml-arrow2)" />
+          <path d="M370,64 V116 H140 V128" marker-end="url(#dl-ml-arrow2)" />
+          <path d="M180,154 H400 V68" marker-end="url(#dl-ml-arrow2)" />
+        </g>
+
+        <g class="boxlabel">
+          <text x="355" y="48">Environment</text>
+          <text x="105" y="160">Agent</text>
+        </g>
         <g class="edgelabel">
-          <text x="118" y="30">Reward</text>
-          <text x="212" y="90">State</text>
-          <text x="300" y="180">Action</text>
+          <text x="200" y="90">reward</text>
+          <text x="258" y="110">state</text>
+          <text x="290" y="146">action</text>
         </g>
       </svg>
     </div>
@@ -194,7 +207,8 @@ const CLUSTER_COLORS = { 0: 'var(--dl-accent)', 1: 'var(--dl-heading)', 2: 'var(
   stroke: var(--dl-accent);
 }
 
-.box text {
+.box text,
+.boxlabel text {
   fill: var(--dl-heading);
   font-size: 13px;
   text-anchor: middle;
