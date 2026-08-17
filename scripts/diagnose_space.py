@@ -115,6 +115,49 @@ def main() -> None:
         except Exception as exc:  # noqa: BLE001
             lines += [f"### `{path}`", "", f"download failed: `{exc}`", ""]
 
+    # --- how the app is actually served and embedded ------------------------
+    import urllib.request
+    import urllib.error
+
+    def probe(url: str, note: str) -> None:
+        req = urllib.request.Request(url, headers={
+            "Authorization": f"Bearer {token}",
+            "User-Agent": "dl2026-diagnostics",
+        })
+        try:
+            with urllib.request.urlopen(req, timeout=30) as r:
+                body = r.read()
+                lines.append(f"- {note}: `{r.status}` `{r.headers.get('content-type')}` "
+                             f"{len(body)} bytes")
+                return body
+        except urllib.error.HTTPError as e:
+            lines.append(f"- {note}: `HTTP {e.code}` {e.reason}")
+        except Exception as exc:  # noqa: BLE001
+            lines.append(f"- {note}: failed `{exc}`")
+        return b""
+
+    app_host = "https://deeplearning-vt-deeplearning-2026.static.hf.space"
+    lines += ["## Serving layer", ""]
+    probe(f"{app_host}/index.html", "app index.html")
+    probe(f"{app_host}/lecture-01/index.html", "deck index.html")
+    probe(f"{app_host}/lecture-01/assets/index-y1O4_MBz.js", "deck entry bundle")
+    lines.append("")
+
+    lines += ["## How the Space page embeds the app", ""]
+    page = probe(f"https://huggingface.co/spaces/{REPO}", "Space page HTML")
+    html = page.decode("utf-8", "replace")
+    iframes = re.findall(r"<iframe[^>]*>", html)
+    lines.append(f"- iframe tags found in server HTML: **{len(iframes)}**")
+    for tag in iframes[:3]:
+        sandbox = re.search(r'sandbox="([^"]*)"', tag)
+        src = re.search(r'src="([^"]*)"', tag)
+        lines.append(f"  - src: `{src.group(1) if src else None}`")
+        lines.append(f"  - sandbox: `{sandbox.group(1) if sandbox else 'ABSENT'}`")
+    if not iframes:
+        for key in ("sandbox=", "static.hf.space"):
+            lines.append(f"- page HTML mentions `{key}`: **{key in html}**")
+    lines.append("")
+
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text("\n".join(lines) + "\n", encoding="utf-8")
     print(f"wrote {OUT} ({len(lines)} lines)")
