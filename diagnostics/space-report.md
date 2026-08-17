@@ -65,8 +65,14 @@ total: **400**
 ## Serving layer
 
 - app index.html: `200` `text/html` 5131 bytes
+    - `cross-origin-opener-policy`: `same-origin`
+    - `access-control-allow-origin`: `*`
 - deck index.html: `200` `text/html` 3406 bytes
+    - `cross-origin-opener-policy`: `same-origin`
+    - `access-control-allow-origin`: `*`
 - deck entry bundle: `200` `application/javascript; charset=utf-8` 93087 bytes
+    - `cross-origin-opener-policy`: `same-origin`
+    - `access-control-allow-origin`: `*`
 
 ## How the Space page embeds the app
 
