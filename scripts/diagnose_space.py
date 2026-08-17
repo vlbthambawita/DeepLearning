@@ -135,7 +135,10 @@ def main() -> None:
                 for h in ("content-security-policy", "content-security-policy-report-only",
                           "x-frame-options", "cross-origin-resource-policy",
                           "cross-origin-embedder-policy", "cross-origin-opener-policy",
-                          "access-control-allow-origin"):
+                          "access-control-allow-origin",
+                          # A long-lived cache on the deck HTML would keep
+                          # serving the old broken build through refreshes.
+                          "cache-control", "etag", "age", "last-modified"):
                     v = r.headers.get(h)
                     if v:
                         lines.append(f"    - `{h}`: `{v[:300]}`")
