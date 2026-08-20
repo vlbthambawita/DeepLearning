@@ -43,19 +43,14 @@ const props = withDefaults(defineProps<{
       weeks: [4, 5],
     },
     {
-      section: 'Recurrent Neural Networks and Transformers',
-      description: 'What an RNN is and where it applies; the mechanism, and an implementation in PyTorch. What a transformer is, and the original architecture.',
-      weeks: [6, 7],
+      section: 'Recurrent Networks, Transformers and LLMs',
+      description: 'What an RNN is and where it applies; the mechanism, and an implementation in PyTorch. What a transformer is, and the original architecture. Then large language models: how one is trained, how one is adapted, and how to build on top of one.',
+      weeks: [6, 7, 8],
     },
     {
       section: 'Generative Adversarial Networks',
       description: 'Generative models and autoencoders. Implementing a GAN in Colab, improving synthetic data quality, and the main GAN variants and applications.',
-      weeks: [8, 9],
-    },
-    {
-      section: 'Graph Neural Networks / LLMs',
-      description: 'Introduction to graph data, graph neural networks and large language models.',
-      weeks: [10],
+      weeks: [9, 10],
     },
     {
       section: 'Deep Reinforcement Learning',

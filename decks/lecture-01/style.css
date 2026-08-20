@@ -79,3 +79,22 @@
   color: var(--dl-body);
   margin-bottom: 0.2rem;
 }
+
+/* Grade badge on the two-assignment cards: pass/fail vs A-F is the one
+   distinction students ask about most, so it gets its own line. */
+.dl-assignment__grade {
+  display: inline-block;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0.05rem 0.5rem;
+  border-radius: 999px;
+  border: 1px solid var(--dl-border);
+  color: var(--dl-muted);
+  margin-bottom: 0.35rem;
+}
+
+.dl-assignment__grade.is-graded {
+  border-color: var(--dl-accent);
+  background: var(--dl-accent-soft);
+  color: var(--dl-accent-strong);
+}

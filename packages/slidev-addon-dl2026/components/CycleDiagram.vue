@@ -6,23 +6,58 @@
  * Eight steps around a hub, one readable at a time. Given as a component rather
  * than an image because this cycle is the part of the pipeline the group
  * actually does, and it will be referenced again later in the course.
+ *
+ * Each step carries its own explanation: the names alone ("data access",
+ * "quality control") sound like formalities, and the point of the slide is that
+ * they are not. The selected step's detail replaces the list's own line, so the
+ * legend stays one screen tall however long the explanations get.
  */
 import { computed, ref } from 'vue'
 
+export interface CycleStep {
+  label: string
+  /** What the step actually involves, and why it is not free. */
+  detail: string
+}
+
 const props = withDefaults(defineProps<{
-  steps?: string[]
+  steps?: CycleStep[]
   hub?: string
   size?: number
 }>(), {
   steps: () => [
-    'Ethical approval',
-    'Data access',
-    'Querying data',
-    'Data de-identification',
-    'Data transfer',
-    'Quality control',
-    'Structure data',
-    'Label data',
+    {
+      label: 'Ethical approval',
+      detail: 'A protocol to a research ethics committee: what you collect, from whom, why, for how long, and who may see it. Months, not weeks — and nothing else can start until it lands.',
+    },
+    {
+      label: 'Data access',
+      detail: 'A data-processing agreement with the hospital or registry that holds the data. Legal, not technical: who is controller, who is processor, where the data may physically sit.',
+    },
+    {
+      label: 'Querying data',
+      detail: 'Selecting the actual cohort from a clinical system — inclusion and exclusion criteria, date ranges, which modality. Done with a domain expert, or the cohort is quietly wrong.',
+    },
+    {
+      label: 'Data de-identification',
+      detail: 'Strip names, IDs and dates — including the ones hidden in DICOM headers, file names and burnt into pixels. One missed identifier can undo the whole approval.',
+    },
+    {
+      label: 'Data transfer',
+      detail: 'Moving it to where you may compute on it: encrypted transfer, an approved storage location, access logs. Terabytes over a hospital network takes longer than you expect.',
+    },
+    {
+      label: 'Quality control',
+      detail: 'Find the corrupt files, duplicates, wrong-modality scans and empty studies before they become training data. Expect to lose a real fraction of what you received.',
+    },
+    {
+      label: 'Structure data',
+      detail: 'One consistent layout: folder convention, file format, resolution, a manifest that maps every sample to its metadata. This is what makes the dataset reusable by the next person.',
+    },
+    {
+      label: 'Label data',
+      detail: 'Clinicians annotate — the expensive step. Write the labelling protocol, measure agreement between annotators, and adjudicate where they disagree.',
+    },
   ],
   hub: 'Unprocessed data',
   size: 340,
@@ -33,12 +68,13 @@ const selected = ref(0)
 const geometry = computed(() => {
   const c = props.size / 2
   const radius = props.size * 0.36
-  return props.steps.map((label, i) => {
+  return props.steps.map((step, i) => {
     // Start at the top and go clockwise, matching how the original was drawn.
     const angle = (-Math.PI / 2) + (i * 2 * Math.PI) / props.steps.length
     return {
       i,
-      label,
+      label: step.label,
+      detail: step.detail,
       x: c + radius * Math.cos(angle),
       y: c + radius * Math.sin(angle),
       angle,
@@ -47,6 +83,7 @@ const geometry = computed(() => {
 })
 
 const centre = computed(() => props.size / 2)
+const active = computed(() => props.steps[selected.value])
 
 /** Arc between consecutive steps, so the cycle reads as a direction. */
 function arcTo(i: number) {
@@ -101,6 +138,14 @@ function arcTo(i: number) {
           @mouseenter="selected = node.i"
         >{{ node.label }}</li>
       </ol>
+
+      <div class="dl-cycle__detail">
+        <div class="dl-cycle__detailhead">
+          <span class="dl-cycle__step">Step {{ selected + 1 }}</span>
+          <h3>{{ active.label }}</h3>
+        </div>
+        <p>{{ active.detail }}</p>
+      </div>
     </div>
   </div>
 </template>
@@ -109,7 +154,7 @@ function arcTo(i: number) {
 .dl-cycle {
   display: flex;
   align-items: center;
-  gap: 2rem;
+  gap: 1.6rem;
   width: 100%;
   height: 100%;
   min-height: 0;
@@ -119,7 +164,7 @@ function arcTo(i: number) {
   flex: 0 0 auto;
   height: 100%;
   max-height: 100%;
-  max-width: 50%;
+  max-width: 38%;
 }
 
 .dl-cycle__arc {
@@ -168,24 +213,66 @@ function arcTo(i: number) {
 .dl-cycle__legend {
   flex: 1 1 auto;
   min-width: 0;
+  display: flex;
+  gap: 1.4rem;
+  align-items: flex-start;
 }
 
 .dl-cycle__legend ol {
   margin: 0;
-  padding-left: 1.5rem;
+  padding-left: 1.3rem;
   list-style: decimal;
+  flex: 0 0 auto;
 }
 
 .dl-cycle__legend li {
-  margin: 0.3rem 0;
-  font-size: 1.02rem;
+  margin: 0.15rem 0;
+  font-size: 0.92rem;
   color: var(--dl-muted);
   cursor: pointer;
   transition: color 0.15s ease;
+  white-space: nowrap;
 }
 
 .dl-cycle__legend li.is-selected {
   color: var(--dl-heading);
   font-weight: 600;
+}
+
+.dl-cycle__detail {
+  flex: 1 1 auto;
+  min-width: 0;
+  border-left: 3px solid var(--dl-accent);
+  background: var(--dl-surface);
+  border-radius: 0 8px 8px 0;
+  padding: 0.7rem 0.9rem;
+}
+
+.dl-cycle__detailhead {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+}
+
+.dl-cycle__step {
+  flex-shrink: 0;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--dl-accent);
+}
+
+.dl-cycle__detail h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  line-height: 1.2;
+}
+
+.dl-cycle__detail p {
+  margin: 0.4rem 0 0;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--dl-body);
 }
 </style>
