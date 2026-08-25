@@ -27,3 +27,86 @@
   border-left: none;
   padding-left: 0;
 }
+
+/*
+ * The Iris data table. Written as raw HTML rather than a Markdown table so the
+ * header can carry both the symbol and the measurement it names, and so the two
+ * "⋮" rows can be marked up as elisions rather than as data.
+ */
+.slidev-layout table.dl-iris-table {
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.slidev-layout .dl-iris-table th,
+.slidev-layout .dl-iris-table td {
+  padding: 0.16rem 0.4rem;
+  text-align: right;
+}
+
+.slidev-layout .dl-iris-table th:last-child,
+.slidev-layout .dl-iris-table td:last-child {
+  text-align: left;
+}
+
+.slidev-layout .dl-iris-table th {
+  text-align: right;
+  font-size: 0.8rem;
+  line-height: 1.15;
+  vertical-align: bottom;
+}
+
+/* The plain-language name under each symbol. */
+.dl-iris-table th span {
+  font-weight: 400;
+  font-size: 0.62rem;
+  color: var(--dl-muted);
+  letter-spacing: 0.01em;
+}
+
+.slidev-layout .dl-iris-table tr.is-gap td {
+  color: var(--dl-muted);
+  padding: 0.05rem 0.5rem;
+}
+
+/*
+ * A column of prose set beside a dense figure: body size would push it off the
+ * slide, and dl-secondary's muted grey is too faint for content that is being
+ * read rather than glanced at.
+ */
+.dl-tight {
+  font-size: 1.06rem;
+  line-height: 1.45;
+}
+
+.dl-tight li {
+  margin: 0.34rem 0;
+}
+
+.dl-tight .dl-callout {
+  font-size: 1rem;
+}
+
+/*
+ * The perceptron/Adaline comparison. Five rows of prose in three columns needs
+ * to be smaller than the theme's default table size, which is tuned for short
+ * numeric cells.
+ */
+.slidev-layout .dl-compare-table table {
+  font-size: 0.88rem;
+  table-layout: fixed;
+}
+
+.slidev-layout .dl-compare-table th,
+.slidev-layout .dl-compare-table td {
+  padding: 0.24rem 0.6rem;
+  line-height: 1.35;
+  vertical-align: top;
+}
+
+/* The row-label column carries no data, so it gets the least room. */
+.slidev-layout .dl-compare-table td:first-child,
+.slidev-layout .dl-compare-table th:first-child {
+  width: 24%;
+  color: var(--dl-heading);
+}

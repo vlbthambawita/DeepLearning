@@ -235,3 +235,6 @@ old_slides/extracted/
 # Release staging (created by the release workflow)
 release-pdfs/
 TODO/
+
+# Working notes, not part of the course material
+TODO/

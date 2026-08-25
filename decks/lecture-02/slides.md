@@ -54,7 +54,7 @@ index: "01"
 
 ---
 layout: interactive
-title: The biological neuron
+title: The biological neuron, and what we kept
 aside-width: 16rem
 ---
 
@@ -62,10 +62,25 @@ aside-width: 16rem
 
 ::aside::
 
-Interconnected nerve cells in the brain.
+Click a part: it highlights in both diagrams at once.
 
-Click a part to see what it maps onto. The analogy is loose — but it is where
-the vocabulary comes from.
+The two usually left out matter most. A spike starts at the **axon hillock**,
+and only past a threshold — which becomes the **bias**. The spike is
+**all-or-none** — which is the unit step.
+
+<div class="mt-3 dl-secondary">
+Read the red line each time: a caricature of a nerve cell, not a model of one.
+</div>
+
+<div class="mt-3">
+  <Citation source="Kandel et al., Principles of Neural Science" />
+</div>
+
+<!--
+Do not oversell the analogy. It is where the words came from and very little
+more — overselling it is part of what set up the first AI winter.
+-->
+
 
 ---
 layout: default
@@ -103,16 +118,114 @@ the input features, in order to decide whether the neuron fires.
 </div>
 
 ---
-layout: default
-title: A sample dataset to explain the notation
+layout: interactive
+title: A sample dataset — Iris
+aside-width: 12rem
 ---
 
-# A sample dataset
+<IrisDataset>
+  <template #setosa><img src="./figures/iris-setosa.jpg" alt="Iris setosa in flower"></template>
+  <template #versicolor><img src="./figures/iris-versicolor.jpg" alt="Iris versicolor in flower"></template>
+  <template #virginica><img src="./figures/iris-virginica.jpg" alt="Iris virginica in flower"></template>
+</IrisDataset>
+
+::aside::
+
+**Iris**, Fisher 1936. 150 flowers, 50 per species.
+
+**Sepals** are the outer whorl — on an iris, the drooping *falls*. **Petals**
+are the inner *standards*.
+
+Click a species: both are redrawn to scale from a real row.
+
+<div class="mt-3 dl-callout">
+Petal length: 1.5 → 4.1 → 5.5 cm. That column does most of the work.
+</div>
+
+<!--
+Ask which measurement they would pick if allowed only one. The drawing answers
+it before the scatter plot does.
+-->
+
+---
+layout: default
+title: The Iris data, as a table
+---
+
+# What one row actually contains
+
+<div class="grid grid-cols-[1.5fr_1fr] gap-7 mt-1">
+<div>
+
+<table class="dl-iris-table">
+<thead>
+<tr>
+<th><Katex expr="i" /></th>
+<th><Katex expr="x_1" /><br><span>sepal length</span></th>
+<th><Katex expr="x_2" /><br><span>sepal width</span></th>
+<th><Katex expr="x_3" /><br><span>petal length</span></th>
+<th><Katex expr="x_4" /><br><span>petal width</span></th>
+<th><Katex expr="y" /></th>
+<th>class</th>
+</tr>
+</thead>
+<tbody>
+<tr><td>1</td><td>5.1</td><td>3.5</td><td>1.4</td><td>0.2</td><td>0</td><td><em>setosa</em></td></tr>
+<tr><td>2</td><td>4.9</td><td>3.0</td><td>1.4</td><td>0.2</td><td>0</td><td><em>setosa</em></td></tr>
+<tr class="is-gap"><td>⋮</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td>51</td><td>7.0</td><td>3.2</td><td>4.7</td><td>1.4</td><td>1</td><td><em>versicolor</em></td></tr>
+<tr><td>52</td><td>6.4</td><td>3.2</td><td>4.5</td><td>1.5</td><td>1</td><td><em>versicolor</em></td></tr>
+<tr class="is-gap"><td>⋮</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td>101</td><td>6.3</td><td>3.3</td><td>6.0</td><td>2.5</td><td>2</td><td><em>virginica</em></td></tr>
+<tr><td>102</td><td>5.8</td><td>2.7</td><td>5.1</td><td>1.9</td><td>2</td><td><em>virginica</em></td></tr>
+</tbody>
+</table>
+
+<div class="mt-2 dl-secondary">All four measurements in centimetres.</div>
+
+<div class="mt-6">
+  <Citation source="Fisher (1936), via the UCI Machine Learning Repository" url="https://archive.ics.uci.edu/dataset/53/iris" />
+</div>
+
+</div>
+<div>
+
+### The target variable
+
+<div class="dl-tight">
+
+<v-clicks>
+
+- The file stores the class as **text**: `Iris-setosa`, `Iris-versicolor`,
+  `Iris-virginica`. It has to be encoded before any arithmetic.
+- We map those to $0$, $1$, $2$ — but that order is **arbitrary**. The classes
+  are nominal; nothing says versicolor lies between the other two.
+- Today's neuron is **binary**, so we take setosa vs versicolor, two of the four
+  features, and $y \in \{0, 1\}$.
+
+</v-clicks>
+
+<div v-click class="mt-3 dl-callout">
+Three classes need three output units — <strong>one-hot</strong> encoding.
+Later today.
+</div>
+
+</div>
+
+</div>
+</div>
+
+---
+layout: default
+title: The notation
+---
+
+# The notation
 
 <div class="grid grid-cols-2 gap-6 mt-2">
 <div>
 
-The **Iris** dataset: 150 examples, 4 measured features each.
+That table, written the way every equation from here on will assume:
 
 <div class="dl-math-xs">
 
@@ -124,6 +237,7 @@ x_1^{(2)} & \cdots & x_4^{(2)} \\
 \vdots & \ddots & \vdots \\
 x_1^{(150)} & \cdots & x_4^{(150)}
 \end{bmatrix}
+\in \mathbb{R}^{150 \times 4}
 $$
 
 </div>
@@ -242,7 +356,7 @@ here on has a <code>bias=True</code> argument for exactly this.
 ---
 layout: interactive
 title: The decision function of the perceptron
-aside-width: 17rem
+aside-width: 13rem
 ---
 
 <PerceptronPlayground mode="boundary" />
@@ -250,10 +364,15 @@ aside-width: 17rem
 ::aside::
 
 $\sigma(\mathbf{w}^\top\mathbf{x} + b)$ splits the plane with a **linear
-decision boundary**.
+decision boundary**: the line where $z = 0$, with one side firing and the other
+not.
 
-The boundary is the set of points where $z = 0$; everything on one side fires,
-everything on the other does not.
+Drag $w_1, w_2$ to **rotate** it, $b$ to **slide** it. That is the whole model.
+
+<div class="mt-3 dl-secondary">
+Right: the same 24 points collapsed to one number each. The step cuts that axis
+at zero.
+</div>
 
 ---
 layout: default
@@ -285,6 +404,31 @@ Note there is **no** $x$ in the bias update — the bias has no input to scale i
 
 </div>
 </div>
+
+---
+layout: interactive
+title: The whole perceptron, error loop included
+aside-width: 13rem
+---
+
+<PerceptronDiagram />
+
+::aside::
+
+The same neuron as slide 4, with the part the learning rule needs: the output is
+**compared** against the true label $y$, and that error is what travels back to
+the weights.
+
+<div class="mt-3 dl-secondary">
+Move a slider until the prediction flips, then press <strong>Apply update</strong>.
+The two cases the next slides work through by hand are both one control away.
+</div>
+
+<!--
+Drive this one live. Set y = 1 with a negative z, apply the update twice, and
+let them see z cross zero — then set the prediction right and show that every
+delta collapses to zero.
+-->
 
 ---
 layout: default
@@ -407,14 +551,16 @@ the misclassified point.
 turn the toggle off and run a few epochs.
 
 ---
-layout: default
+layout: interactive
 title: The big picture
+aside-width: 15rem
 ---
 
-# The big picture
+<PerceptronDiagram static />
 
-<div class="grid grid-cols-2 gap-10 mt-2">
-<div>
+::aside::
+
+<div class="dl-tight">
 
 <v-clicks>
 
@@ -426,17 +572,15 @@ title: The big picture
 
 </v-clicks>
 
+<div v-click class="mt-4 dl-prompt">
+Can you read the whole diagram now?
 </div>
-<div v-click>
 
-<PerceptronVsAdaline />
-
-</div>
 </div>
 
 <!--
 "Can you understand this now?" — the 2025 deck asked this over a repeated
-screenshot. Ask it, then step through the list.
+screenshot. Ask it, then step through the list against the diagram.
 -->
 
 ---
@@ -467,17 +611,47 @@ title: ADALINE
 ---
 layout: interactive
 title: Perceptron vs Adaline
-aside-width: 16rem
+aside-width: 11rem
 ---
 
 <PerceptronVsAdaline />
 
 ::aside::
 
-One edge differs, and it decides everything.
+The **same network** twice. One edge moves — the red tap — and everything else
+follows from it.
 
-Adaline compares the true label against the **continuous** output of the linear
-activation. The perceptron compares it against the **thresholded** prediction.
+<div class="mt-3 dl-secondary">
+Click a row to take it on its own.
+</div>
+
+---
+layout: default
+title: Perceptron vs Adaline — the differences
+---
+
+# What follows from moving that one edge
+
+<div class="dl-compare-table mt-3">
+
+| | **Perceptron** — Rosenblatt, 1957 | **Adaline** — Widrow & Hoff, 1960 |
+| --- | --- | --- |
+| Learning activation | unit step, $\sigma(z) \in \{0, 1\}$ | linear, $\sigma(z) = z$ |
+| Error measured from | the **thresholded** label $\hat{y}$ | the **continuous** $\sigma(z)$, before thresholding |
+| Loss function | none — it minimises nothing | mean squared error: differentiable **and** convex |
+| How the weights move | a hand-written correction, one example at a time, only on a mistake | **gradient descent**, over all $n$ examples, every step |
+| Converges | only if the classes are linearly separable | always — to the single MSE minimum, separable or not |
+
+</div>
+
+<div class="mt-2 text-right">
+  <Citation source="Raschka — “Perceptron, Adaline, and neural network models”" url="https://sebastianraschka.com/faq/docs/diff-perceptron-adaline-neuralnet.html" />
+</div>
+
+<div class="mt-2 dl-callout">
+The unit step's derivative is zero everywhere it exists — which is the whole
+reason the perceptron has no loss to descend.
+</div>
 
 ---
 layout: default
