@@ -668,16 +668,18 @@ $$ L(\mathbf{w}, b) = \frac{1}{2n} \sum_{i=1}^{n} \Bigl(y^{(i)} - \sigma\bigl(z^
 
 </div>
 
-<div v-click class="mt-3 dl-secondary">
+<div v-click class="mt-2 dl-secondary">
 
 The $\tfrac{1}{2}$ is there purely for convenience — it cancels the 2 that falls
 out when we differentiate.
 
 </div>
 
-<div v-click class="mt-4">
+<div class="mt-5">
 
 Because the activation is **linear**:
+
+<div class="dl-tight">
 
 <v-clicks>
 
@@ -686,6 +688,8 @@ Because the activation is **linear**:
 - so we can use **gradient descent** to find it
 
 </v-clicks>
+
+</div>
 
 </div>
 
@@ -702,8 +706,9 @@ aside-width: 16rem
 Where the gradient is positive, step in the **opposite** direction. How far is
 the learning rate $\eta$.
 
-Push $\eta$ past **2.0** and the loss climbs instead of falling — slide 21 of
-the old deck, answered by doing it.
+Push $\eta$ past **2.0** and the loss climbs instead of falling: every step now
+overshoots the minimum by more than it started away from it. That is why the
+learning rate is the first thing to tune.
 
 ---
 layout: default
@@ -841,11 +846,15 @@ aside-width: 23rem
 
 ::aside::
 
-Full-batch descent needs **every** example for one step. On a large dataset that
-is unaffordable.
+One **step** is one update of $\mathbf{w}$ and $b$.
 
-**Stochastic gradient descent** uses one example — or a mini-batch — per step.
-Noisier, far cheaper, and it supports **online learning**.
+Full-batch descent averages the gradient over the **whole** training set, so all
+$n$ examples must be visited before the weights may move once — here $n = 500$;
+on ImageNet it is 1.3 million.
+
+**Stochastic gradient descent** estimates that same average from one example —
+or a mini-batch — and steps immediately. Noisier, $n$ times cheaper per step,
+and it supports **online learning**.
 
 With SGD we normally use an adaptive learning rate, e.g.
 
@@ -925,18 +934,26 @@ index: "03"
 ---
 layout: interactive
 title: The multilayer perceptron
-aside-width: 17rem
+aside-width: 16rem
 ---
 
-<MLPDiagram mode="static" :layers="[4, 6, 5, 3]" />
+<MLPDiagram mode="links" :layers="[3, 4, 2]" :width="600" :height="330" />
 
 ::aside::
 
-Connect single neurons into a **multilayer feedforward** network.
+Connect single neurons into a **multilayer feedforward** network: every unit is
+joined to **every** unit of the next layer.
 
-More than one hidden layer makes it a **deep** neural network — and training
-those needs special algorithms, which is where the term *deep learning* comes
-from.
+Each link carries one **weight**; each unit adds one **bias** (dashed).
+
+More than one hidden layer makes it **deep** — and training those needs special
+algorithms, which is where *deep learning* comes from.
+
+<!--
+Count the links out loud once: 3x4 + 4x2 = 20 weights, plus 6 biases. Then say
+what the same count is for the MNIST network later in the deck — 784x50 + 50x10
+= 39,700 — and the point about why we never write them out by hand makes itself.
+-->
 
 ---
 layout: interactive
@@ -971,24 +988,103 @@ aside-width: 16rem
 </v-clicks>
 
 <div v-click class="mt-3 dl-secondary">
-And this only works if the activations are <strong>non-linear</strong> — stack
-linear layers and you still have a linear model.
+And all of it is wasted unless the activations are
+<strong>non-linear</strong>. Next slide: why.
 </div>
+
+---
+layout: default
+title: Why the activation has to be non-linear
+---
+
+# Why the activation has to be non-linear
+
+<div class="grid grid-cols-2 gap-8 mt-2 dl-tight">
+<div>
+
+Let both activations be the identity, $\sigma(z) = z$ — two **linear** layers:
+
+<div class="dl-math-xs">
+
+$$ \mathbf{a}^{(h)} = W^{(h)}\mathbf{x} + \mathbf{b}^{(h)} $$
+
+$$ \mathbf{a}^{(\text{out})} = W^{(\text{out})}\mathbf{a}^{(h)} + \mathbf{b}^{(\text{out})} $$
+
+</div>
+
+<div v-click class="mt-3">
+
+Substitute the first line into the second:
+
+<div class="dl-math-xs">
+
+$$ \mathbf{a}^{(\text{out})} = \underbrace{W^{(\text{out})}W^{(h)}}_{W'}\,\mathbf{x} + \underbrace{W^{(\text{out})}\mathbf{b}^{(h)} + \mathbf{b}^{(\text{out})}}_{\mathbf{b}'} $$
+
+</div>
+
+</div>
+
+</div>
+<div>
+
+<div v-click class="dl-callout">
+
+$W'$ is one matrix and $\mathbf{b}'$ is one vector, so the two layers **are** a
+single layer $\mathbf{a} = W'\mathbf{x} + \mathbf{b}'$ — a straight decision
+boundary again. Stack a hundred: still one matrix. The depth bought nothing.
+
+</div>
+
+<div v-click class="mt-4">
+
+Put a non-linear $\sigma$ back between them:
+
+<div class="dl-math-xs">
+
+$$ \mathbf{a}^{(\text{out})} = W^{(\text{out})}\,\sigma\bigl(W^{(h)}\mathbf{x} + \mathbf{b}^{(h)}\bigr) + \mathbf{b}^{(\text{out})} $$
+
+</div>
+
+</div>
+
+<div v-click class="mt-3">
+
+Now $\sigma$ cannot be moved through the multiplication, so no single $W'$
+reproduces it. The layers stop collapsing — which is the *only* reason depth
+buys anything.
+
+</div>
+
+</div>
+</div>
+
+<!--
+Go slowly here. Adaline was a linear model and could not solve XOR; a stack of
+linear layers is the same model, so it cannot either. Sigmoid, tanh and ReLU all
+supply the bend — compared on the last slide.
+-->
 
 ---
 layout: figure
 title: Example — labelling handwritten digits
 ---
 
-<img src="./figures/mnist-digits.jpeg" alt="Grid of handwritten digits from the MNIST dataset">
+<MnistPipeline />
 
 ::caption::
 
-The exercise for this week: an MLP on MNIST, written from scratch.
+The exercise for this week: an MLP on MNIST, written from scratch. Every box on
+this diagram is one of the pieces we built today.
 
 ::citation::
 
-<Citation source="Raschka, Liu & Mirjalili, ch. 11" />
+<Citation source="After Raschka, Liu & Mirjalili, ch. 11" />
+
+<!--
+Walk it right to left once: 10 outputs because there are 10 digits, 50 hidden
+units because someone picked 50, 784 inputs because the image is 28 by 28. Only
+the middle number is a choice.
+-->
 
 ---
 layout: interactive

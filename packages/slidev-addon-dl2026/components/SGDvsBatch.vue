@@ -14,7 +14,11 @@ const props = withDefaults(defineProps<{
   optimum?: number
   eta?: number
   start?: number
-  /** Examples in the "dataset" — only used to count gradient evaluations. */
+  /**
+   * Training examples in the pretend dataset. It never enters the maths — the
+   * bowl below is one weight — but it is what a "full batch" step has to read,
+   * so it sets the cost of that step.
+   */
   n?: number
   noise?: number
 }>(), {
@@ -77,16 +81,23 @@ const sgdCost = computed(() => steps.value)
     </template>
 
     <template #readout>
+      <div class="dl-sgd__setup">
+        Dataset: <strong>n = {{ props.n.toLocaleString() }}</strong> training examples;
+        one <em>step</em> = one update of <i>w</i>.
+      </div>
       <div class="dl-sgd__legend">
-        <span><i class="dot is-batch" /> full batch — smooth, {{ props.n }} gradients per step</span>
-        <span><i class="dot is-sgd" /> stochastic — noisy, 1 gradient per step</span>
+        <span>
+          <i class="dot is-batch" /> full batch — reads all
+          {{ props.n.toLocaleString() }} examples per step
+        </span>
+        <span><i class="dot is-sgd" /> stochastic — reads 1 example per step</span>
       </div>
       <div>
         {{ steps }} step{{ steps === 1 ? '' : 's' }} ·
-        gradients evaluated: <strong>{{ batchCost.toLocaleString() }}</strong> vs
+        gradient evaluations so far: <strong>{{ batchCost.toLocaleString() }}</strong> vs
         <strong>{{ sgdCost.toLocaleString() }}</strong>
         <span v-if="steps > 0" class="dl-sgd__note">
-          — that ratio is the whole argument for SGD on a large dataset.
+          — same {{ steps }} update{{ steps === 1 ? '' : 's' }}, {{ props.n.toLocaleString() }}× the work.
         </span>
       </div>
     </template>
@@ -94,6 +105,11 @@ const sgdCost = computed(() => steps.value)
 </template>
 
 <style scoped>
+.dl-sgd__setup {
+  color: var(--dl-body);
+  margin-bottom: 0.3rem;
+}
+
 .dl-sgd__legend {
   display: flex;
   flex-wrap: wrap;
