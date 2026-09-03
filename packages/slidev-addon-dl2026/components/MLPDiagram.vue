@@ -8,6 +8,14 @@
  * convey visible: backpropagation walks the *same* graph in the opposite
  * direction, and the update only happens once the signal has reached the front.
  *
+ * `mode="dropout"` is Lecture 04 slide 37, where the same picture answers a
+ * different question: what `nn.Dropout(0.5)` does to it. The 2025 CNN deck gave
+ * dropout one slide of two static networks side by side, so the thing students
+ * actually get wrong — that the two pictures are the *same* network in two
+ * modes, and which one `model.eval()` selects — was left implicit. Here it is
+ * one network with a switch, and the mask is reseeded on demand so the room can
+ * see that "half the units" is a different half every batch.
+ *
  * `mode="links"` answers the other question the picture kept dodging: what the
  * lines actually are. Every unit is selectable, and selecting one names the
  * links that feed it — one weight per incoming edge, plus its own bias — beside
@@ -15,24 +23,31 @@
  * the same content whether the layer has three units or three thousand.
  */
 import { computed, onUnmounted, ref } from 'vue'
+import { seededRandom } from '../composables/useRandom'
 
 const props = withDefaults(defineProps<{
   /** Units per layer, input first. */
   layers?: number[]
   /**
    * 'static' just draws the network; 'procedure' enables the phase walk;
-   * 'links' labels the units and lets one be selected to expose its inputs.
+   * 'links' labels the units and lets one be selected to expose its inputs;
+   * 'dropout' masks hidden units under a train/eval switch.
    */
-  mode?: 'static' | 'procedure' | 'links'
+  mode?: 'static' | 'procedure' | 'links' | 'dropout'
   width?: number
   height?: number
   labels?: boolean
+  /** Dropout probability, for mode="dropout". */
+  p?: number
+  seed?: number
 }>(), {
   layers: () => [4, 6, 5, 3],
   mode: 'procedure',
   width: 520,
   height: 300,
   labels: true,
+  p: 0.5,
+  seed: 7,
 })
 
 type Phase = 'idle' | 'forward' | 'loss' | 'backward' | 'update'
@@ -42,6 +57,7 @@ const frontier = ref(0)
 const timer = ref<number | null>(null)
 
 const isLinks = computed(() => props.mode === 'links')
+const isDropout = computed(() => props.mode === 'dropout')
 const layerCount = computed(() => props.layers.length)
 
 /** Units are large enough to hold their own name only in the links diagram. */
@@ -195,6 +211,46 @@ const focusExpr = computed(() => {
 
 const focusCount = computed(() => (focus.value ? props.layers[focus.value.layer - 1] : 0))
 
+/* ---- dropout mode: one network, two behaviours -------------------------- */
+
+/** Evaluation is the default, because it is the behaviour students assume. */
+const training = ref(false)
+const draw = ref(0)
+
+/**
+ * Which hidden units are dropped on the current draw. Input and output layers
+ * are never masked — dropping an input pixel or a class score is a different
+ * technique with a different name, and conflating them is a common misreading
+ * of the picture.
+ */
+const dropped = computed(() => {
+  const out = new Set<string>()
+  if (!isDropout.value || !training.value)
+    return out
+  const rand = seededRandom(props.seed + draw.value * 7919)
+  for (let li = 1; li < layerCount.value - 1; li++) {
+    for (let ni = 0; ni < props.layers[li]; ni++) {
+      if (rand() < props.p)
+        out.add(`${li}-${ni}`)
+    }
+  }
+  return out
+})
+
+function isDroppedUnit(li: number, ni: number) {
+  return dropped.value.has(`${li}-${ni}`)
+}
+
+/** An edge is cut if either end of it is gone. */
+function isCutEdge(e: { from: number, fromIndex: number, toIndex: number, bias: boolean }) {
+  if (!isDropout.value || !training.value)
+    return false
+  return (!e.bias && isDroppedUnit(e.from, e.fromIndex)) || isDroppedUnit(e.from + 1, e.toIndex)
+}
+
+const hiddenUnits = computed(() =>
+  props.layers.slice(1, -1).reduce((a, b) => a + b, 0))
+
 /* ---- procedure mode: the phase walk ------------------------------------- */
 
 /** Which layer boundary the signal is crossing right now, if any. */
@@ -220,6 +276,8 @@ function layerState(li: number): 'idle' | 'active' | 'done' | 'updating' {
 
 /** In links mode the unit colouring says what is selected, not what is running. */
 function nodeClass(li: number, ni: number) {
+  if (isDropout.value)
+    return isDroppedUnit(li, ni) ? 'is-dropped' : 'is-kept'
   if (!isLinks.value)
     return `is-${layerState(li)}`
   if (focus.value && focus.value.layer === li && focus.value.index === ni)
@@ -332,6 +390,7 @@ function layerCaption(li: number) {
             'is-bias': e.bias,
             'is-incoming': isLinks && isIncoming(e),
             'is-faded': isLinks && focus !== null && !isIncoming(e),
+            'is-cut': isCutEdge(e),
           }"
         />
       </g>
@@ -389,7 +448,20 @@ function layerCaption(li: number) {
     </svg>
 
     <template v-if="props.mode !== 'static'" #controls>
-      <template v-if="isLinks">
+      <template v-if="isDropout">
+        <StepButton
+          :label="training ? 'Switch to model.eval()' : 'Switch to model.train()'"
+          @click="training = !training"
+        />
+        <StepButton
+          label="New mini-batch"
+          variant="ghost"
+          glyph="↻"
+          :disabled="!training"
+          @click="draw++"
+        />
+      </template>
+      <template v-else-if="isLinks">
         <StepButton label="Next unit" glyph="▸" @click="nextUnit" />
         <StepButton label="Show the whole network" variant="ghost" @click="selected = null" />
       </template>
@@ -401,7 +473,22 @@ function layerCaption(li: number) {
     </template>
 
     <template v-if="props.mode !== 'static'" #readout>
-      <span v-if="!isLinks" :class="{ 'is-live': phase !== 'idle' }">{{ CAPTION[phase] }}</span>
+      <template v-if="isDropout">
+        <div v-if="training">
+          <strong>Training.</strong> {{ dropped.size }} of the {{ hiddenUnits }} hidden units are
+          switched off for this mini-batch, and every link into or out of them is gone with
+          them. Each unit is dropped <em>independently</em> with
+          <Katex :expr="`p = ${props.p}`" />, so it is about half, not exactly half. Press
+          <strong>New mini-batch</strong>: a different set every time, so no unit can rely on
+          any particular neighbour being there.
+        </div>
+        <div v-else>
+          <strong>Evaluation.</strong> Every unit is present and nothing is dropped. This is what
+          <code>model.eval()</code> selects, and forgetting to call it is why a model can score
+          worse on the test set than it did while training.
+        </div>
+      </template>
+      <span v-else-if="!isLinks" :class="{ 'is-live': phase !== 'idle' }">{{ CAPTION[phase] }}</span>
       <template v-else-if="focus">
         <div class="dl-mlp__count">
           This unit has <strong>{{ focusCount }}</strong> incoming links — one weight per unit
@@ -492,6 +579,23 @@ function layerCaption(li: number) {
 .dl-mlp__nodes circle.is-active {
   fill: var(--dl-accent);
   stroke: var(--dl-accent-strong);
+}
+
+.dl-mlp__nodes circle.is-kept {
+  fill: var(--dl-accent-soft);
+  stroke: var(--dl-accent);
+}
+
+.dl-mlp__nodes circle.is-dropped {
+  fill: var(--dl-bg);
+  stroke: var(--dl-border);
+  stroke-dasharray: 3 2;
+}
+
+.dl-mlp__edges line.is-cut {
+  stroke: var(--dl-border);
+  stroke-width: 0.35;
+  stroke-dasharray: 2 4;
 }
 
 .dl-mlp__nodes circle.is-updating {

@@ -177,6 +177,24 @@
   color: var(--dl-body);
 }
 
+/*
+ * A column of prose set beside a dense figure or a widget: body size would push it off the
+ * slide, and dl-secondary's muted grey is too faint for content that is being
+ * read rather than glanced at.
+ */
+.dl-tight {
+  font-size: 1.06rem;
+  line-height: 1.45;
+}
+
+.dl-tight li {
+  margin: 0.34rem 0;
+}
+
+.dl-tight .dl-callout {
+  font-size: 1rem;
+}
+
 /* A quoted prompt or question posed to the room. */
 .dl-prompt {
   font-size: 1.05rem;
@@ -214,8 +232,16 @@
   font-size: 0.72em;
 }
 
+/*
+ * `overflow: hidden` is what gives the block its rounded corners, but it also
+ * makes the wrapper's `min-height` resolve to 0 — and `default` is a column
+ * flex container, so an over-long code block was quietly squeezed and its last
+ * lines swallowed with no warning anywhere. Refusing to shrink turns that
+ * silent truncation into a visible overflow, which the `o` overview catches.
+ */
 .slidev-code-wrapper {
   border: 1px solid var(--dl-border);
   border-radius: 6px;
   overflow: hidden;
+  flex-shrink: 0;
 }

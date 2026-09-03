@@ -115,19 +115,39 @@ own value. `Slider` stops the propagation; any new keyboard control must too.
 If a slide still overflows, it is usually too full — split it rather than
 shrinking further.
 
+**`title:` does not render a heading.** Slidev claims that front-matter key for
+its own slide metadata and never forwards it to the layout, so an `interactive`
+or `figure` slide whose front matter says `title:` comes out with no heading at
+all. Use `heading:` for the text the room reads; keep `title:` as well if you
+want the navigation and the exported outline to name the slide.
+
 **Never nest `<v-clicks>` inside a `v-click` element.** Slidev numbers the
 children before their container, so the children are "revealed" while the
 container is still hidden — the clicks advance the counter and nothing happens
 on screen. Reveal the container as a whole, or drop the container's `v-click`.
 
 **Check for overflow before you tag.** Nothing warns you that a slide runs off
-the canvas. Open the deck, press `o` for the overview, and look.
+the canvas. Open the deck, press `o` for the overview, and look — then run the
+check, which also catches the three cases the overview cannot show you: content
+hidden behind the footer, code lines eaten by the code block's own
+`overflow: hidden`, and a formula too wide for the `interactive` aside rail.
+
+```bash
+npm run build:all
+npm run preview &
+npm run check -- lecture-03          # or no argument for every deck
+npm run check -- lecture-03 --dark
+npm run check -- lecture-03 --shots /tmp/deck   # a PNG per slide, to eyeball
+```
+
+It walks each slide to its last click state and exits non-zero if anything is
+losing content.
 
 ## Layouts and components
 
 Layouts: `title`, `section`, `default`, `figure`, `interactive`, `end`. `figure`
 has `caption` and `citation` slots; `interactive` has an `aside` rail sized with
-`aside-width`.
+`aside-width`. Both take their heading from `heading:`, not `title:`.
 
 **Prefer these over Slidev's built-in layouts.** The footer is rendered by each
 of our layouts, so a slide using `two-cols-header` or `image-right` silently

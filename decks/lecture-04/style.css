@@ -1,0 +1,37 @@
+/*
+ * Global styles for this deck.
+ *
+ * Slidev loads a `style.css` sitting next to slides.md as a real stylesheet.
+ * A <style> block inside the markdown would be scoped to a single slide, which
+ * is almost never what you want — see CONTRIBUTING.md.
+ *
+ * If a second lecture wants something you put here, move it to
+ * packages/slidev-theme-dl2026/styles/layout.css instead.
+ */
+
+/*
+ * Four code slides, the longest of them 21 lines including the shape comments
+ * that make it worth reading. Slidev's default code size fits about 16 lines on
+ * this canvas before the last one disappears behind the footer; this fits 22 and
+ * is still legible from the back of the room.
+ */
+.slidev-layout pre.shiki {
+  font-size: 0.76rem;
+  line-height: 1.38;
+}
+
+/*
+ * The ground-truth mask beside the fully-connected argument. The theme's card
+ * default crops photographs to a landscape strip, which is wrong for a square
+ * binary mask — it is the *shape* of the thing that matters here.
+ */
+.dl-mask-tile {
+  max-width: 12rem;
+}
+
+.dl-mask-tile img {
+  height: auto;
+  aspect-ratio: 1;
+  object-fit: contain;
+  background: #000;
+}

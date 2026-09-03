@@ -70,24 +70,6 @@
 }
 
 /*
- * A column of prose set beside a dense figure: body size would push it off the
- * slide, and dl-secondary's muted grey is too faint for content that is being
- * read rather than glanced at.
- */
-.dl-tight {
-  font-size: 1.06rem;
-  line-height: 1.45;
-}
-
-.dl-tight li {
-  margin: 0.34rem 0;
-}
-
-.dl-tight .dl-callout {
-  font-size: 1rem;
-}
-
-/*
  * The perceptron/Adaline comparison. Five rows of prose in three columns needs
  * to be smaller than the theme's default table size, which is tuned for short
  * numeric cells.

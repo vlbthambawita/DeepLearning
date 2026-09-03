@@ -62,7 +62,12 @@ const props = withDefaults(defineProps<{
   currentWeek: null,
 })
 
-const selected = ref(0)
+/*
+ * Open on the block the course is actually in. Passing `current-week` marked the
+ * week on the track but left the description showing week 1, so a "where we are"
+ * slide opened on the wrong entry.
+ */
+const selected = ref(Math.max(0, props.entries.findIndex(e => e.weeks.includes(props.currentWeek ?? 0))))
 const active = computed(() => props.entries[selected.value])
 
 function label(entry: SyllabusEntry) {

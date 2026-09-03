@@ -87,17 +87,27 @@ function step(delta: number) {
   min-height: 0;
 }
 
+/*
+ * Sized from its height, not its width. `max-height: 100%` on the image cannot
+ * resolve while the frame's own height comes from that same image, so a wide
+ * figure grew past the bottom of the slide instead of being letterboxed. Taking
+ * the height from the stage and letting the width follow breaks the cycle — and
+ * the frame's box stays exactly the image's box, which is what keeps the
+ * percentage regions aligned with what they point at.
+ */
 .dl-spot__frame {
   position: relative;
-  display: inline-block;
+  display: block;
+  height: 100%;
+  width: fit-content;
   max-width: 100%;
-  max-height: 100%;
 }
 
 .dl-spot__frame :deep(img) {
   display: block;
+  height: 100%;
+  width: auto;
   max-width: 100%;
-  max-height: 100%;
   object-fit: contain;
 }
 

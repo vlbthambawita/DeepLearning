@@ -5,7 +5,16 @@
  * widget never has to carry the explanation on its own.
  */
 const props = defineProps<{
-  title?: string
+  /*
+   * The heading the room sees.
+   *
+   * Not `title`: Slidev claims that key for its own slide metadata — the nav,
+   * the overview, the exported outline — and never forwards it to the layout, so
+   * a slide whose front matter says `title:` renders with no heading at all.
+   * Setting both is the useful case: `heading` for the slide, `title` for the
+   * navigation.
+   */
+  heading?: string
   /** Width of the prose rail. */
   asideWidth?: string
   /** Put the prose rail on the left instead of the right. */
@@ -15,7 +24,7 @@ const props = defineProps<{
 
 <template>
   <div class="slidev-layout dl-interactive">
-    <h1 v-if="props.title" class="dl-interactive__title">{{ props.title }}</h1>
+    <h1 v-if="props.heading" class="dl-interactive__title">{{ props.heading }}</h1>
 
     <div class="dl-interactive__grid" :class="{ 'is-aside-left': props.asideLeft }">
       <div class="dl-interactive__stage">

@@ -6,7 +6,16 @@
  * Raschka/Liu/Mirjalili and must stay attributed wherever they are reused.
  */
 const props = defineProps<{
-  title?: string
+  /*
+   * The heading the room sees.
+   *
+   * Not `title`: Slidev claims that key for its own slide metadata — the nav,
+   * the overview, the exported outline — and never forwards it to the layout, so
+   * a slide whose front matter says `title:` renders with no heading at all.
+   * Setting both is the useful case: `heading` for the slide, `title` for the
+   * navigation.
+   */
+  heading?: string
   /** Fraction of the slide height the figure may occupy. */
   maxHeight?: string
 }>()
@@ -14,7 +23,7 @@ const props = defineProps<{
 
 <template>
   <div class="slidev-layout dl-figure">
-    <h1 v-if="props.title" class="dl-figure__title">{{ props.title }}</h1>
+    <h1 v-if="props.heading" class="dl-figure__title">{{ props.heading }}</h1>
 
     <div class="dl-figure__canvas" :style="{ maxHeight: props.maxHeight }">
       <slot />

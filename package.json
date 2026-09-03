@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "version": "0.1.0",
-  "description": "PGR207 Deep Learning 2026 — animated, interactive Slidev decks",
+  "description": "PGR207 Deep Learning 2026 \u2014 animated, interactive Slidev decks",
   "license": "CC-BY-4.0",
   "engines": {
     "node": ">=20.12.0"
@@ -17,7 +17,8 @@
     "build:all": "node scripts/build-site.mjs --all",
     "export": "node scripts/export-pdf.mjs",
     "preview": "vite preview --outDir dist --port 4173",
-    "publish:hf": "node scripts/publish-hf.mjs"
+    "publish:hf": "node scripts/publish-hf.mjs",
+    "check": "node scripts/check-overflow.mjs"
   },
   "devDependencies": {
     "@slidev/cli": "^52.19.0",
