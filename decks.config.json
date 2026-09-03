@@ -32,7 +32,7 @@
       "title": "Deep Convolutional Neural Networks",
       "subtitle": "Locality and weight sharing, the convolution operation, and CNNs in PyTorch",
       "week": 4,
-      "published": false,
+      "published": true,
       "notebook": null,
       "source": "old_slides/2025/Teaching - Deep Leaning - 2025 - Lecture 03.pdf"
     }
