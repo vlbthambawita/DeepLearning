@@ -1,0 +1,31 @@
+/*
+ * Global styles for this deck.
+ *
+ * Slidev loads a `style.css` sitting next to slides.md as a real stylesheet.
+ * A <style> block inside the markdown would be scoped to a single slide, which
+ * is almost never what you want — see CONTRIBUTING.md.
+ *
+ * If a second lecture wants something you put here, move it to
+ * packages/slidev-theme-dl2026/styles/layout.css instead.
+ */
+
+/*
+ * Nine code slides, the longest 14 lines plus the trailing shape comments that
+ * are the reason the code is on a slide at all. Slidev's default size fits
+ * about 16 short lines before the last one hides behind the footer, but these
+ * lines are wide — the comment column has to survive, because it carries the
+ * shapes. Same size Lecture 04 settled on, so the two decks read alike.
+ */
+.slidev-layout pre.shiki {
+  font-size: 0.76rem;
+  line-height: 1.38;
+}
+
+/*
+ * The shape-quiz slide is two columns of six one-line answers with an arrow in
+ * the middle of each. At body size the arrow pushes the answer onto a second
+ * line, which turns a six-item list into a twelve-line one.
+ */
+.dl-tight code {
+  white-space: nowrap;
+}
