@@ -32,7 +32,7 @@
       "title": "PyTorch for Deep Learning",
       "subtitle": "Tensors, autograd, and a fully-connected network on MNIST",
       "week": 3,
-      "published": false,
+      "published": true,
       "notebook": null,
       "source": null
     },
