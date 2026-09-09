@@ -126,6 +126,25 @@ children before their container, so the children are "revealed" while the
 container is still hidden — the clicks advance the counter and nothing happens
 on screen. Reveal the container as a whole, or drop the container's `v-click`.
 
+**A prop default cannot reference a `<script setup>` constant.** `withDefaults`
+compiles its default factories outside the setup scope, so
+`image: () => SQUARE` fails to build with "cannot reference locally declared
+variables" even though `SQUARE` is defined above it. Put the data in
+`composables/` and import it — `FeatureMapLab` keeps its image and its kernels
+in `useFilterBank.ts` for exactly this reason.
+
+**Display maths in an `interactive` aside pushes the widget off the canvas.**
+The rail is `flex-shrink: 0`, and a KaTeX `bmatrix` is one unbreakable box: if it
+is wider than `aside-width`, the rail wins and the stage is squeezed until the
+widget bleeds off the left edge of the slide. Describe the matrix in words, or
+put it on a `default` slide.
+
+**`npm run check` only sees *vertical* clipping.** A widget whose grid is sized
+in rem does not shrink, so on a narrow stage it slides underneath the aside and
+off the slide — and the check reports nothing, because nothing is hidden behind
+the footer. Widgets with fixed cell grids have to be eyeballed with `--shots`
+after any change to their cell size or their slide's `aside-width`.
+
 **Check for overflow before you tag.** Nothing warns you that a slide runs off
 the canvas. Open the deck, press `o` for the overview, and look — then run the
 check, which also catches the three cases the overview cannot show you: content

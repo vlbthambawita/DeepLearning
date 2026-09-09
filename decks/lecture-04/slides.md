@@ -29,7 +29,7 @@ itself, in one dimension and then two. Next: channels, pooling, the training
 pieces, a real CNN in PyTorch, and where CNNs go after classification.
 
 Everything in the first session is arithmetic they must be able to do by hand
-before they touch nn.Conv2d. Do not rush slides 20–21.
+before they touch nn.Conv2d. Do not rush slides 17–23.
 -->
 
 ---
@@ -86,7 +86,7 @@ Do the arithmetic out loud: 224 x 224 x 3 = 150,528 inputs, times 256 units.
 Nobody trains that as a first layer.
 
 Leave the convolution row unexplained for now — say "we will earn that number
-in about fifteen minutes" and move on. It comes back on slide 10.
+in about fifteen minutes" and move on. It comes back on slide 11.
 -->
 
 ---
@@ -100,16 +100,17 @@ A fully-connected layer has **one weight per pixel position**.
 
 <v-clicks>
 
-- Weight $w_{37}$ has learned something about *pixel 37* — and nothing about pixel 38
-- Shift the digit three pixels to the right and none of that knowledge applies
-- So "an edge" has to be learned again, separately, at **every** position in the frame
+- Weight $w_{37}$ has learned about *pixel 37* — and nothing about pixel 38
+- Shift the digit three pixels right: that stroke now lands on input **40**, read by a weight
+  that has never seen it
+- So "an edge" is learned again, separately, at **every** position in the frame
 
 </v-clicks>
 
-<div v-click class="mt-6 dl-callout">
+<div v-click class="mt-5 dl-callout">
 
-The parameter count is the symptom. The disease is that position-locked weights cannot share
-what they learn.
+The parameter count is the symptom. The disease: position-locked weights cannot share what
+they learn.
 
 </div>
 
@@ -150,7 +151,7 @@ wrong answer now.
 <!--
 This is the hinge of the lecture. Sparse connectivity is fact one made into
 wiring; parameter sharing is fact two made into wiring. Say that now, and refer
-back to it on slides 8 and 9.
+back to it on slides 9 and 10.
 -->
 
 ---
@@ -307,36 +308,42 @@ in one corner of the image is available in every other corner for free.
 </div>
 
 <!--
-This is the payoff for slide 3. Put the two numbers side by side on the board if
+This is the payoff for slide 4. Put the two numbers side by side on the board if
 the projector is small.
 
 If someone objects that 2,432 weights cannot possibly be enough: correct, which
-is why we stack many such layers. That is slide 30.
+is why we stack many such layers. That is slide 38.
 -->
 
 ---
-layout: figure
-heading: Feature maps and the receptive field
-title: Feature maps and the receptive field
+layout: interactive
+heading: One filter over a whole image
+title: One filter over a whole image
+aside-width: 17rem
 ---
 
-<img src="./figures/receptive-field.jpeg" alt="A photograph of a dog with two small patches of pixels highlighted, each connected to a single element of a feature map">
+<FeatureMapLab />
 
-::caption::
+::aside::
 
-Each element of the output — the **feature map** — is computed from one small patch of the
-input. That patch is the element's **local receptive field**.
+A 9×9 image: a bright square, on a dark background. And one filter, applied everywhere.
 
-::citation::
+<v-clicks>
 
-<Citation source="Raschka, Liu & Mirjalili, Machine Learning with PyTorch and Scikit-Learn" />
+- The output is an image too — a **feature map**, 9×9 because $p = 1$
+- Press **Next patch**: the outlined 3×3 patch is that cell's **local receptive field**
+- Every cell of the map used those same **9** weights, on its own patch
+
+</v-clicks>
 
 <!--
-Two patches, two feature-map elements. Same weights in both patches — that is
-the picture of slide 9 drawn on a real image.
+Do not explain the numbers yet — that is the next slide. Here the point is only
+the shape of the thing: an image goes in, an image comes out, and one output
+pixel comes from one small patch of input pixels.
 
-The word "feature map" is worth pausing on: it is an image, not a vector. It has
-a width, a height, and a position that means something.
+"Feature map" is worth pausing on. It is not a vector. It has a width, a height,
+and a position that still means something — which is exactly what Flatten will
+throw away at the end of the network.
 -->
 
 ---
@@ -459,7 +466,7 @@ $\mathbf{w}$
 
 <div class="dl-secondary">
 
-the **filter**, or kernel — the shared weights from slide 9
+the **filter**, or kernel — the shared weights from slide 10
 
 </div>
 
@@ -493,34 +500,121 @@ title: The formula
 
 # The formula
 
-<div class="mt-4">
+<div class="mt-2">
 
-$$ y[i] = \sum_{k} x[i + k]\, w[k] $$
+$$ y[i] = \sum_{k=0}^{m-1} x[i + k]\, w[k] $$
 
 </div>
 
+<div class="grid grid-cols-2 gap-8 mt-4 dl-tight">
+<div>
+
 <v-clicks>
 
-- $i$ indexes the **output** — one sum per output element
-- $k$ indexes the **filter** — one term per weight
-- The sum runs over the *filter*, not over the image
+- $i$ — **which output** we are computing. It is also **where the window starts**
+- $k$ — **which weight**, and how far into the window we have walked: $0, 1, \dots, m-1$
+- $x[i+k]$ — the input that weight $w[k]$ lands on when the window starts at $i$
+
+</v-clicks>
+
+</div>
+<div>
+
+<div v-click class="dl-callout">
+
+Four weights → four products → **one** output number. Then $i$ increases by the stride and we
+do the whole thing again.
+
+</div>
+
+<div v-click class="mt-4 dl-secondary">
+
+Everything the window did on the last slide is in the two indices: $i$ moves the window, $k$
+walks across it.
+
+</div>
+
+</div>
+</div>
+
+<!--
+Read it aloud in words before anything else: "output i is the sum, over the
+filter, of each weight times the input it is sitting on."
+
+The textbook writes this sum from -inf to +inf with x[i - k], which is the
+flipped version. We come to the flip in a few slides; teaching it first makes
+the code they will write look wrong to them.
+-->
+
+---
+layout: interactive
+heading: The formula, one output at a time
+title: The formula, one output at a time
+aside-width: 17rem
+---
+
+<ConvFormulaTrace />
+
+::aside::
+
+Press **Next step**. The notation becomes arithmetic, one line at a time:
+
+<v-clicks>
+
+- the **sum**, with $i$ fixed
+- $i + k$ **worked out** — four indices
+- the **numbers** those indices name
+- **one** output element
+
+</v-clicks>
+
+<div v-click class="mt-2 dl-secondary">
+
+A fifth press moves $i$ on — and $\mathbf{w}$ never changes.
+
+</div>
+
+<!--
+Walk the first output line by line, then hand the second one to the room: read
+out the four indices before pressing, then the four products.
+
+The line students actually need is the second one. Once they can turn i + k into
+four concrete indices, every convolution question in the course is arithmetic.
+-->
+
+---
+layout: default
+title: Three ways to misread it
+---
+
+# Three ways to misread it
+
+<v-clicks>
+
+- **"The sum is over the image."** It is not — $k$ stops at $m - 1$. A 4-tap filter adds four
+  products, whether the input has 8 elements or 8 million.
+- **"$\mathbf{w}$ depends on $i$."** It does not: $w[k]$, never $w[i]$. The same four numbers
+  compute every output — that is parameter sharing, written down.
+- **"One output per input."** Only if the window can stand at every position. Eight inputs
+  and a 4-tap filter gave **five** outputs.
 
 </v-clicks>
 
 <div v-click class="mt-5 dl-callout">
 
-$i + k$ can run off the end of $\mathbf{x}$: with 10 elements, a filter at $i = 8$ asks for
-$x[10]$. Two ways out — stop early, or invent the missing values.
+And one real problem: $i + k$ runs **off the end**. With $n = 8$ and $m = 4$, an output at
+$i = 5$ asks for $x[8]$, which does not exist. Two ways out — stop early, or invent the
+missing values.
 
 </div>
 
 <!--
-The textbook writes this sum from -inf to +inf with x[i - k], which is the
-flipped version. We come to the flip on slide 23; teaching it first makes the
-code they will write look wrong to them.
+All three are things students write in the exam, and the second one is the
+expensive one: a student who thinks w is indexed by i has not understood the
+lecture, whatever else they can compute.
 
-Say explicitly: the sum is over the filter, not over the image. Students who
-think there is one sum for the whole layer never recover.
+The callout is the bridge to padding. Ask which of the two ways out we have been
+using so far — stopping early, which is why five outputs and not eight.
 -->
 
 ---
@@ -534,7 +628,8 @@ aside-width: 16rem
 
 ::aside::
 
-**Padding** invents the missing values, and the invented value is zero.
+**Padding** invents the missing values, and the invented value is zero — a weight on a zero
+adds nothing, rather than a lie.
 
 Drag $p$. Each step adds one zero to each end, so a padded $\mathbf{x}$ has $n + 2p$
 elements, and the output gets longer.
@@ -552,6 +647,11 @@ practice. Let them discover that; it is a better lesson than the rule.
 
 The padded zeros are drawn dashed and grey. Point out that a tap landing on one
 contributes nothing to the sum, which is what makes zero the convenient choice.
+
+If someone asks what else you could invent: nn.Conv2d will mirror or repeat the
+edge instead — padding_mode='reflect' or 'replicate'. Both are used in
+segmentation, where a black border along the image edge is a lie the network
+learns to trust.
 -->
 
 ---
@@ -649,13 +749,13 @@ title: The size of the output
 
 Everything on the last four slides is one formula:
 
-<div class="mt-6">
+<div class="mt-3">
 
 $$ o = \left\lfloor \frac{n + 2p - m}{s} \right\rfloor + 1 $$
 
 </div>
 
-<div class="grid grid-cols-4 gap-4 mt-8 dl-secondary">
+<div class="grid grid-cols-4 gap-4 mt-4 dl-secondary">
 <div v-click>
 
 $n$ — input size
@@ -678,11 +778,11 @@ $s$ — stride
 </div>
 </div>
 
-<div v-click class="mt-8 dl-callout">
+<div v-click class="mt-6 dl-callout">
 
-Read it as: *how many places can the window stand?* $n + 2p$ is how much room there is,
-$m$ is how much room the window needs, $s$ is how far apart the standing positions are, and
-the $+1$ counts the first one.
+Read it as: *how many places can the window stand?* $n + 2p$ is the room, $m$ is what the
+window needs, $s$ is how far apart the positions are, $+1$ counts the first. A 12-seat bench
+and a 5-seat sofa: 8 places, or 4 moving two seats at a time.
 
 </div>
 
@@ -741,6 +841,46 @@ Make them compute before clicking. Both of these take ten seconds and they will
 be doing this on every layer of every architecture from now on.
 
 The floor in question 2 is the point of question 2.
+-->
+
+---
+layout: default
+title: The same formula, on shapes you will actually meet
+---
+
+# The same formula, on shapes you will actually meet
+
+<div class="dl-tight">
+
+<v-clicks>
+
+- **ResNet's first layer.** $224 \times 224$, $m = 7$, $p = 3$, $s = 2$ →
+  $\lfloor (224 + 6 - 7)/2 \rfloor + 1 = \mathbf{112}$
+- **The layer we will write today.** $28 \times 28$, $m = 5$, $p = 2$, $s = 1$ → $\mathbf{28}$.
+  Same in, same out
+- **A max-pool.** $28 \times 28$, $m = 2$, $p = 0$, $s = 2$ → $\mathbf{14}$. Pooling uses the
+  *same* formula
+- **A VGG block.** $14 \times 14$, $m = 3$, $p = 1$, $s = 1$ → $\mathbf{14}$. Shape in, shape
+  out — which is what lets you stack twenty of them
+
+</v-clicks>
+
+</div>
+
+<div v-click class="mt-4 dl-callout">
+
+Two dimensions is this formula **twice**, once for height and once for width. A 480×640 frame
+is the same work done twice with different $n$.
+
+</div>
+
+<!--
+These four rows are every shape decision in the deck's own architecture plus the
+two most-read architectures in the field. Nothing new — the point is that
+nothing new is needed.
+
+Row 3 is the one to say out loud: pooling is not a different kind of layer as
+far as shapes are concerned.
 -->
 
 ---
@@ -846,6 +986,52 @@ is why we write one number.
 -->
 
 ---
+layout: default
+title: One output cell, all nine terms
+---
+
+# One output cell, all nine terms
+
+Take the **centre** cell of that output, $Y_{1,1}$ — the one window that sees the whole input
+and no padded zeros.
+
+<div class="grid grid-cols-2 gap-8 mt-3">
+<div class="dl-math-xs">
+
+$$ X = \begin{bmatrix} 2 & 1 & 2 \\ 5 & 0 & 1 \\ 1 & 7 & 3 \end{bmatrix} \qquad W = \begin{bmatrix} 0.5 & 0.7 & 0.4 \\ 0.3 & 0.4 & 0.1 \\ 0.5 & 1.0 & 0.5 \end{bmatrix} $$
+
+<div v-click class="mt-3 dl-secondary">
+
+Multiply the two grids cell by cell — *not* a matrix product — and add up all nine numbers.
+
+</div>
+
+</div>
+<div v-click class="dl-math-xs">
+
+$$ \begin{aligned} Y_{1,1} =\;& 2(0.5) + 1(0.7) + 2(0.4) \\ +\;& 5(0.3) + 0(0.4) + 1(0.1) \\ +\;& 1(0.5) + 7(1.0) + 3(0.5) \\[2pt] =\;& \mathbf{13.1} \end{aligned} $$
+
+</div>
+</div>
+
+<div v-click class="mt-4 dl-callout">
+
+Nine weights, nine products, **one** number. The two sums in the formula are only "every row
+of the window" and "every column of the window" — two dimensions brings no new mathematics.
+
+</div>
+
+<!--
+Have the room do this one on paper while the widget from the last slide is still
+on screen, then check it against cell (1,1). Everyone gets 13.1 or finds their
+own arithmetic slip, which is the better outcome.
+
+If someone asks why not a matrix product: because a matrix product mixes rows
+with columns, and there is no reason for the pixel above to multiply the weight
+to the left. Elementwise, then sum.
+-->
+
+---
 layout: interactive
 heading: The worked example
 title: The worked example
@@ -882,6 +1068,76 @@ Four cells, nine products each. Do the first one on the board alongside the
 widget so they see that the widget is not doing anything they cannot.
 
 Output size: floor((3 + 2 - 3)/2) + 1 = 2. Ask for it before showing it.
+-->
+
+---
+layout: interactive
+heading: What the numbers in that map mean
+title: What the numbers in that map mean
+aside-width: 18rem
+---
+
+<FeatureMapLab />
+
+::aside::
+
+The filter's columns are $1, 0, -1$: it asks *brighter on the left than on the right?*
+everywhere.
+
+<v-clicks>
+
+- **−27** down the left side: dark, then bright
+- **+27** down the right: the same edge, reversed
+- **0** in both flat regions — inside and outside
+- **0** along the **top and bottom** edges too — this filter is blind to them
+
+</v-clicks>
+
+<!--
+The last bullet is the slide. A filter does not detect "the square" — it detects
+one pattern, everywhere, and answers with a signed number for how much of that
+pattern it found. That is why a layer needs many filters, and why the next slide
+runs three of them.
+
+Ask for the sign before revealing it: dark-then-bright is negative here, and
+nothing about that is fundamental — flip the filter's sign and it flips too.
+-->
+
+---
+layout: interactive
+heading: Same image, three filters
+title: Same image, three filters
+aside-width: 19rem
+---
+
+<FeatureMapLab mode="compare" :values="false" />
+
+::aside::
+
+Three filters, one image, three feature maps.
+
+<v-clicks>
+
+- **vertical edge** — the two sides only
+- **horizontal edge** — top and bottom only
+- **blur** — each value → its 3×3 average
+
+</v-clicks>
+
+<div v-click class="mt-3 dl-callout">
+
+For fifty years, computer vision was people writing kernels like these. A CNN **learns**
+them.
+
+</div>
+
+<!--
+This is the pay-off of parameter sharing made visible: one filter is one
+question asked at every position, and a layer with 32 filters asks 32 questions.
+
+Sobel, Prewitt, Gaussian blur — name them as the hand-designed ancestors, then
+say the honest version: a trained network's first layer really does end up
+looking like these, and nobody told it to.
 -->
 
 ---
@@ -965,6 +1221,12 @@ $m_1 \times m_2 \times C_{\text{in}} \times C_{\text{out}}$.
 
 </div>
 
+<div v-click class="mt-2 dl-secondary">
+
+One number: 3×3 on RGB reads **27** inputs → 27 products, one bias.
+
+</div>
+
 <!--
 The thing to make unmissable: the number of output channels is the number of
 filters, and each filter is a full-depth stack. Students who think a filter is
@@ -1003,10 +1265,48 @@ $$ 5 \times 5 \times 3 \times 32 + 32 = 2\,432 $$
 </v-clicks>
 
 <!--
-Same number as slide 10, now derived rather than asserted.
+Same number as slide 11, now derived rather than asserted.
 
 The third bullet is the setup for the next slide. If someone asks why not one
 huge kernel, say "hold that", then answer it with the widget.
+-->
+
+---
+layout: default
+title: Your turn — count the weights
+---
+
+# Your turn — count the weights
+
+<div class="dl-tight dl-math-sm">
+
+<v-clicks>
+
+- `nn.Conv2d(3, 32, kernel_size=3)` → $3 \cdot 3 \cdot 3 \cdot 32 + 32 = \mathbf{896}$
+- `nn.Conv2d(32, 64, kernel_size=3)` → $3 \cdot 3 \cdot 32 \cdot 64 + 64 = \mathbf{18\,496}$
+- `nn.Conv2d(64, 64, kernel_size=3)` → $\mathbf{36\,928}$ — and the same layer at
+  `kernel_size=11` → $\mathbf{495\,680}$, thirteen times more
+- `nn.Linear(7*7*64, 1024)` → $3136 \cdot 1024 + 1024 = \mathbf{3\,212\,288}$
+
+</v-clicks>
+
+</div>
+
+<div v-click class="mt-4 dl-callout">
+
+Every convolution above is cheap, and the one dense layer costs **more than eighty times all
+of them together**. Hold that number — it comes back when we count our own network.
+
+</div>
+
+<!--
+Do the first one together, then let them race the other three. The arithmetic is
+the point: they will be reading architecture tables for the rest of the course.
+
+Row 3 is the answer to "why not one big kernel" from a cost angle; the next
+slide answers it from a reach angle.
+
+The eighty times: 3,212,288 against 896 + 18,496 + 36,928 = 56,320.
 -->
 
 ---
@@ -1033,7 +1333,7 @@ The highlighted region is what one output unit can see, back at the input. Drag
 
 <div v-click class="mt-3 dl-callout">
 
-Same reach, fewer weights, one nonlinearity per layer.
+Same reach, fewer weights, one nonlinearity per layer — and $L$ layers reach $1 + L(m-1)$.
 
 </div>
 
@@ -1198,7 +1498,8 @@ flowchart LR
 
 - The **nonlinearity goes between** the convolution and the pooling, on every conv layer
 - It is almost always **ReLU**: $\max(0, z)$ — cheap, and it does not saturate
-- Without it, depth buys nothing at all: the whole stack collapses to a single linear map
+- Without it the stack collapses to a single linear map: $[1, -1]$ followed by $[1, -1]$
+  **is** the one filter $[1, -2, 1]$
 
 </v-clicks>
 
@@ -1240,6 +1541,11 @@ not).
 
 In a CNN, dropout normally goes in the fully-connected head, not between conv
 layers — the conv layers have few enough parameters that they rarely need it.
+
+If someone asks about the scale: with p = 0.5 half the inputs to the next layer
+are missing, so its sums would be half as large in training as in eval. PyTorch
+divides the surviving activations by 1 - p during training, so the two modes
+agree. That is why there is nothing to undo at eval time.
 -->
 
 ---
@@ -1249,14 +1555,16 @@ title: Batch normalisation, in one slide
 
 # Batch normalisation, in one slide
 
-Standardise each channel across the mini-batch, then let the network rescale it with two
-learned parameters.
+Standardise each channel across the mini-batch; two learned parameters rescale it.
 
 <div class="mt-3 dl-math-sm">
 
 $$ \hat{z} = \frac{z - \mu_{\text{batch}}}{\sqrt{\sigma^2_{\text{batch}} + \epsilon}}, \qquad \text{out} = \gamma \hat{z} + \beta $$
 
 </div>
+
+<div class="grid grid-cols-2 gap-8 mt-3 dl-tight">
+<div>
 
 <v-clicks>
 
@@ -1266,10 +1574,23 @@ $$ \hat{z} = \frac{z - \mu_{\text{batch}}}{\sqrt{\sigma^2_{\text{batch}} + \epsi
 
 </v-clicks>
 
+</div>
+<div>
+
+<div v-click class="dl-callout">
+
+Four images, one channel, activations $10, 12, 14, 16$: $\mu = 13$, $\sigma = 2.24$, and out
+come $-1.34, -0.45, 0.45, 1.34$.
+
+</div>
+
 <div v-click class="mt-3 dl-secondary">
 
 We use it, we do not derive it.
 
+</div>
+
+</div>
 </div>
 
 <!--
@@ -1278,6 +1599,58 @@ the code that follows.
 
 Worth one mention because every architecture they read about has it, and because
 "why does my model behave differently in eval" has two answers, not one.
+-->
+
+---
+layout: default
+title: What the loss actually computes
+---
+
+# What the loss actually computes
+
+Three classes, one image. The model's last layer emits three raw numbers — the **logits**:
+
+<div class="mt-1 dl-math-sm">
+
+$$ \mathbf{z} = [\,2.0,\quad 0.5,\quad -1.0\,] $$
+
+</div>
+
+<div class="grid grid-cols-2 gap-8 mt-2 dl-tight">
+<div>
+
+<v-clicks>
+
+- **softmax** turns them into probabilities: $[0.79,\; 0.18,\; 0.04]$
+- the loss then looks at **one** of them — the true class — and takes $-\log$ of it
+- true class **0**: $-\log 0.79 = \mathbf{0.24}$ — nearly right
+- true class **2**: $-\log 0.04 = \mathbf{3.24}$ — confidently wrong
+
+</v-clicks>
+
+</div>
+<div>
+
+<div v-click class="dl-callout dl-math-sm">
+
+$$ \ell = -\log p_{\text{true}} $$
+
+Right and confident is cheap. Wrong and confident is expensive. Genuinely unsure —
+$p = 1/3$ each — costs $\log 3 = 1.10$ whatever the answer turns out to be.
+
+</div>
+
+</div>
+</div>
+
+<!--
+Do the softmax on the board if they have not seen it since Lecture 02:
+exp(2), exp(0.5), exp(-1) = 7.39, 1.65, 0.37, sum 9.41, divide.
+
+The fact worth adding aloud: the gradient of this loss with respect to the
+logits is exactly p - y, here [-0.21, 0.18, 0.04]. "Probability minus truth" is
+the whole backward pass of the last layer, and it is why these losses pair with
+these last layers.
 -->
 
 ---
@@ -1314,6 +1687,68 @@ same; the last column and the callout are the part that stops the bug.
 
 Ask what the model's last layer should be if the loss is CrossEntropyLoss. The
 answer "nothing" surprises people every year.
+-->
+
+---
+layout: default
+title: The double softmax, in numbers
+---
+
+# The double softmax, in numbers
+
+<div class="grid grid-cols-2 gap-8 mt-1 dl-tight">
+<div>
+
+### As intended
+
+<v-clicks>
+
+- model ends `Linear(…, 3)` → $[2.0, 0.5, -1.0]$
+- `CrossEntropyLoss` softmaxes → $[0.79, 0.18, 0.04]$
+- true class 0 → loss $\mathbf{0.24}$
+
+</v-clicks>
+
+</div>
+<div>
+
+### With a `Softmax` on the end
+
+<v-clicks>
+
+- model outputs $[0.79, 0.18, 0.04]$
+- the loss softmaxes **those** → $[0.50, 0.27, 0.24]$
+- true class 0 → loss $\mathbf{0.70}$
+
+</v-clicks>
+
+</div>
+</div>
+
+<div v-click class="mt-3 dl-math-sm">
+
+Worse: make the model *certain* — logits $[6.0, 0.5, -1.0]$, so $p_0 = 0.995$ — and the
+doubled version still reports $0.57$, a loss of $\mathbf{0.55}$. However sure the model
+becomes, this loss cannot fall below about $0.55$.
+
+</div>
+
+<div v-click class="mt-3 dl-callout">
+
+Nothing crashes and the loss curve still falls. The network is simply never rewarded for being
+sure — so it never becomes sure, and the accuracy is quietly short.
+
+</div>
+
+<!--
+Softmax of an already-softmaxed vector squashes everything towards 1/K, because
+the inputs are now all between 0 and 1 — a range of at most 1 in the exponent.
+That is the whole bug in one sentence.
+
+The floor, exactly: as the model saturates the probability vector tends to
+[1, 0, 0], and softmax([1, 0, 0]) = e/(e + 2) = 0.576, so the loss bottoms out at
+log(2 + e) - 1 = 0.552 instead of 0. Worth writing on the board — it is the most
+convincing version of the argument.
 -->
 
 ---
@@ -1660,8 +2095,65 @@ the resolution back up after all that pooling.
 The 172 M number is the argument. Compute it with them: 3136 features in,
 54,756 pixels out.
 
-This is exactly the imbalance the architecture ledger showed on slide 41, taken
+This is exactly the imbalance the architecture ledger showed on slide 51, taken
 to its conclusion.
+-->
+
+---
+layout: default
+title: Getting the resolution back
+---
+
+# Getting the resolution back
+
+Pooling threw the resolution away: $234 \to 117 \to 58 \to 29$. A mask needs all 234 back.
+Two ways up, both one line of PyTorch:
+
+<div class="grid grid-cols-2 gap-8 mt-3 dl-tight">
+<div>
+
+<v-clicks>
+
+- `nn.Upsample(scale_factor=2)` — copy each value into a 2×2 block, then a normal `Conv2d`
+  tidies it up. **No parameters** in the upsample
+- `nn.ConvTranspose2d(64, 64, 2, stride=2)` — **learnable**. Each input value is multiplied by
+  the whole kernel, and the pieces are *added into* a larger output
+
+</v-clicks>
+
+</div>
+<div>
+
+<div v-click class="dl-math-sm">
+
+In one dimension, $\mathbf{x} = [2, 3]$, $\mathbf{w} = [1, 0.5]$, $s = 2$:
+
+$$ 2 \cdot [1,\, 0.5] \;\text{at } 0, \qquad 3 \cdot [1,\, 0.5] \;\text{at } 2 $$
+
+$$ \mathbf{y} = [\,2,\; 1,\; 3,\; 1.5\,], \qquad o = (n-1)s + m $$
+
+</div>
+
+</div>
+</div>
+
+<div v-click class="mt-3 dl-callout">
+
+A convolution asks *how many places can the window stand?* A transposed convolution asks
+*where does each input write?* Same weights, run the other way — hence **transposed**, not
+"deconvolution".
+
+</div>
+
+<!--
+Draw the 1D example on the board as two overlapping strips. With stride 2 and a
+2-tap kernel they do not overlap; with a 3-tap kernel they do, the overlaps get
+added, and that uneven adding is exactly where checkerboard artefacts in
+generated images come from. Upsample-then-convolve avoids it, which is why many
+modern U-Net implementations use it.
+
+Output size: (n - 1)s + m is the output-size formula solved for n. That is the
+one line worth having them notice.
 -->
 
 ---
@@ -1689,6 +2181,77 @@ turns 64 channels into 2 class scores per pixel, and the grey arrows.
 The skip connections are the insight. Pooling destroys the exact position of an
 edge; the encoder still has it at full resolution, so hand it across rather than
 trying to reconstruct it. Everything else here is week 4 material.
+-->
+
+---
+layout: default
+title: Training on a mask — the loss, and the score
+---
+
+# Training on a mask — the loss, and the score
+
+<div class="grid grid-cols-2 gap-8 mt-1 dl-tight">
+<div>
+
+### The loss: per pixel
+
+A mask is 54 756 independent yes/no decisions, so it is the **binary** loss, averaged over
+pixels: `BCEWithLogitsLoss` straight on the output map.
+
+<v-clicks>
+
+- one pixel, logit $2.0$ → $p = 0.88$
+- that pixel **is** polyp: loss $0.13$
+- that pixel is **not**: loss $2.13$
+- average over every pixel, every image
+
+</v-clicks>
+
+</div>
+<div>
+
+### The score: Dice
+
+<div v-click>
+
+Accuracy is useless here: a polyp is a few per cent of the frame, so "no polyp anywhere"
+already scores 95%.
+
+</div>
+
+<div v-click class="mt-2 dl-math-sm">
+
+$$ \text{Dice} = \frac{2\,|A \cap B|}{|A| + |B|} $$
+
+</div>
+
+<div v-click class="mt-1 dl-math-xs">
+
+Truth 4 pixels, prediction 4 pixels, overlap 3:
+
+$$ \text{Dice} = \frac{2 \cdot 3}{4 + 4} = 0.75 \qquad (\text{IoU} = \tfrac{3}{5} = 0.6) $$
+
+</div>
+
+</div>
+</div>
+
+<div v-click class="mt-3 dl-callout">
+
+Trained per pixel, judged per region. Dice ignores the vast correct background entirely,
+which is exactly why it is the number your project reports.
+
+</div>
+
+<!--
+The two halves are a real conceptual split and students conflate them: the loss
+is what gradient descent minimises, Dice is what a clinician cares about. Many
+segmentation papers optimise a sum of BCE and (1 - Dice) to close the gap; say
+that, because they will meet it in the reference implementation.
+
+Dice and IoU are monotonically related — Dice = 2·IoU/(1 + IoU) — so a ranking by
+one is a ranking by the other. Only the numbers differ, and Dice is always the
+kinder of the two.
 -->
 
 ---
