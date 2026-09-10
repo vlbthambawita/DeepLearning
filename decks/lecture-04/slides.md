@@ -1311,38 +1311,115 @@ The eighty times: 3,212,288 against 896 + 18,496 + 36,928 = 56,320.
 
 ---
 layout: interactive
-heading: Why stack small kernels instead of using one big one
-title: Why stack small kernels instead of using one big one
-aside-width: 20rem
+heading: What one unit can see
+title: What one unit can see
+aside-width: 22rem
+---
+
+<ReceptiveFieldChain />
+
+::aside::
+
+Read it **downwards**, from the dark unit at the top.
+
+<v-clicks>
+
+- **1 layer**: it reads a window of **3** pixels — nothing else can change it
+- **2 layers**: 3 units of *conv 1*, each reading 3 overlapping pixels → **5**
+- **3 layers** → **7**. Each layer adds $m - 1 = 2$, not $m$: the windows overlap
+
+</v-clicks>
+
+<div v-click class="mt-2 dl-callout">
+
+That cone is the unit's **receptive field** — every input that can affect it.
+
+</div>
+
+<!--
+Drag the slider one step at a time and count the lines with the room. The
+"adds m − 1, not m" step is the one nobody guesses right: ask for a prediction
+between layer 1 and layer 2 and most of the room will say 6 or 9.
+
+Say the consequence out loud: a unit in layer 2 physically cannot know about a
+pixel eight columns away. If the object is bigger than the cone, no amount of
+filters in that layer will find it — you need depth.
+-->
+
+---
+layout: interactive
+heading: The same field, seen from the front
+title: The same field, seen from the front
+aside-width: 19rem
 ---
 
 <ConvStackDiagram mode="receptive-field" :kernel="3" :max-depth="3" />
 
 ::aside::
 
-The highlighted region is what one output unit can see, back at the input. Drag
-**stacked layers**:
+The same cone in two dimensions, head on: the patch of image one output unit depends on.
 
 <v-clicks>
 
-- 1 layer sees 3×3
-- 2 layers see 5×5 — **18** weights, not 25
-- 3 layers see 7×7 — **27** weights, not 49
+- 1 layer → **3×3**
+- 2 layers → **5×5**
+- 3 layers → **7×7**
+- $L$ layers of $m$: $1 + L(m-1)$ per side
 
 </v-clicks>
 
-<div v-click class="mt-3 dl-callout">
+<div v-click class="mt-2 dl-secondary">
 
-Same reach, fewer weights, one nonlinearity per layer — and $L$ layers reach $1 + L(m-1)$.
+A pool multiplies everything above it: three layers after two 2×2 pools reach **4×** as far.
 
 </div>
 
 <!--
-This is the single idea behind VGG and everything after it, and the 2025 deck
-did not have it.
+Two views of one fact, deliberately: the chain shows the mechanism, this shows
+the area. Students who saw only the area memorise the numbers.
 
-The receptive field is why depth matters at all: a shallow network physically
-cannot see a large object, however many filters it has.
+The secondary line is the answer to "how does a network ever see a whole
+object?" — pooling, not bigger kernels. It also previews why the U-Net encoder
+can afford to be all 3×3.
+-->
+
+---
+layout: interactive
+heading: Three 3×3 layers, or one 7×7?
+title: Three 3×3 layers, or one 7×7?
+aside-width: 18rem
+---
+
+<ReceptiveFieldChain mode="compare" :max-depth="3" :channels="64" />
+
+::aside::
+
+Both cones end on the same **7** pixels. The bill does not match.
+
+<v-clicks>
+
+- stacked: $3 \times 3^2 = \mathbf{27}$ weights
+- one kernel: $7^2 = \mathbf{49}$
+- at 64→64 channels: **110 592** against **200 704**
+
+</v-clicks>
+
+<div v-click class="mt-2 dl-callout">
+
+And the stack passes a **ReLU three times**, so it expresses shapes one window cannot.
+Cheaper *and* stronger — hence 3×3 everywhere since 2014.
+
+</div>
+
+<!--
+The two-layer version is the same argument in smaller numbers: two 3×3 see 5×5
+for 18 weights against 25, or 73,728 against 102,400 at 64 channels. Use it if
+someone wants the arithmetic done a second time.
+
+What the picture does not show, and worth saying: the stack also computes more
+intermediate feature maps, so it costs more memory and more activations. The
+trade is weights and expressiveness against activation memory, and 3×3 wins on
+current hardware.
 -->
 
 ---
@@ -1654,6 +1731,113 @@ these last layers.
 -->
 
 ---
+layout: interactive
+heading: Logits are not probabilities
+title: Logits are not probabilities
+aside-width: 19rem
+---
+
+<LogitLab />
+
+::aside::
+
+Three **raw scores** — negative allowed, summing to nothing in particular. **Softmax**
+exponentiates and divides by the total: $p_i = e^{z_i} / \sum_j e^{z_j}$.
+
+<v-clicks>
+
+- Drag $z(\text{cat})$ up: the others *shrink*. They compete for a total of 1
+- **+2 to every logit**: nothing moves. Only differences matter
+- The loss reads **one** bar — the true class
+
+</v-clicks>
+
+<!--
+Drive all three demonstrations. The +2 button is the one that changes how they
+read a network's output: a logit of 12 means nothing on its own.
+
+If someone asks why exponentiate rather than, say, divide by the sum of the
+scores: because the scores can be negative, and because exp turns addition of
+evidence into multiplication of odds — which is exactly what the log in the loss
+undoes.
+-->
+
+---
+layout: interactive
+heading: Two classes, one number — sigmoid
+title: Two classes, one number — sigmoid
+aside-width: 18rem
+---
+
+<LogitLab mode="binary" :classes="['background', 'polyp']" :logits="[2, 0, 0]" :true-class="1" />
+
+::aside::
+
+Two classes need only one score. **Sigmoid** squashes it into $(0,1)$:
+$\sigma(z) = 1/(1 + e^{-z})$.
+
+<v-clicks>
+
+- $z = 0 \Rightarrow p = 0.5$: the threshold is **zero logit**
+- $z = 2 \Rightarrow p = 0.88$: loss $\mathbf{0.13}$ if polyp, $\mathbf{2.13}$ if not
+- Drag $z$ to $-6$: sure and wrong is unbounded
+
+</v-clicks>
+
+<div v-click class="mt-2 dl-secondary">
+
+The loss a mask uses, once per pixel.
+
+</div>
+
+<!--
+Sigmoid is softmax with two classes: fix z(background) = 0 and the softmax of
+[0, z] is exactly σ(z). Worth showing on the board, because it explains why
+BCEWithLogitsLoss and CrossEntropyLoss are the same idea in the table.
+
+The last bullet is the setup for class imbalance later: on a mask that is 95%
+background, the confident-and-wrong pixels dominate the average.
+-->
+
+---
+layout: interactive
+heading: The shape of the loss
+title: The shape of the loss
+aside-width: 21rem
+---
+
+<LossCurve branches />
+
+::aside::
+
+One curve, read at the probability given to the **true** class. Drag $p$.
+
+<v-clicks>
+
+- $p = 1$ → **0**: right and certain is free
+- $p = 0.5$ → **0.69**, a coin flip
+- $p \to 0$ → no ceiling: one confident mistake can dominate a batch
+- Every halving of $p$ adds the same 0.69
+
+</v-clicks>
+
+<div v-click class="mt-2 dl-callout">
+
+Switch to $y = 0$ and the dashed curve takes over. That switch *is* binary cross-entropy.
+
+</div>
+
+<!--
+The steepness on the left is the practical point: gradient magnitude is largest
+exactly where the model is most wrong, which is what makes cross-entropy train
+faster than squared error on a classifier.
+
+Ask what the loss of a perfectly uncertain 10-class model is: log 10 = 2.30.
+That is the number a fresh MNIST model starts at, and it is a useful sanity
+check on any training run.
+-->
+
+---
 layout: default
 title: Which loss, and logits or probabilities
 ---
@@ -1677,7 +1861,8 @@ goes down, and the accuracy is quietly worse. Same for `BCEWithLogitsLoss` and `
 
 <div v-click class="mt-3 dl-secondary">
 
-Prefer the logits versions: more stable, and one fewer place to make this mistake.
+Prefer the logits versions: the softmax or sigmoid happens *inside* the loss, in one stable
+step.
 
 </div>
 
