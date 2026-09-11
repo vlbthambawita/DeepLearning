@@ -44,6 +44,15 @@
       "published": true,
       "notebook": null,
       "source": "old_slides/2025/Teaching - Deep Leaning - 2025 - Lecture 03.pdf"
+    },
+    {
+      "id": "lecture-05",
+      "title": "Recurrent Neural Networks",
+      "subtitle": "Sequence data, the recurrent layer, LSTM and GRU, and an RNN in PyTorch",
+      "week": 6,
+      "published": false,
+      "notebook": null,
+      "source": "old_slides/2025/Teaching - Deep Leaning - 2025 - Lecture 5_6.pdf"
     }
   ]
 }
