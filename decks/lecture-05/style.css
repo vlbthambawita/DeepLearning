@@ -29,25 +29,6 @@
 }
 
 /*
- * Three slides are tables long enough that the theme's row padding runs them off
- * the canvas: the padded-batch table (four rows plus a header of eight-element id
- * vectors), the LSTM/GRU comparison, and the end-to-end shape ledger at seven
- * rows. `npm run check` catches all three — the rows do not visibly overflow,
- * they disappear behind the footer.
- *
- * Tightening the rows rather than dropping one, because in every case the row
- * that would go is the one a student would want to check.
- */
-.dl-ledger table {
-  font-size: 1.02rem;
-}
-
-.dl-ledger table th,
-.dl-ledger table td {
-  padding: 0.24rem 0.6rem;
-}
-
-/*
  * Only the padded-batch table is columns of figures. Right-aligning by column
  * index on the other two put the shape ledger's prose column and two of the
  * comparison table's three data columns hard against the right edge.

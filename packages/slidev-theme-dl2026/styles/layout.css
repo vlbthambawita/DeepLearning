@@ -195,6 +195,22 @@
   font-size: 1rem;
 }
 
+/*
+ * A table dense enough that the theme's row padding would run it off the canvas.
+ * Lectures 05 and 06 both have several — padded-batch ids, LSTM/GRU comparison,
+ * shape ledgers, the parameter table, the scale-over-time table. Tightening the
+ * rows rather than dropping one, because in every case the row that would go is
+ * the one a student would want to check.
+ */
+.dl-ledger table {
+  font-size: 1.02rem;
+}
+
+.dl-ledger table th,
+.dl-ledger table td {
+  padding: 0.24rem 0.6rem;
+}
+
 /* A quoted prompt or question posed to the room. */
 .dl-prompt {
   font-size: 1.05rem;

@@ -53,6 +53,15 @@
       "published": true,
       "notebook": null,
       "source": "old_slides/2025/Teaching - Deep Leaning - 2025 - Lecture 5_6.pdf"
+    },
+    {
+      "id": "lecture-06",
+      "title": "Transformers",
+      "subtitle": "Query, key and value; the original architecture, and what modern transformers changed",
+      "week": 7,
+      "published": true,
+      "notebook": null,
+      "source": "old_slides/2025/Teaching - Deep Leaning - 2025 - Lecture 5_6.pdf"
     }
   ]
 }

@@ -1,0 +1,54 @@
+/*
+ * Global styles for this deck.
+ *
+ * Slidev loads a `style.css` sitting next to slides.md as a real stylesheet.
+ * A <style> block inside the markdown would be scoped to a single slide, which
+ * is almost never what you want — see CONTRIBUTING.md.
+ *
+ * If a second lecture wants something you put here, move it to
+ * packages/slidev-theme-dl2026/styles/layout.css instead. `.dl-ledger` started
+ * out in lecture-05's copy of this file and moved to the theme the moment this
+ * deck wanted it.
+ */
+
+/*
+ * Five code slides, the longest 15 lines including the shape comments that are
+ * the reason the code is on a slide at all. Same size Lectures 03, 04 and 05
+ * settled on, so the decks read alike.
+ */
+.slidev-layout pre.shiki {
+  font-size: 0.76rem;
+  line-height: 1.38;
+}
+
+/*
+ * The parameter table's middle column is a formula in inline maths, and KaTeX
+ * sets its own line-height — enough to push the seven-row shape ledger and the
+ * six-row change table off the bottom of the canvas at the theme's default.
+ */
+.dl-ledger table .katex {
+  font-size: 0.95em;
+  line-height: 1;
+}
+
+/*
+ * The scale-over-time table is the only one here that is columns of figures:
+ * five numeric columns beside two labels. Right-aligning them makes the growth
+ * down each column legible, which is the entire reason the table exists — and
+ * tabular figures keep 12288 from being visibly wider than 8192.
+ */
+.dl-ledger--scale table td:not(:first-child),
+.dl-ledger--scale table th:not(:first-child) {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/*
+ * `nn.TransformerEncoderLayer(...)` and `F.scaled_dot_product_attention` are
+ * long enough that at body size they wrap mid-identifier in a bullet, which
+ * turns a four-item list into a seven-line one. Same fix as lecture-05.
+ */
+.dl-tight code {
+  white-space: nowrap;
+}
