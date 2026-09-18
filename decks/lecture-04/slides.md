@@ -312,7 +312,7 @@ This is the payoff for slide 4. Put the two numbers side by side on the board if
 the projector is small.
 
 If someone objects that 2,432 weights cannot possibly be enough: correct, which
-is why we stack many such layers. That is slide 38.
+is why we stack many such layers. That is slide 39.
 -->
 
 ---
@@ -1260,15 +1260,77 @@ $$ 5 \times 5 \times 3 \times 32 + 32 = 2\,432 $$
 <v-clicks>
 
 - $H$ and $W$ do not appear — the layer's size is independent of the image's
-- Double the kernel side and the cost quadruples: 3×3 is everywhere, 11×11 is history
+- The kernel side enters **squared**: go from 3×3 to 6×6 and the same layer costs **four
+  times** as much, for the same channels and the same image
 
 </v-clicks>
 
 <!--
 Same number as slide 11, now derived rather than asserted.
 
-The third bullet is the setup for the next slide. If someone asks why not one
-huge kernel, say "hold that", then answer it with the widget.
+The second bullet is the setup for the next slide: if the only thing a bigger
+kernel costs is weights, how big should it be? Say "hold that" and go.
+-->
+
+---
+layout: default
+title: How big is 11×11?
+---
+
+# So how big should the kernel be?
+
+<div class="grid grid-cols-2 gap-8 mt-3">
+<div>
+
+<svg viewBox="0 0 236 252" role="img" aria-label="A 28 by 28 image with an 11 by 11 kernel window and a 3 by 3 kernel window drawn inside it, to scale" style="width: 100%; max-width: 16rem;">
+  <rect x="6" y="6" width="224" height="224" fill="var(--dl-surface)" stroke="var(--dl-border)" stroke-width="1" />
+  <path d="M6 6V230M14 6V230M22 6V230M30 6V230M38 6V230M46 6V230M54 6V230M62 6V230M70 6V230M78 6V230M86 6V230M94 6V230M102 6V230M110 6V230M118 6V230M126 6V230M134 6V230M142 6V230M150 6V230M158 6V230M166 6V230M174 6V230M182 6V230M190 6V230M198 6V230M206 6V230M214 6V230M222 6V230M230 6V230" fill="none" stroke="var(--dl-border)" stroke-width="0.6" />
+  <path d="M6 6H230M6 14H230M6 22H230M6 30H230M6 38H230M6 46H230M6 54H230M6 62H230M6 70H230M6 78H230M6 86H230M6 94H230M6 102H230M6 110H230M6 118H230M6 126H230M6 134H230M6 142H230M6 150H230M6 158H230M6 166H230M6 174H230M6 182H230M6 190H230M6 198H230M6 206H230M6 214H230M6 222H230M6 230H230" fill="none" stroke="var(--dl-border)" stroke-width="0.6" />
+  <rect x="74" y="74" width="88" height="88" fill="var(--dl-accent-soft)" stroke="var(--dl-accent)" stroke-width="1.5" />
+  <rect x="106" y="106" width="24" height="24" fill="var(--dl-accent)" stroke="var(--dl-accent-strong)" stroke-width="1.5" />
+  <text x="118" y="68" text-anchor="middle" style="font-size: 15px; fill: var(--dl-heading)">11×11</text>
+  <text x="118" y="152" text-anchor="middle" style="font-size: 12px; fill: var(--dl-accent-strong)">3×3</text>
+  <text x="118" y="246" text-anchor="middle" style="font-size: 13px; fill: var(--dl-muted)">one 28×28 image — 784 pixels</text>
+</svg>
+
+</div>
+<div class="dl-tight">
+
+A kernel size is a count of **pixels on a side** — how much of the image one output unit is
+allowed to look at.
+
+<v-clicks>
+
+- **3×3** — nine weights per input channel, the smallest window with a centre and a direction
+- **11×11** — 121 weights, thirteen times as many, and about a **sixth** of this image at one go
+- **AlexNet** (2012) opened with 96 filters of 11×11×3. **VGG** (2014) used nothing larger
+  than 3×3 and more than halved its error
+
+</v-clicks>
+
+</div>
+</div>
+
+<div v-click class="mt-3 dl-callout">
+
+Kernel size is a **reach against cost** dial — and reach turned out to be the wrong thing to
+spend on. In a few slides: why a *stack* of 3×3 reaches just as far, for less.
+
+</div>
+
+<!--
+The point of the picture is that "11×11" is not an abstract hyperparameter — it
+is a window you can see, and on a 28×28 digit it is enormous. On a 224×224
+ImageNet photo the same window is small, which is why AlexNet could use it at
+all; say that if someone objects.
+
+AlexNet's first layer, if they want it on the board: 96 × 11 × 11 × 3 + 96 =
+34,944 weights, and it moved with stride 4. A modern ResNet still opens with one
+7×7, then never goes above 3×3 again.
+
+Do not settle the argument here. This slide only makes the question concrete;
+the receptive-field pair two slides on is the answer, and it is not complete
+until the ReLU slide.
 -->
 
 ---
@@ -1575,8 +1637,8 @@ flowchart LR
 
 - The **nonlinearity goes between** the convolution and the pooling, on every conv layer
 - It is almost always **ReLU**: $\max(0, z)$ — cheap, and it does not saturate
-- Without it the stack collapses to a single linear map: $[1, -1]$ followed by $[1, -1]$
-  **is** the one filter $[1, -2, 1]$
+- Without it, **depth buys nothing**: two conv layers in a row compute what one
+  slightly wider conv layer computes
 
 </v-clicks>
 
@@ -1586,6 +1648,80 @@ layer type — which is worth saying explicitly, because students file "activati
 function" under MLP and are surprised to need it here.
 
 ReLU has no parameters, so it does not appear in any parameter count.
+
+The third bullet is only the claim. Do not argue it here — the next slide does
+it in five numbers, which convinces people that the sentence does not.
+-->
+
+---
+layout: default
+title: Two conv layers with no ReLU, in numbers
+---
+
+# Why that is not optional
+
+Apply the difference filter $w = [1, -1]$ **twice**, with nothing in between.
+
+<div class="grid grid-cols-2 gap-8 mt-3 dl-tight">
+<div>
+
+### Two layers
+
+<v-clicks>
+
+- $x = [3,\; 1,\; 4,\; 1,\; 5]$
+- layer 1, $w = [1, -1]$ → $z = [2,\; -3,\; 3,\; -4]$
+- layer 2, $w = [1, -1]$ → $y = [5,\; -6,\; 7]$
+
+</v-clicks>
+
+</div>
+<div>
+
+### One layer, $w = [1, -2, 1]$
+
+<v-clicks>
+
+- $y[i] = x[i] - 2\,x[i+1] + x[i+2]$
+- $3 - 2 + 4$, &nbsp; $1 - 8 + 1$, &nbsp; $4 - 2 + 5$
+- $y = [5,\; -6,\; 7]$ — the same, for **every** input
+
+</v-clicks>
+
+</div>
+</div>
+
+<div v-click class="mt-3 dl-secondary">
+
+In general two conv layers, kernels $a$ and $b$, are **one** layer with kernel $a * b$.
+
+</div>
+
+<div v-click class="mt-3 dl-callout">
+
+Four weights bought a function that three weights already computed. Now put a **ReLU**
+between the layers: $z$ becomes $[2,\; 0,\; 3,\; 0]$, so $y = [2,\; -3,\; 3]$ — and no
+single filter gives that, because *which* entries were clipped depends on the input.
+
+</div>
+
+<!--
+Do layer 1 with the room, then ask for layer 2 before showing it. Then ask what
+the single filter [1, -2, 1] gives, and let the match land on its own.
+
+The general statement, if they want it: two convolutions with kernels a and b
+compose into one convolution with kernel a * b, of length m1 + m2 - 1. Any depth
+of linear conv layers is therefore one conv layer with a wider kernel. Depth
+reaches further; without a nonlinearity it computes nothing new.
+
+Which is exactly what the "three 3×3 against one 7×7" slide was quietly
+assuming. Without the ReLU the stack is strictly worse than the big kernel: 27
+weights that reach only those 7×7 filters which happen to factor into three 3×3
+ones, against 49 weights that reach all of them. The ReLU is what turns the
+extra layers from redundancy into depth.
+
+[1, -2, 1] is [1, -1] convolved with [1, -1] — the second difference, the
+discrete Laplacian. Same filter they will meet as an edge detector.
 -->
 
 ---
@@ -2280,7 +2416,7 @@ the resolution back up after all that pooling.
 The 172 M number is the argument. Compute it with them: 3136 features in,
 54,756 pixels out.
 
-This is exactly the imbalance the architecture ledger showed on slide 51, taken
+This is exactly the imbalance the architecture ledger showed on slide 58, taken
 to its conclusion.
 -->
 
