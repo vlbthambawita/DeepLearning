@@ -1,0 +1,194 @@
+/*
+ * Global styles for this deck.
+ *
+ * Slidev loads a `style.css` sitting next to slides.md as a real stylesheet. A
+ * <style> block inside the markdown would be scoped to a single slide, which is
+ * almost never what you want — see CONTRIBUTING.md.
+ *
+ * If a second lecture wants something here, move it to
+ * packages/slidev-theme-dl2026/styles/layout.css instead.
+ */
+
+/*
+ * Six code slides, the longest 13 lines including the shape comments that are
+ * the reason the code is on a slide at all. Same size lectures 03 to 06 settled
+ * on, so the decks read alike.
+ */
+.slidev-layout pre.shiki {
+  font-size: 0.76rem;
+  line-height: 1.38;
+}
+
+/*
+ * The divergence table's middle column is a formula in inline maths, and KaTeX
+ * sets its own line-height — enough to push a four-row table off the bottom of
+ * the canvas at the theme's default. Same fix lecture-06 needed.
+ */
+.dl-ledger table .katex {
+  font-size: 0.95em;
+  line-height: 1;
+}
+
+/*
+ * The four-divergence table is the one slide whose second column is a full
+ * display-style formula rather than a word or two. Giving it the slack, and
+ * letting the other two columns shrink, is what keeps the formulas on one line
+ * each — wrapped, they stop reading as formulas.
+ */
+.dl-ledger--formula table td:nth-child(2) {
+  width: 55%;
+  white-space: nowrap;
+}
+
+.dl-ledger--formula table th {
+  display: none;
+}
+
+/*
+ * The five-family comparison is the widest table in the deck: six columns, and
+ * every cell a fragment rather than a number. Slightly smaller, and centred
+ * everywhere but the first column, so the rows can be read across.
+ */
+.dl-ledger--compare table {
+  font-size: 0.92em;
+}
+
+.dl-ledger--compare table td:not(:first-child),
+.dl-ledger--compare table th:not(:first-child) {
+  text-align: center;
+}
+
+/*
+ * `F.scaled_dot_product_attention`-length identifiers wrap mid-name at body size
+ * inside a bullet, which turns a three-item list into a six-line one. Same fix
+ * as lectures 05 and 06.
+ */
+.dl-tight code {
+  white-space: nowrap;
+}
+
+/*
+ * ---------------------------------------------------------------------------
+ * Hand-authored SVG diagrams
+ *
+ * Three slides draw their own figure — the autoencoder, the two GAN networks,
+ * and the two computation graphs on the reparameterisation slide. They share
+ * this vocabulary so the three read as one set.
+ *
+ * Note for anyone extending these: never write a literal `opacity="0.5"` on an
+ * SVG element. UnoCSS attributify scans source text and emits a rule that beats
+ * the SVG presentation attribute — see CONTRIBUTING.md.
+ * ---------------------------------------------------------------------------
+ */
+.dl-diagram {
+  width: 100%;
+  max-width: 41rem;
+  height: auto;
+  font-family: inherit;
+}
+
+/* A tensor: something the data is, rather than something done to it. */
+.dl-dg-box {
+  fill: var(--dl-surface);
+  stroke: var(--dl-border);
+  stroke-width: 1.5;
+}
+
+.dl-dg-box.is-accent {
+  fill: var(--dl-accent-soft);
+  stroke: var(--dl-accent);
+}
+
+.dl-dg-box.is-bad {
+  fill: none;
+  stroke: var(--dl-danger);
+  stroke-dasharray: 4 3;
+}
+
+/* A network: the trapezoids the 2025 deck used, kept for continuity. */
+.dl-dg-net {
+  fill: var(--dl-accent-soft);
+  stroke: var(--dl-accent);
+  stroke-width: 1.6;
+}
+
+.dl-dg-net.is-critic {
+  fill: var(--dl-surface);
+  stroke: var(--dl-body);
+}
+
+.dl-dg-op {
+  fill: var(--dl-bg);
+  stroke: var(--dl-heading);
+  stroke-width: 1.6;
+}
+
+.dl-dg-lab {
+  fill: var(--dl-heading);
+  font-size: 17px;
+  font-style: italic;
+  font-weight: 600;
+}
+
+.dl-dg-lab.is-sm {
+  font-size: 13px;
+  font-style: normal;
+}
+
+.dl-dg-in {
+  fill: var(--dl-accent-strong);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.dl-dg-net.is-critic + .dl-dg-in,
+.dl-dg-in.is-critic {
+  fill: var(--dl-body);
+}
+
+.dl-dg-small {
+  fill: var(--dl-muted);
+  font-size: 11px;
+}
+
+.dl-dg-small.is-bad {
+  fill: var(--dl-danger);
+}
+
+.dl-dg-small.is-good {
+  fill: var(--dl-accent-strong);
+}
+
+.dl-dg-arrow {
+  fill: none;
+  stroke: var(--dl-body);
+  stroke-width: 1.8;
+}
+
+/* Arrowheads are <marker> elements, so they are filled rather than stroked. */
+.dl-dg-head {
+  fill: var(--dl-body);
+}
+
+/* Where a loss or a gradient travels, as opposed to where data does. */
+.dl-dg-loss,
+.dl-dg-grad {
+  fill: none;
+  stroke: var(--dl-muted);
+  stroke-width: 1.4;
+  stroke-dasharray: 3 3;
+}
+
+.dl-dg-grad.is-bad {
+  stroke: var(--dl-danger);
+}
+
+.dl-dg-grad.is-good {
+  stroke: var(--dl-accent);
+  stroke-dasharray: none;
+}
+
+.dl-dg-split {
+  stroke: var(--dl-border);
+  stroke-width: 1;
+}
