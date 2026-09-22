@@ -68,7 +68,7 @@
       "title": "Generative Models and GANs",
       "subtitle": "Autoencoders, VAEs, the adversarial game \u2014 and how diffusion took over",
       "week": 9,
-      "published": false,
+      "published": true,
       "notebook": null,
       "source": "old_slides/2025/Teaching - Deep Leaning - 2025 - Lecture 07.pdf"
     }
