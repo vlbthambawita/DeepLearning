@@ -192,3 +192,163 @@
   stroke: var(--dl-border);
   stroke-width: 1;
 }
+
+/*
+ * ---------------------------------------------------------------------------
+ * A picture on every slide
+ *
+ * Section dividers and the title carry their family's glyph on the right, the
+ * same glyph that marks that family everywhere else in the deck.
+ * ---------------------------------------------------------------------------
+ */
+.dl-side-glyph {
+  position: absolute;
+  right: 4.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* A row of pictures joined by arrows: x → x̂, image → noise, and so on. */
+.dl-pixrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  flex-wrap: nowrap;
+}
+
+.dl-pixrow .dl-op {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--dl-body);
+}
+
+.dl-pixrow .dl-op.is-accent {
+  color: var(--dl-accent);
+}
+
+/* A grid of samples, as a practitioner would log one every epoch. */
+.dl-samplegrid {
+  display: inline-grid;
+  grid-template-columns: repeat(3, auto);
+  gap: 4px;
+}
+
+.dl-diagram.is-sm {
+  max-width: 26rem;
+}
+
+.dl-diagram.is-xs {
+  max-width: 18rem;
+}
+
+/* Bars in hand-drawn charts: P is ink, Q is accent, in every chart of the deck. */
+.dl-dg-bar {
+  fill: var(--dl-muted);
+}
+
+.dl-dg-bar.is-q {
+  fill: var(--dl-accent);
+}
+
+.dl-dg-bar.is-bad {
+  fill: var(--dl-danger);
+}
+
+.dl-dg-fill {
+  fill: var(--dl-accent-soft);
+  stroke: var(--dl-accent);
+  stroke-width: 1.4;
+}
+
+.dl-dg-fill.is-muted {
+  fill: var(--dl-surface);
+  stroke: var(--dl-muted);
+}
+
+.dl-dg-fill.is-dashed {
+  stroke-dasharray: 4 3;
+}
+
+.dl-dg-dot {
+  fill: var(--dl-body);
+}
+
+.dl-dg-dot.is-accent {
+  fill: var(--dl-accent);
+}
+
+.dl-dg-dot.is-bad {
+  fill: var(--dl-danger);
+}
+
+.dl-dg-line {
+  fill: none;
+  stroke: var(--dl-accent);
+  stroke-width: 2.2;
+}
+
+.dl-dg-line.is-muted {
+  stroke: var(--dl-muted);
+}
+
+.dl-dg-line.is-bad {
+  stroke: var(--dl-danger);
+}
+
+.dl-dg-emoji {
+  font-size: 30px;
+}
+
+/* A small card with a glyph on top: the four-losses overview and the recap. */
+.dl-glyphcard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.25rem;
+  padding: 0.55rem 0.5rem 0.65rem;
+  border: 1px solid var(--dl-border);
+  border-radius: 8px;
+  background: var(--dl-surface);
+  font-size: 0.95rem;
+  line-height: 1.3;
+}
+
+.dl-glyphcard strong {
+  color: var(--dl-heading);
+}
+
+.dl-glyphcard .dl-glyphcard__cost {
+  color: var(--dl-muted);
+  font-size: 0.85rem;
+}
+
+.dl-ledger td .dl-glyph {
+  vertical-align: middle;
+  margin-right: 0.3rem;
+}
+
+.dl-dg-lab.is-bad-text {
+  fill: var(--dl-danger);
+}
+
+/* Diagrams that share the slide with text below: cap the height, not the width. */
+.dl-diagram.is-sm-h {
+  max-height: 11.5rem;
+}
+
+/* A poll's answer, set in the right-hand column under its sketch. */
+.dl-reveal--side {
+  font-size: 1.35rem;
+}
+
+/* Diagrams that share the slide with text below: cap the height, not the width. */
+.dl-diagram.is-sm-h {
+  max-height: 11.5rem;
+}
+
+/* A poll's answer, set in the right-hand column under its sketch. */
+.dl-reveal--side {
+  font-size: 1.35rem;
+}

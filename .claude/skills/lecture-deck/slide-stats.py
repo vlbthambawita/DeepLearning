@@ -4,7 +4,9 @@
 Counts the words the room has to *read* on each slide — speaker notes, code
 blocks and maths excluded, since none of those are what makes a slide a wall of
 text. Prints the slides over budget so they can become a diagram, be split, or
-move into the speaker notes.
+move into the speaker notes, and every slide with no picture at all — the
+skill's rule is a visual on every slide, and a table or an equation does not
+count as one.
 
     python3 .claude/skills/lecture-deck/slide-stats.py               # every deck
     python3 .claude/skills/lecture-deck/slide-stats.py lecture-07    # one deck
@@ -73,18 +75,35 @@ def is_visual(body):
     )
 
 
+# Components that are furniture rather than a picture of anything.
+NOT_A_PICTURE = {"Citation", "PollSlide", "LinkCard", "Katex"}
+
+
+def has_picture(body):
+    """Stricter than is_visual: a table or an equation is still something to read."""
+    b = re.sub(r"<!--.*?-->", " ", body, flags=re.S)
+    parts = set(COMPONENT.findall(b)) - NOT_A_PICTURE
+    return bool(
+        parts
+        or re.search(r"<(img|svg)\b", b)
+        or "```mermaid" in b
+    )
+
+
 def report(deck, show_all):
     path = Path("decks") / deck / "slides.md"
     if not path.exists():
         print(f"  no slides.md for {deck}")
         return
 
-    rows, by_layout = [], {}
+    rows, by_layout, bare = [], {}, []
     for n, (layout, label, body) in enumerate(slides(path), start=1):
         words = prose_words(body)
         parts = sorted(set(COMPONENT.findall(body)) - {"Citation"})
         by_layout.setdefault(layout, []).append(words)
         rows.append((n, layout, label, words, parts, is_visual(body)))
+        if not has_picture(body):
+            bare.append((n, layout, label))
 
     print(f"\n{deck}  —  {len(rows)} slides")
     for layout in ("default", "interactive", "figure"):
@@ -96,6 +115,10 @@ def report(deck, show_all):
 
     words_only = sum(1 for r in rows if not r[5] and r[1] in ("default", "figure"))
     print(f"  words-only slides: {words_only}")
+
+    print(f"  no picture: {len(bare)}")
+    for n, layout, label in bare:
+        print(f"      {n:3d} {layout:12s} {label}")
 
     flagged = [r for r in rows if r[3] > BUDGET.get(r[1], 70)]
     if flagged:

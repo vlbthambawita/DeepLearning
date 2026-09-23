@@ -13,12 +13,17 @@ carry a number the room can check by hand.
 
 1. **`CONTRIBUTING.md`** — "Things that will catch you out" is the real reference.
    Read all of it; each item cost someone real debugging time.
-2. **The most recent deck** (`decks/lecture-06/slides.md` at time of writing).
+2. **The most recent deck** (`decks/lecture-07/slides.md` at time of writing —
+   also the reference for a visual on every slide).
    Match its voice and rhythm, not `_template`'s — the template shows mechanics,
    the shipped decks show the standard.
 3. **`TODO/summary_slideset_<prev>.md`** — the concept summary for the lecture
    before yours. The new deck has to pick up exactly where that one stopped.
 4. **`PLAN.md` § "Content conversion strategy"** — only if converting a 2025 PDF.
+5. **What the room actually knows.** The deck number and the syllabus week do
+   not tell you this — the teaching order changes, and a lecture can be given
+   before the one numbered ahead of it. Ask the user if it is not stated. Write
+   the answer into the plan (below) and hold every slide to it.
 
 ## 1. Fix the through-line first, in `TODO/plan_slideset_XX.md`
 
@@ -26,8 +31,16 @@ Do not open `slides.md` until this exists and the user has seen it:
 
 - **One sentence** saying what the room can do at the end that it could not at
   the start.
+- **The prerequisites**, as two lists: what the room *has* (e.g. "CNNs, BCE,
+  BatchNorm, Adam") and what it *does not have yet* (e.g. "RNNs, LSTMs,
+  attention, transformers"). Nothing from the second list may carry weight on a
+  slide: no hand-off from it, no "remember week N's X" analogy, no poll option
+  or code line that needs it. If a modern result genuinely uses one (a
+  transformer denoiser, say), name it in a phrase as *a different architecture*
+  and say the idea on the slide does not depend on it. Grep the finished deck for
+  the second list's words.
 - **The hand-off**: what the previous lecture ended on, and how slide 3 picks it
-  up. Lecture 06 opens on week 6's two walls and spends the deck knocking down
+  up — from a lecture on the *has* list. Lecture 06 opens on week 6's two walls and spends the deck knocking down
   the second — that continuity is deliberate.
 - **The running example**: one concrete case carried across every section, with
   real numbers the room can verify. Lecture 06 runs "the river bank" through
@@ -96,7 +109,57 @@ python3 .claude/skills/lecture-deck/slide-stats.py lecture-07
 ```
 
 It prints every slide over budget and marks the ones that are `<- words only`.
-A slide that trips both is the one to fix first.
+A slide that trips both is the one to fix first. It also lists every slide with
+**no picture** (see "A picture on every slide") — tables, maths, `PollSlide`,
+`LinkCard` and `Citation` do not count as one.
+
+### A picture on every slide
+
+**Every slide carries a visual** — title, section dividers, polls, code slides
+and the end slide included. Visualisation is the main teaching tool in these
+decks; text labels the picture, it does not replace it. A markdown table or a
+display equation is *not* a picture on its own: it is still something to read.
+What counts:
+
+| kind | use it for | how |
+| --- | --- | --- |
+| **drawn diagram** | a flow, a pipeline, who-feeds-whom | inline `<svg class="dl-diagram">` with the deck's `.dl-dg-*` classes |
+| **plot** | a function, a curve, a trade-off, a comparison of sizes | `Plot2D` + `PlotCurve`/`PlotLine`/`PlotLabel`, or hand SVG bars |
+| **a tiny image** | what the data looks like: clean, noisy, blurred, collapsed | a pixel-grid component driven by a seeded pattern |
+| **a widget** | something that changes as a control moves | an addon component in `WidgetFrame` |
+| **an icon / glyph** | a memory anchor for a concept that recurs | one small SVG per concept, reused everywhere that concept appears |
+
+Make the visuals **memorable and consistent**, because that is what the room
+recalls in the exam:
+
+- **One recurring glyph per big idea.** Draw it on the section divider, again on
+  the slide that previews the sections, and again on the recap. Students
+  remember the shape before the name.
+- **Draw the running example the same way every time** — same colours, same
+  layout, same three bars or three blobs — so a new slide reads as "the same
+  thing, one step further".
+- **One visual metaphor per concept, and keep it** (a forger and a detective; a
+  tug of war between two loss terms; scissors where `detach()` cuts the
+  gradient). A metaphor that appears once is decoration; one that returns is a
+  hook.
+- **Show the data, not a description of it.** "The average of two sharp images
+  is blurry" is two small images and their average, side by side.
+- **The picture carries the argument.** If you can delete the visual and the
+  slide still makes its point, the visual is decoration; redo it so it is the
+  explanation and the bullets are captions.
+- Polls get a small sketch of the situation the question describes; code slides
+  get a shape strip or a gradient-path sketch beside or above the code; section
+  dividers get their glyph.
+
+Keep every drawn diagram theme-coloured (`var(--dl-*)` only, never a hex
+value), legible in dark mode, deterministic, and static in the one-page-per-
+click PDF (reveal parts with `v-click` on `<g>` elements if they must build).
+
+```bash
+python3 .claude/skills/lecture-deck/slide-stats.py lecture-07   # lists "no picture" slides
+```
+
+The target is **zero** slides in the "no picture" list.
 
 ### Reach for a picture before more sentences
 
@@ -152,6 +215,15 @@ Stable across decks: `Citation`, `LinkCard`, `PollSlide`, `SyllabusTimeline`,
 `WidgetFrame`, `Slider`, `StepButton`, and the plot primitives `Plot2D`,
 `PlotCurve`, `PlotPoints`, `PlotLine`, `PlotLabel` (they work in data
 coordinates). Everything is auto-registered — never import in a deck.
+
+For the "picture on every slide" rule: `PixelImage` draws a tiny seeded 12×12
+sample (smiley, heart, star, house, moon, tree, pure noise, or a
+transposed-conv tap pattern) that can be noised, shift-averaged into a blur,
+or placed *inside* a hand-drawn SVG with `in-svg :x :y`. `FamilyGlyph` is one
+emblem per concept, reused on its section divider, the overview and the recap.
+Lecture 07 uses both on nearly every slide — copy its patterns. Never put emoji
+inside a diagram: headless Chromium (and so the PDF export) draws them as empty
+boxes. Draw the icon instead.
 
 A new widget must be: deterministic (`seededRandom` from `composables/useRandom.ts`,
 never `Math.random`), keyboard-operable **and stop arrow-key propagation** (Slidev
@@ -226,6 +298,10 @@ Flip `"published": true` only when the user says so. Publishing is tag-driven �
 never push a tag unless asked.
 
 ## Pre-flight checklist
+
+- `slide-stats.py` reports **no picture: 0** — every slide shows something.
+- No slide leans on a concept from the plan's *does not have yet* list; grep
+  for those words before calling the deck done.
 
 - `<style>` inside a slide is scoped to that slide → deck-wide CSS goes in
   `decks/<id>/style.css`; anything a second deck wants goes in the theme.
