@@ -47,7 +47,7 @@ const blind = computed(() =>
   Math.abs(scored.value[1].s.js - scored.value[2].s.js) < 1e-9)
 
 const MEASURES = [
-  { key: 'tv', name: 'TV', note: 'largest single-bin gap' },
+  { key: 'tv', name: 'TV', note: 'half the total gap' },
   { key: 'klPQ', name: 'KL(P‖Q)', note: 'infinite if a mode is missed' },
   { key: 'js', name: 'JS(P‖Q)', note: 'what a GAN minimises' },
   { key: 'em', name: 'EM(P, Q)', note: 'what a WGAN minimises' },

@@ -118,12 +118,12 @@ title: What a CNN already does
   <text class="dl-dg-in is-critic" x="206" y="67" text-anchor="middle">CNN</text>
   <path class="dl-dg-arrow" marker-end="url(#cnn-arrow)" d="M294 62 H326" />
   <rect class="dl-dg-bar" x="336" y="36" width="150" height="14" rx="3" />
-  <rect class="dl-dg-bar" x="336" y="56" width="10" height="14" rx="3" />
-  <rect class="dl-dg-bar" x="336" y="76" width="6" height="14" rx="3" />
+  <rect class="dl-dg-bar" x="336" y="56" width="7" height="14" rx="3" />
+  <rect class="dl-dg-bar" x="336" y="76" width="4" height="14" rx="3" />
   <text class="dl-dg-small" x="494" y="47">smiley 0.94</text>
   <text class="dl-dg-small" x="494" y="67">heart 0.04</text>
   <text class="dl-dg-small" x="494" y="87">star 0.02</text>
-  <text class="dl-dg-small" x="336" y="112">432 numbers in → 3 out</text>
+  <text class="dl-dg-small" x="336" y="112">144 pixels in → 3 scores out</text>
   <g v-click>
     <line class="dl-dg-split" x1="8" y1="128" x2="652" y2="128" />
     <text class="dl-dg-small is-good" x="8" y="148">today — create</text>
@@ -151,8 +151,8 @@ Few numbers in, **many** out — and a new picture each time. That is a
 
 <!--
 Start from what the room owns. The top row is the network they trained in weeks
-4 and 5: an image goes in, a softmax over a few classes comes out. The 432 is
-12 x 12 x 3 for the toy picture — the arithmetic is the point, not the size.
+4 and 5: an image goes in, a softmax over a few classes comes out. The 144 is
+12 x 12 for the toy picture — the arithmetic is the point, not the size.
 
 Click, and the bottom row appears: the same kind of network, pointed the other
 way. A handful of random numbers in, a whole image out, and a *different* image
@@ -204,7 +204,7 @@ A 256 × 256 colour image.
 <v-clicks>
 
 - **196 608 numbers**, not three class scores
-- Each is **continuous** — no short list of answers to put a softmax over
+- Far too many possible images to list and put **one softmax** over
 - They must **agree**: an eye on the left wants an eye on the right
 
 </v-clicks>
@@ -227,6 +227,10 @@ The right-hand picture is the honest counter-example, and it is a CNN: PixelCNN
 the left, and generates one pixel at a time. It works. It is also 196 608
 sequential forward passes for a single image, which is the trade the diffusion
 section comes back to. Name it, do not teach it.
+
+The second bullet: each pixel has 256 values, so there are 256^196608 possible
+images — a softmax over *whole images* is impossible. PixelCNN gets round it by
+putting a 256-way softmax on one pixel at a time, which is exactly why it is slow.
 
 The third bullet is the one that makes it hard: the numbers are not independent.
 Sampling each pixel on its own gives static, not a face.
@@ -341,14 +345,17 @@ a simple distribution you can sample from, and a learned map from it to the data
 
 <div v-click class="mt-3 dl-callout">
 
-Autoencoder, VAE, GAN, diffusion — **all four** do exactly this. They differ only
-in **how $g_\theta$ is trained**.
+VAE, GAN and diffusion all do exactly this — the autoencoder tries and fails.
+They differ only in **how $g_\theta$ is trained**.
 
 </div>
 
 <!--
-Write the prompt line on the board and leave it there for the whole lecture. Every
-section ends by coming back to it.
+Write the prompt line on the board and leave it there for the whole lecture. The
+recap slide comes back to it.
+
+Diffusion fits the deal with one twist: its map from z to image is not one pass
+of g but many small denoising steps. Say so if asked; section 05 makes it concrete.
 
 Notation: z is the latent — a short vector of random numbers. N(0, I) means "each
 number drawn independently from a standard bell curve", which is torch.randn.
@@ -472,7 +479,7 @@ The point to leave them with: "generative model" is not one capability. Ask what
 you actually need — samples, a density, or a latent you can edit — because no
 family gives you all three.
 
-PixelCNN is on the list because it was on the previous-but-two slide: generating
+PixelCNN is on the list because it was on the "Now make a real picture" slide: generating
 one pixel at a time means each step is a softmax over 256 intensity values, and
 the probability of the whole image is the product of those. Exact, and very slow
 to sample.
@@ -682,7 +689,7 @@ Not generation. The useful outputs are the **code** and the **error**.
   <polygon class="dl-dg-net" points="196,34 150,48 150,60 196,74" />
   <path class="dl-dg-arrow" marker-end="url(#an-arrow)" d="M200 54 H226" />
   <PixelImage in-svg :x="232" :y="24" :size="60" pattern="smiley" :noise="0.05" :seed="4" tone="accent" />
-  <rect class="dl-dg-bar is-q" x="304" y="48" width="10" height="12" rx="2" />
+  <rect class="dl-dg-bar is-q" x="304" y="48" width="4" height="12" rx="2" />
   <text class="dl-dg-small" x="304" y="78">error 0.02</text>
   <g v-click>
     <PixelImage in-svg :x="6" :y="124" :size="60" pattern="house" />
@@ -1014,8 +1021,9 @@ Two terms that want opposite things. Everything a VAE does is the compromise.
 </div>
 
 <!--
-Name it as the ELBO — evidence lower bound — say that maximising it maximises a
-lower bound on the likelihood of the data, and then do not derive it. The
+This is the negative of the ELBO — the evidence lower bound. Minimising this loss
+maximises a lower bound on the likelihood of the data; say that, and then do not
+derive it. The
 derivation is a whole lecture and it is not this one.
 
 KL, the Kullback–Leibler divergence, is a measure of how different two
@@ -1069,6 +1077,7 @@ actual $\mathbf{z}$. Drawing one is not a differentiable operation.
   <text class="dl-dg-lab is-sm" x="389" y="54" text-anchor="middle">μ, σ</text>
   <circle class="dl-dg-op" cx="486" cy="49" r="15" />
   <text class="dl-dg-lab is-sm" x="486" y="55" text-anchor="middle">+</text>
+  <text class="dl-dg-small" x="486" y="24" text-anchor="middle">μ + σ ⊙ ε</text>
   <rect class="dl-dg-box" x="456" y="94" width="60" height="26" rx="4" />
   <text class="dl-dg-lab is-sm" x="486" y="112" text-anchor="middle">ε</text>
   <rect class="dl-dg-box is-accent" x="574" y="34" width="44" height="30" rx="4" />
@@ -1089,10 +1098,9 @@ and now $\boldsymbol\mu$ and $\boldsymbol\sigma$ sit on a differentiable path.
 </div>
 
 <!--
-This is the one piece of real technique in the section and it generalises far
-beyond VAEs — the same move shows up in reinforcement learning and in every
-stochastic layer anyone has shipped since. It is called the reparameterisation
-trick.
+This is the one piece of real technique in the section and it generalises well
+beyond VAEs — the same move shows up in some reinforcement-learning methods and
+in other layers that sample. It is called the reparameterisation trick.
 
 Read the two graphs. On the left, an arrow into a "sample" box and nothing coming
 back. On the right, epsilon entering from outside as a constant, and mu and sigma
@@ -1403,7 +1411,7 @@ $$
 
 <div v-click class="mt-1 dl-callout">
 
-Both halves are binary cross-entropy. **D wants $V$ big; G wants it small:**
+Each half is **minus** a binary cross-entropy. **D wants $V$ big; G wants it small:**
 $\;\min_G \max_D V$.
 
 </div>
@@ -1418,7 +1426,8 @@ One objective, two players, opposite signs — a **saddle point**, not a minimum
 Go term by term, pointing at the two bars, and keep asking "who wants this big?".
 The first term is D's score on real data, large when D(x) → 1. The second is D's
 score on fakes, large when D(G(z)) → 0. The equation is much less frightening
-once the room notices both halves are the BCE loss from week 4.
+once the room notices each half is the week-4 BCE loss with its sign flipped —
+so maximising V is exactly minimising D's BCE.
 
 Notation: E means "average over", theta^(D) and theta^(G) are the two networks'
 weights, p_data is the real data and p_z the noise we draw z from.
@@ -1538,8 +1547,8 @@ $$
   <PlotCurve :fn="(x) => 0.9 * Math.exp(-((x - 1) ** 2) / 1.2)" color="var(--dl-accent)" :width="2" :fill-to="0" :opacity="0.5" />
   <PlotCurve :fn="(x) => 1 / (1 + Math.exp(4 * x / 1.2))" color="var(--dl-heading)" :width="2.6" />
   <PlotLine :from="[-4, 0.5]" :to="[4, 0.5]" color="var(--dl-muted)" :width="1" dashed />
-  <PlotLabel :at="[-2.6, 0.62]" text="p_data" color="var(--dl-muted)" bold />
-  <PlotLabel :at="[1.7, 0.62]" text="p_g" color="var(--dl-accent)" bold />
+  <PlotLabel :at="[-3.3, 0.62]" text="real data" color="var(--dl-muted)" bold />
+  <PlotLabel :at="[1.7, 0.62]" text="generator" color="var(--dl-accent)" bold />
   <PlotLabel :at="[-3.9, 0.98]" text="D*" color="var(--dl-heading)" :dx="2" :dy="10" bold />
 </Plot2D>
 
@@ -1564,8 +1573,11 @@ a·log(d) + b·log(1 - d), which is maximised at d = a / (a + b). Point out that
 this is per-x, so you can do it pointwise inside the integral.
 
 The last bullet is the target the whole game is aimed at, and it is a good moment
-to ask what "D's loss went to 0.693" means in a training log. It means ln 2. It
-means you have won.
+to ask what a discriminator loss of about 1.386 means in a training log. With
+loss_d written as on the training-loop slide (real BCE + fake BCE), D = 1/2
+everywhere gives ln 2 per term, 2 ln 2 = 1.386 in total: D is guessing. That is
+what equilibrium looks like — though a D that has simply stopped learning looks
+the same, so check the samples.
 
 Next slide computes all three of these numbers on the running example.
 -->
@@ -1735,7 +1747,7 @@ title: The four steps
 
 # The four steps
 
-One iteration: two passes for $D$, one for $G$, and a label flip.
+One iteration: two batches through $D$, one more for $G$ — and a label flip.
 
 <div class="mt-3 flex justify-center">
 <svg viewBox="0 0 660 200" class="dl-diagram" role="img" aria-label="Four steps: real batch labelled 1, fake batch labelled 0, update D, then fakes labelled 1 to update G">
@@ -1879,7 +1891,7 @@ for real in loader:
     <text class="dl-dg-small" x="4" y="26">line 6</text>
     <rect class="dl-dg-box" x="50" y="10" width="44" height="24" rx="4" />
     <text class="dl-dg-lab is-sm" x="72" y="27" text-anchor="middle">G</text>
-    <text class="dl-dg-emoji" x="128" y="32" text-anchor="middle" style="font-size: 20px">✂️</text>
+    <g transform="translate(116 12)"><circle class="dl-dg-op" cx="4" cy="4" r="4" /><circle class="dl-dg-op" cx="4" cy="16" r="4" /><path class="dl-dg-arrow" d="M7 6 L22 14 M7 14 L22 6" /></g>
     <rect class="dl-dg-box is-accent" x="160" y="10" width="44" height="24" rx="4" />
     <text class="dl-dg-lab is-sm" x="182" y="27" text-anchor="middle">D</text>
     <text class="dl-dg-small" x="214" y="26">← loss_d</text>
@@ -1909,9 +1921,10 @@ Two optimisers, each holding only its own parameters — lines 1 and 2.
 betas=(0.5, 0.999) is DCGAN's setting and everyone still uses it. Adam's default
 0.9 keeps too much momentum for a loss surface that is moving under you.
 
-Have them trace what happens without detach on line 6: the discriminator update
-also pushes gradient into G, so G is being nudged to make D's job *easier*. It
-trains, slowly, to something wrong.
+Have them trace what happens without detach on line 6: loss_d.backward() also
+computes gradients into G. In this loop line 11 wipes them before they are used,
+so it is only wasted work — but move the zero_grad calls and G starts following
+D's objective, i.e. gets nudged to make D's job *easier*. The poll is next.
 -->
 
 ---
@@ -1926,7 +1939,7 @@ layout: default
   :items="[
     'A shape error on the next line',
     'Nothing — G has its own optimiser, so it is unaffected',
-    'D\'s update also computes gradients into G, which opt_g then applies',
+    'loss_d.backward() also fills G\'s .grad — harmless here only because line 11 clears it',
     'The discriminator stops learning',
   ]"
 />
@@ -1942,7 +1955,7 @@ layout: default
   </defs>
   <rect class="dl-dg-box" x="10" y="30" width="50" height="28" rx="4" />
   <text class="dl-dg-lab is-sm" x="35" y="49" text-anchor="middle">G</text>
-  <text class="dl-dg-emoji" x="100" y="24" text-anchor="middle" style="font-size: 20px">✂️</text>
+  <g transform="translate(88 8)"><circle class="dl-dg-op" cx="4" cy="4" r="4" /><circle class="dl-dg-op" cx="4" cy="16" r="4" /><path class="dl-dg-arrow" d="M7 6 L22 14 M7 14 L22 6" /></g>
   <line class="dl-dg-line is-bad" x1="86" y1="6" x2="114" y2="30" />
   <rect class="dl-dg-box is-accent" x="140" y="30" width="50" height="28" rx="4" />
   <text class="dl-dg-lab is-sm" x="165" y="49" text-anchor="middle">D</text>
@@ -1953,14 +1966,14 @@ layout: default
 
 <div v-click class="mt-4 dl-reveal dl-reveal--side">
 
-G accumulates gradient from D's loss
+G gets gradient from D's loss
 
 </div>
 
 <div v-click class="mt-2 dl-secondary">
 
-`opt_g` only *applies* gradients; it does not decide who computed them. G's
-`.grad` now carries a term from the discriminator's objective.
+Backward follows the graph, not the optimiser. Line 11 saves this loop; zero the
+gradients once at the top instead, and `opt_g` applies D's gradient.
 
 </div>
 
@@ -1974,10 +1987,12 @@ pass follows the graph; the optimiser only decides which parameters get stepped.
 
 The sketch is the scissors from the previous slide, removed.
 
-The reason `opt_g.zero_grad()` on line 11 does not save you: it clears before the
-generator's own backward, so the stale gradient is gone — but in the many
-loop orderings people write where it does not, it is not. Worth showing the
-ordering that breaks.
+Be precise about this exact loop: `opt_g.zero_grad()` on line 11 runs before G's
+own backward, so the leaked gradient is wiped and the only cost is wasted
+compute. The damage appears in the very common variant that calls
+`zero_grad()` once at the top of the iteration (or reuses `fake` for step 4):
+then opt_g.step() applies a gradient that pushes G to make D's job *easier*.
+Show that ordering on the board — it is the one students will write.
 
 The honest summary: detach is the cheap way to say "treat this tensor as data".
 -->
@@ -2059,7 +2074,7 @@ title: DCGAN — a CNN, run backwards
 # DCGAN — a CNN, run backwards
 
 <div class="mt-1 flex justify-center">
-<svg viewBox="0 0 660 230" class="dl-diagram" role="img" aria-label="The discriminator shrinks a 64 by 64 image to one number with strided convolutions; the generator grows a vector to a 64 by 64 image with transposed convolutions">
+<svg viewBox="0 0 660 244" class="dl-diagram" role="img" aria-label="The discriminator shrinks a 64 by 64 image to one number with strided convolutions; the generator grows a vector to a 64 by 64 image with transposed convolutions">
   <defs>
     <marker id="dc-arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
       <path class="dl-dg-head" d="M0 0 L7 3.5 L0 7 z" />
@@ -2072,6 +2087,7 @@ title: DCGAN — a CNN, run backwards
     <text class="dl-dg-small" :x="110 + i * 70" y="104">{{ [32, 16, 8][i] }}²</text>
   </g>
   <path class="dl-dg-arrow" marker-end="url(#dc-arrow)" d="M84 60 H104" />
+  <text class="dl-dg-small" x="44" y="112" text-anchor="middle">64²</text>
   <text class="dl-dg-small" x="160" y="120" text-anchor="middle">strided conv: halves each block</text>
   <circle class="dl-dg-op" cx="340" cy="56" r="14" />
   <text class="dl-dg-small" x="340" y="60" text-anchor="middle">0.9</text>
@@ -2088,6 +2104,7 @@ title: DCGAN — a CNN, run backwards
     <path class="dl-dg-arrow" marker-end="url(#dc-arrow)" d="M28 192 H54" />
     <path class="dl-dg-arrow" marker-end="url(#dc-arrow)" d="M290 192 H320" />
     <PixelImage in-svg :x="326" :y="156" :size="72" pattern="heart" :noise="0.12" :seed="3" tone="accent" />
+    <text class="dl-dg-small" x="362" y="240" text-anchor="middle">64²</text>
     <text class="dl-dg-small is-good" x="420" y="196">transposed conv: doubles each block</text>
   </g>
 </svg>
@@ -2145,7 +2162,7 @@ Not a new operation: insert zeros between the inputs, then convolve.
 
 <div v-click class="mt-2 dl-callout">
 
-Kernel 3, stride 2: a 4× difference between neighbours.
+Kernel 3, stride 2: taps of 1, 2 and 4 — a 4× range.
 
 </div>
 
@@ -2196,8 +2213,8 @@ title: The checkerboard, and what to do instead
 
 <!--
 The three pictures are the tap counts from the widget, shaded, for an untrained
-layer where every weight is equal. Left: the checkerboard — a 4x difference
-between neighbouring cells, and a grid the eye cannot un-see. Middle: stride
+layer where every weight is equal. Left: the checkerboard — cells get 1, 2 or 4
+taps, a 4x range, and a grid the eye cannot un-see. Middle: stride
 divides kernel and the interior is flat. Right: upsample then convolve, flat by
 construction.
 
@@ -2340,7 +2357,7 @@ title: Four ways to say two distributions differ
 
 | | | |
 | --- | --- | --- |
-| total variation | $\mathrm{TV}(P,Q) = \sup_x \lvert P(x) - Q(x) \rvert$ | biggest single gap |
+| total variation | $\mathrm{TV}(P,Q) = \tfrac{1}{2}\sum_x \lvert P(x) - Q(x) \rvert$ | half the total gap |
 | Kullback–Leibler | $\mathrm{KL}(P \Vert Q) = \int P(x) \log \frac{P(x)}{Q(x)}\,dx$ | asymmetric; $\infty$ if $Q$ misses |
 | Jensen–Shannon | $\mathrm{JS}(P,Q) = \tfrac{1}{2}\big(\mathrm{KL}(P\Vert M) + \mathrm{KL}(Q\Vert M)\big)$ | symmetric, $M = \tfrac{P+Q}{2}$ |
 | earth-mover | $\mathrm{EM}(P,Q) = \inf_{\gamma} \mathbb{E}_{(u,v)\sim\gamma} \lVert u - v \rVert$ | cheapest way to move the mass |
@@ -2378,7 +2395,10 @@ callout is the only thing they need to carry. The sketch is where the name comes
 from: P and Q as two piles of sand, and EM is the cheapest total amount of
 "how much sand times how far" to turn one pile into the other.
 
-sup and inf mean "the largest" and "the smallest" over all choices; gamma is a
+TV is written here as half the sum of the gaps, which equals the largest
+difference in probability either distribution gives any set of outcomes — the
+2025 deck's "biggest single-bin gap" is not the standard definition, though on
+this example the two agree. inf means "the smallest" over all choices; gamma is a
 transport plan — which sand goes where. None of that needs to be on the board.
 
 KL's asymmetry deserves one sentence: KL(P||Q) blows up where the model puts no
@@ -2462,7 +2482,7 @@ title: Wasserstein, and what came after
 - **WGAN** (2017) — a *critic* with no sigmoid, whose loss estimates EM
 - The critic must be **Lipschitz**: it cannot change faster than a fixed rate
 - **WGAN-GP** enforces that with a gradient penalty
-- **Spectral normalisation** does it per layer — now the default
+- **Spectral normalisation** does it per layer — cheaper, and now common
 
 </v-clicks>
 
@@ -2527,7 +2547,7 @@ title: The zoo, and the six that mattered
 <div v-click class="mt-2 dl-secondary">
 
 Over 500 named variants exist — *the GAN zoo*. Almost all change the loss, the
-conditioning, or the normalisation.
+conditioning, or the architecture.
 
 </div>
 
@@ -2594,7 +2614,7 @@ Synthetic data where the real thing cannot be shared — our own research area.
   <rect class="dl-dg-box" x="196" y="10" width="8" height="184" />
   <path class="dl-dg-arrow" marker-end="url(#md-arrow)" d="M178 95 H226" />
   <PixelImage in-svg :x="234" :y="50" :size="50" pattern="star" :noise="0.1" :seed="8" tone="accent" />
-  <PixelImage in-svg :x="292" :y="50" :size="50" pattern="checker:2:1" tone="accent" />
+  <PixelImage in-svg :x="292" :y="50" :size="50" pattern="star" />
   <text class="dl-dg-small" x="259" y="118" text-anchor="middle">image</text>
   <text class="dl-dg-small" x="317" y="118" text-anchor="middle">+ its mask</text>
   <text class="dl-dg-small is-good" x="290" y="150" text-anchor="middle">synthetic — can be shared</text>
@@ -2613,8 +2633,8 @@ was meant to protect.
 <!--
 The picture is the privacy argument: the real scans never cross the wall; only
 the generator's samples do. The right-hand pair is the labels argument — image
-and segmentation mask generated together, so nobody has to draw the mask. (The
-"mask" here is just a filled square, for the picture.)
+and segmentation mask generated together, so nobody has to draw the mask — the
+mask is the clean silhouette of the generated star.
 
 Two of our own papers sit behind this slide and are worth naming: DeepFake ECGs
 (Scientific Reports, 2021) generates 12-lead traces good enough to train on, and
@@ -2751,7 +2771,7 @@ section 01 — corrupt, then ask for the clean version — with one addition tha
 turns it into a generative model: do it at *every* noise level, with the level as
 an input.
 
-Sohl-Dickstein et al. published the idea in 2015 and nobody noticed. Ho et al. in
+Sohl-Dickstein et al. published the idea in 2015 and it drew little attention. Ho et al. in
 2020 made it work, and the difference was mostly parameterisation and scale. That
 is a useful pattern to point out.
 -->
@@ -2876,7 +2896,7 @@ Given a noisy image and its noise level, **predict the noise that was added**.
   </svg>
   <span class="dl-op">→</span>
   <PixelImage pattern="noise" :seed="31" :size="74" label="predicted ε" />
-  <span v-click class="dl-op is-accent">⇒ subtract ⇒</span>
+  <span v-click class="dl-op is-accent">⇒ remove some ⇒</span>
   <PixelImage v-click pattern="smiley" :noise="0.12" :seed="32" :size="74" tone="accent" label="a step cleaner" />
 </div>
 
@@ -2897,7 +2917,9 @@ every noise level.
 
 <!--
 Read the strip left to right: noisy image and its level in, the network's guess
-of the noise out, and subtracting that guess gives an image one step cleaner.
+of the noise out. Subtracting all of it gives an estimate of the clean image; the
+sampler removes only part of it and adds a little fresh noise, which gives an
+image one step cleaner.
 
 epsilon_theta is the network — theta its weights, as always. Its shape is image
 in, image out: the same shape as the autoencoder, which is why the denoiser in
@@ -3159,8 +3181,8 @@ title: Pushing past the prompt
   <text class="dl-dg-small is-good" x="120" y="92">with c</text>
   <path class="dl-dg-grad" d="M180 150 L170 100" />
   <g v-click>
-    <path class="dl-dg-line is-bad" style="stroke-dasharray: 6 4" marker-end="url(#cf-arrow)" d="M40 200 L150 20" />
-    <text class="dl-dg-small is-bad" x="156" y="24">w = 3: push further</text>
+    <path class="dl-dg-line is-bad" style="stroke-dasharray: 6 4" marker-end="url(#cf-arrow)" d="M40 200 L155 25" />
+    <text class="dl-dg-small is-bad" x="162" y="30">w = 2.5: push further</text>
   </g>
 </svg>
 
@@ -3290,8 +3312,7 @@ A 512 × 512 image is 786 432 numbers, visited fifty times. Most of it is detail
   <path class="dl-dg-arrow" marker-end="url(#ld-arrow)" d="M468 98 H500" />
   <PixelImage in-svg :x="508" :y="30" :size="128" pattern="heart" tone="accent" />
   <text class="dl-dg-small" x="572" y="186" text-anchor="middle">decode once, at the end</text>
-  <text class="dl-dg-small" x="190" y="200" text-anchor="middle">section 01's autoencoder</text>
-  <text class="dl-dg-small" x="426" y="200" text-anchor="middle">section 01's autoencoder</text>
+  <text class="dl-dg-small" x="308" y="200" text-anchor="middle">f and g: section 01's autoencoder, trained first</text>
 </svg>
 </div>
 
@@ -3313,7 +3334,7 @@ model" turns out to be half of the most widely deployed generative model there i
 
 Read the picture: train an autoencoder first; encode to a 64 x 64 x 4 code, 48
 times smaller than the image; run the *entire* diffusion loop in that small space;
-decode once at the very end. The squares are drawn to scale against each other.
+decode once at the very end.
 
 The division of labour is the elegant part. The autoencoder handles texture and
 high-frequency detail, which is easy and local; the diffusion model handles
@@ -3454,6 +3475,8 @@ each straight one on the right.
 The general name is flow matching (Lipman et al., 2022): regress a velocity field
 that carries noise to data along a path you choose. Diffusion is one particular
 choice of path in this family; rectified flow is the straight one.
+
+Note the notation shift: here t runs continuously from 0 to 1, not 0 to T.
 
 The linear interpolation is worth writing next to the forward-process equation.
 Same shape, different coefficients — and that really is most of the difference.
@@ -3613,8 +3636,9 @@ No held-out accuracy here. The answer is a **distance between two clouds**.
   <path class="dl-dg-arrow" marker-end="url(#fid-arrow)" d="M112 100 H264" />
   <text class="dl-dg-lab is-sm" x="190" y="92" text-anchor="middle">FID</text>
   <g v-click>
-    <circle v-for="(p, i) in [[330,180],[334,184],[328,186]]" :key="`c${i}`" class="dl-dg-dot is-bad" :cx="p[0]" :cy="p[1]" r="3" />
-    <text class="dl-dg-small is-bad" x="320" y="204" text-anchor="end">collapsed G: a tiny cloud → bad FID</text>
+    <ellipse class="dl-dg-line is-bad" style="fill: none; stroke-width: 1.4" cx="96" cy="126" rx="11" ry="8" />
+    <circle v-for="(p, i) in [[92,124],[98,128],[95,122],[101,125]]" :key="`c${i}`" class="dl-dg-dot is-bad" :cx="p[0]" :cy="p[1]" r="2.5" />
+    <text class="dl-dg-small is-bad" x="8" y="204">collapsed G: a tiny cloud, even inside the real one → bad FID</text>
   </g>
 </svg>
 
@@ -3857,7 +3881,8 @@ progress bar.
 The deliberate-breakage exercise works because students predict before they run.
 What each break does, so you can grade it:
 
-  - no detach: trains, slowly, to something visibly worse
+  - no detach: depends on where zero_grad sits — wasted compute, or G pushed
+    the wrong way and visibly worse samples
   - saturating loss: often does not move at all in the first epochs
   - D five steps per G step: D wins, G's gradient vanishes, samples stay noise
 

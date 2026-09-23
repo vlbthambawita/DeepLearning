@@ -1,6 +1,6 @@
 ---
 name: lecture-deck
-description: Author a PGR207 lecture deck — use whenever the task is building slides for a new lecture, chapter or week, converting a 2025 PDF deck into Slidev, adding or reworking slides in decks/lecture-XX/slides.md, or writing a new teaching widget for the dl2026 addon.
+description: Author or review a PGR207 lecture deck — use whenever the task is building slides for a new lecture, chapter or week, converting a 2025 PDF deck into Slidev, adding or reworking slides in decks/lecture-XX/slides.md, reviewing or correcting an existing deck, or writing a new teaching widget for the dl2026 addon.
 ---
 
 # Building a lecture deck
@@ -287,6 +287,48 @@ lecture, not like a scratch script (`logits`, `hidden`, not `x2`, `tmp`).
 **Numbers.** Re-check the running example's arithmetic by hand once the deck is
 finished; those are the numbers the room will check. Confirm every shape in a
 ledger against the code that produces it.
+
+## 7b. Reviewing an existing deck
+
+When asked to review or correct a deck — or as the last step before calling a
+new one done — go through it as a **sceptical student and a sceptical expert at
+once**. The build and `check` passing says nothing about whether the slides are
+*right*. Work in this order, and fix as you go:
+
+1. **Read every slide in order, in one sitting** — visible text, every SVG
+   `<text>` label, component props, *and* the speaker notes. Notes are where
+   wrong claims hide, because nobody sees them until the lecture.
+2. **Re-derive every number independently.** Script it (a few lines of Python)
+   rather than trusting the composable, then confirm slide text, notes and widget
+   readouts all agree. Units too (nats vs bits).
+3. **Check each claim against the code on the slide.** A statement about what a
+   line of code does must be true *for that exact code*, not for code in
+   general. (Lecture 07's `detach()` poll said the leaked gradient "is applied";
+   in the loop shown, a later `zero_grad()` clears it first.)
+4. **Definitions must be the standard ones.** A 2025 source deck may use a
+   private definition; fix it, and say in the notes why the new deck differs.
+   (Lecture 07: total variation was "largest single-bin gap"; standard is half
+   the summed gap.)
+5. **Every picture must match its claim.** Bars drawn to scale with the numbers
+   printed beside them; vectors computed, not eyeballed; labels that match what
+   is drawn (a 12×12 one-channel image is 144 numbers, not 432); "drawn to scale"
+   only if it is. A picture that contradicts the notes is a bug in one of them.
+6. **Internal consistency.** Slide vs notes vs other slides: the same list of
+   things in both places, no summary that contradicts an earlier slide ("all
+   four families do this" when one section shows the autoencoder does not).
+   Cross-references by slide *name*, and pointing at the right slide.
+7. **Prerequisites.** Grep for the plan's *does not have yet* list, in the deck
+   and in the widgets it uses.
+8. **Overclaims.** "every", "always", "nobody", "the default", "in every image
+   tool" — keep only what you could source; soften the rest.
+9. **Widgets are part of the deck.** Their labels, notes and captions get the
+   same review, and a fix to shared logic (`composables/`) needs a check that no
+   other deck's numbers moved.
+10. **Verify, then look.** `build:all`, `check` light and dark, `--shots`, and
+    eyeball every slide you changed.
+
+Record what was wrong and what changed in `TODO/summary_slideset_XX.md` under a
+dated "Review" heading, so the next review does not re-litigate it.
 
 ## 8. Close the loop
 

@@ -105,9 +105,14 @@ export function js(p: number[], q: number[]): number {
   return (kl(p, m) + kl(q, m)) / 2
 }
 
-/** Total variation as the 2025 deck defines it: the largest single-bin gap. */
+/**
+ * Total variation: half the summed gap, which equals the largest difference in
+ * probability the two distributions give any set of outcomes. (The 2025 deck
+ * used the largest single-bin gap; on this example the two agree, but that one
+ * is not the standard definition.)
+ */
 export function tv(p: number[], q: number[]): number {
-  return Math.max(...p.map((pi, i) => Math.abs(pi - q[i])))
+  return p.reduce((sum, pi, i) => sum + Math.abs(pi - q[i]), 0) / 2
 }
 
 /**
