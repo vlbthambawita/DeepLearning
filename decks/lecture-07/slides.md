@@ -97,6 +97,21 @@ index: "00"
 
 <div class="dl-side-glyph"><FamilyGlyph kind="cnn" :size="190" /></div>
 
+<!--
+Section 00, about ten minutes. Do not linger on the divider; the next slide
+does the work.
+
+The glyph is the CNN emblem: the top arrow is the classifier they built in weeks
+4–5 (image in, label out), the bottom arrow is the same network pointed the other
+way. That reversal is the whole lecture in one picture.
+
+What this section has to land, in order: why "just generate the pixels" is hard
+(196 608 continuous numbers for one colour image), the difference between
+modelling p(y | x) and p(x), and the two-part deal — a simple distribution you
+can sample from, plus a learned map to images. State the deal before any model
+appears; every later section is one answer to "how do you train the map?".
+-->
+
 ---
 layout: default
 title: What a CNN already does
@@ -497,6 +512,21 @@ index: "01"
 # Compress first: autoencoders
 
 <div class="dl-side-glyph"><FamilyGlyph kind="ae" :size="190" /></div>
+
+<!--
+Section 01 is compressible. If you are behind, say the punchline in two
+minutes — squeeze an image through a narrow code, rebuild it, and you get a good
+compressor but not a generator — and jump to section 02.
+
+The glyph: two funnels meeting at a narrow box. The box is the code z. The VAE
+glyph in the next section is the same drawing with a cloud in the middle instead
+of a box; point that out now, because a point becoming a cloud is also the only
+real change between the two models.
+
+In the loss table from section 00 this is row one: pixel MSE against its own
+input. The section ends on the poll about a random z decoding to noise — that
+failure is the reason section 02 exists.
+-->
 
 ---
 layout: default
@@ -908,6 +938,22 @@ index: "02"
 
 <div class="dl-side-glyph"><FamilyGlyph kind="vae" :size="190" /></div>
 
+<!--
+Section 02 is the second compressible one. If time is short, keep "Two
+changes, and only two", "The objective, in two terms" and "Why VAE samples are
+soft"; the code slide and the β widget can go.
+
+The glyph: the autoencoder's funnels, with a cloud at the middle instead of a
+point. Each input now maps to a small region of code space, and the KL term keeps
+those regions packed around the origin, so a random z lands somewhere the decoder
+has seen.
+
+Two things they must leave with. The reparameterisation trick, which turns out to
+be one line of code. And why the samples are blurry: MSE rewards the average of
+the plausible images. Land the blur argument properly — the final poll of
+section 05 asks them to use it again.
+-->
+
 ---
 layout: default
 title: Two changes, and only two
@@ -1252,6 +1298,24 @@ index: "03"
 # The adversarial game
 
 <div class="dl-side-glyph"><FamilyGlyph kind="gan" :size="190" /></div>
+
+<!--
+This is the lecture. Never cut section 03; if anything has to give, it gives
+in 01, 02 or 04. Plan the most time here.
+
+The glyph: a generator and a critic, with the critic's verdict looping back into
+the generator. Keep that loop in mind — it is the gradient path on the training
+loop slide.
+
+The move this section makes: stop writing the loss by hand and let a second
+network learn it. That gives row three of the loss table — sharp samples, and
+unstable training (the unstable half is section 04).
+
+The payoff is "Put D* back in" and "The theorem, as a number". On the three bins,
+D* is 5/8, 2/5 and 10/19, and V(D*, G) = -log 4 + 2 × JS = -1.35179 nats. Tell the
+room to get a pen out before the D* slide; they should compute the three
+fractions themselves, not watch you do it.
+-->
 
 ---
 layout: default
@@ -2071,6 +2135,24 @@ index: "04"
 
 <div class="dl-side-glyph"><FamilyGlyph kind="collapse" :size="190" /></div>
 
+<!--
+The glyph: many starting points, every arrow landing on the same one. That is
+mode collapse, shown before it is named. Let the room guess what it means.
+
+The section has two halves. First, making GANs work on real images: DCGAN,
+transposed convolution, the checkerboard and its fix, and a two-minute BatchNorm
+recap. Second, why they still fail: mode collapse, the four divergences, and
+Wasserstein.
+
+The second payoff of the deck is here. Both collapsed generators score
+JS = 0.3183; earth-mover gives 2/3 and 1, because it knows mode 3 is further from
+mode 1 than mode 2 is. If GAN Lab's two-rings case is still running from the
+previous slide, look at it now — it has usually collapsed.
+
+If short on time, the zoo and the applications slides compress to one sentence
+each. Keep the divergence table and the Wasserstein slide.
+-->
+
 ---
 layout: default
 title: DCGAN — a CNN, run backwards
@@ -2719,6 +2801,27 @@ index: "05"
 # What replaced them: diffusion
 
 <div class="dl-side-glyph"><FamilyGlyph kind="diffusion" :size="190" /></div>
+
+<!--
+Section 05 is new material compared with 2025, and it resolves the argument
+the first four sections set up: sharp like a GAN, stable like a VAE.
+
+The glyph: an image dissolving into noise, left to right, and the arrow that
+undoes it. The forward direction needs no network at all; only the arrow back is
+learned.
+
+The core, which must not be cut: the forward process in one step, the fact that
+the network only predicts the noise that was added, and the three-line training
+loss with no adversary. If short on time, the latent-diffusion, U-Net and "2026"
+slides compress to a sentence each.
+
+The denoiser is usually a U-Net — a CNN with skip connections, so it is on their
+list. Where a modern system uses a different architecture, say so in a phrase
+and move on; nothing in the idea depends on it.
+
+The section ends on the best poll of the deck: why this MSE does not blur when
+the VAE's did.
+-->
 
 ---
 layout: default
@@ -3573,6 +3676,19 @@ index: "06"
 
 <div class="dl-side-glyph"><FamilyGlyph kind="choose" :size="190" /></div>
 
+<!--
+Section 06, about ten minutes. The glyph is a balance: no family wins every
+column, which is exactly what the next slide's table says.
+
+This section is short on new ideas on purpose. Its jobs: compare the families
+side by side, say how quality is actually measured, spend five minutes on what
+comes with the capability, and point at the reading and the lab.
+
+If the session is over time, go straight to the comparison table and the reading
+slide. The evaluation slide and the ethics slide can move to next week's
+opening.
+-->
+
 ---
 layout: default
 title: Five families, side by side
@@ -3914,3 +4030,19 @@ next: GAN variants and applications
   <FamilyGlyph kind="gan" :size="64" label="GAN" />
   <FamilyGlyph kind="diffusion" :size="64" label="diffusion" />
 </div>
+
+<!--
+The four glyphs are the recap. Point at each and ask the room for its row of the
+loss table: autoencoder, pixel MSE to its own input; VAE, MSE plus a KL term, so
+soft; GAN, a second network, so sharp and fragile; diffusion, MSE on the noise at
+every noise level, so sharp and stable.
+
+If there is one sentence to repeat on the way out: the optimal discriminator is
+not a classifier, it is a measurement of the JS divergence between the real and
+the generated data.
+
+Next week is GAN variants and applications, and the lab from the previous slide.
+Leave time for questions. Two likely ones: "which one should
+I use for my project?" (answer with the table's columns) and "is diffusion just a
+better GAN?" (no: different loss, different trade-offs).
+-->
