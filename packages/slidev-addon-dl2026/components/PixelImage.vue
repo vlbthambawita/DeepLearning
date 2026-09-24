@@ -68,7 +68,7 @@ const color = computed(() => ({
     <rect x="-0.5" y="-0.5" :width="PIXEL_SIZE + 1" :height="PIXEL_SIZE + 1" rx="0.8" class="dl-pixel__bg" />
     <rect
       v-for="c in cells" :key="`${c.x}-${c.y}`"
-      :x="c.x" :y="c.y" width="1.02" height="1.02"
+      class="dl-pixel__cell" :x="c.x" :y="c.y" width="1.02" height="1.02"
       :style="{ fill: color, fillOpacity: c.v }"
     />
     <text v-if="props.label" :x="PIXEL_SIZE / 2" :y="PIXEL_SIZE + 0.5 + 12 / scale" text-anchor="middle" class="dl-pixel__svglabel" :style="{ fontSize: `${11 / scale}px` }">{{ props.label }}</text>
@@ -78,7 +78,7 @@ const color = computed(() => ({
       <rect x="-0.5" y="-0.5" :width="PIXEL_SIZE + 1" :height="PIXEL_SIZE + 1" rx="0.8" class="dl-pixel__bg" />
       <rect
         v-for="c in cells" :key="`${c.x}-${c.y}`"
-        :x="c.x" :y="c.y" width="1.02" height="1.02"
+        class="dl-pixel__cell" :x="c.x" :y="c.y" width="1.02" height="1.02"
         :style="{ fill: color, fillOpacity: c.v }"
       />
     </svg>

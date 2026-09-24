@@ -18,7 +18,8 @@
     "export": "node scripts/export-pdf.mjs",
     "preview": "vite preview --outDir dist --port 4173",
     "publish:hf": "node scripts/publish-hf.mjs",
-    "check": "node scripts/check-overflow.mjs"
+    "check": "node scripts/check-overflow.mjs",
+    "check:layout": "node scripts/check-layout.mjs"
   },
   "devDependencies": {
     "@slidev/cli": "^52.19.0",

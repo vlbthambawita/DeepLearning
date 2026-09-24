@@ -73,7 +73,7 @@ Today needs **one** thing from earlier: the **CNN** of weeks 4–5.
   <FamilyGlyph kind="cnn" :size="96" />
 </div>
 
-It turned an image into a label. Today we run that arrow **backwards**.
+It turned an image into a label. Today we **reverse** it: a few numbers in, an image out.
 
 <!--
 Say it plainly: the only earlier block this lecture builds on is the CNN one —
@@ -205,7 +205,7 @@ A 256 × 256 colour image.
 
 - **196 608 numbers**, not three class scores
 - Far too many possible images to list and put **one softmax** over
-- They must **agree**: an eye on the left wants an eye on the right
+- The pixels must **fit together**: a left eye needs a matching right eye
 
 </v-clicks>
 
@@ -269,7 +269,7 @@ title: Two kinds of model
 
 <div v-click class="mt-2 dl-callout">
 
-A classifier only needs the line. A generator needs the whole shape — strictly
+A classifier only needs the line. A generator needs the shape of the data — much
 harder.
 
 </div>
@@ -345,8 +345,9 @@ a simple distribution you can sample from, and a learned map from it to the data
 
 <div v-click class="mt-3 dl-callout">
 
-VAE, GAN and diffusion all do exactly this — the autoencoder tries and fails.
-They differ only in **how $g_\theta$ is trained**.
+The VAE (variational autoencoder), the GAN (generative adversarial network) and
+diffusion all do this — the autoencoder tries and fails. They differ only in
+**how $g_\theta$ is trained**.
 
 </div>
 
@@ -378,7 +379,7 @@ title: Which loss can you even compute?
 
 # Which loss can you even compute?
 
-You cannot differentiate "look like real data". Each family is a different answer.
+"Look like real data" is not a formula you can take a gradient of. Each family finds a different loss.
 
 <div class="grid grid-cols-4 gap-3 mt-4">
 <div v-click class="dl-glyphcard">
@@ -390,7 +391,7 @@ You cannot differentiate "look like real data". Each family is a different answe
 <div v-click class="dl-glyphcard">
   <FamilyGlyph kind="vae" :size="70" />
   <strong>VAE</strong>
-  <span>pixel error <b>+ a leash</b> on the code</span>
+  <span>pixel error <b>+ a pull</b> on the code</span>
   <span class="dl-glyphcard__cost">blurry</span>
 </div>
 <div v-click class="dl-glyphcard">
@@ -409,7 +410,7 @@ You cannot differentiate "look like real data". Each family is a different answe
 
 <div v-click class="mt-4 dl-callout">
 
-Four cards, one lecture. The grey line under each is the plot.
+The grey line on each card is its cost. The rest of the lecture explains why.
 
 </div>
 
@@ -437,7 +438,7 @@ layout: default
 <div>
 
 <PollSlide
-  question="Which of these can tell you the probability it assigns to a picture you hand it?"
+  question="You give the model a picture. Which one can tell you how probable that picture is?"
   :items="[
     'A GAN',
     'A VAE',
@@ -460,7 +461,7 @@ layout: default
 
 <div v-click class="mt-4 dl-reveal">
 
-Only the last one, exactly
+Only the last one gives the exact number
 
 </div>
 
@@ -504,7 +505,7 @@ title: The autoencoder
 
 # The autoencoder
 
-Two networks, back to back, trained to do **nothing** — as accurately as possible.
+Two networks, back to back, trained to output **their own input**.
 
 <div class="mt-2 flex justify-center">
 <svg viewBox="0 0 640 170" class="dl-diagram" role="img" aria-label="An encoder narrows an input image to a small code, a decoder widens it back into an image">
@@ -577,7 +578,7 @@ title: How wide is the middle?
 <v-clicks>
 
 - No room to keep everything, so it **must choose**
-- What it keeps is what the data actually varies along
+- It keeps what changes most between examples
 
 </v-clicks>
 
@@ -601,7 +602,7 @@ title: How wide is the middle?
 
 <v-clicks>
 
-- The **identity map** scores a perfect loss and teaches nothing
+- **Copying** the input gives a perfect loss — and learns nothing
 - Useful only with another constraint — noise, sparsity
 
 </v-clicks>
@@ -611,7 +612,7 @@ title: How wide is the middle?
 
 <div v-click class="mt-3 dl-callout">
 
-The bottleneck is not a limitation you tolerate. It is the entire mechanism.
+The narrow middle is not a weakness. It is what makes the model learn.
 
 </div>
 
@@ -648,7 +649,7 @@ Three clusters of data. Grey is the input, teal is what comes back out.
 
 <div v-click class="mt-2 dl-callout">
 
-That curve is the model's whole idea of what data is.
+That curve is everything the model learned about the data.
 
 </div>
 
@@ -759,7 +760,7 @@ Press **Decode a fresh z** four times. The strip shows every training code.
 
 <div v-click class="mt-2 dl-callout">
 
-The loss asked $f$ to be **invertible**. Never to **fill** anything.
+The loss only asked for codes that **decode back**. Never for codes that **fill** the space.
 
 </div>
 
@@ -877,8 +878,8 @@ Nothing ever lives at that z
 
 <div v-click class="mt-2 dl-secondary">
 
-The decoder is only meaningful on the region the encoder used. Everywhere else
-it extrapolates, and it was never penalised for what it does there.
+The decoder only learned the places where the encoder put codes. Everywhere
+else its output was never trained.
 
 </div>
 
@@ -943,8 +944,8 @@ The variational autoencoder (VAE) is the autoencoder with the gaps fixed.
 </div>
 <div v-click>
 
-**2 — pull it toward a prior.** Punish each region for straying from
-$\mathcal{N}(\mathbf{0}, I)$ — what we sample from later.
+**2 — pull it toward $\mathcal{N}(\mathbf{0}, I)$.** A penalty keeps every
+region close to the distribution we sample from later (the *prior*).
 
 </div>
 </div>
@@ -1008,7 +1009,7 @@ $$
 <v-clicks>
 
 - **Left**: the autoencoder loss, decoded from a *sampled* $\mathbf{z}$
-- **Right**: a leash. For a Gaussian encoder it is a two-line closed form
+- **Right**: KL, a measure of how different two distributions are, pulls each code toward $\mathcal{N}(\mathbf{0}, I)$
 
 </v-clicks>
 
@@ -1051,7 +1052,7 @@ title: You cannot backpropagate through a sample
 # You cannot backpropagate through a sample
 
 The encoder produces $\boldsymbol\mu, \boldsymbol\sigma$; the decoder needs an
-actual $\mathbf{z}$. Drawing one is not a differentiable operation.
+actual $\mathbf{z}$. A random draw has no gradient.
 
 <div class="mt-3 flex justify-center">
 <svg viewBox="0 0 660 132" class="dl-diagram" role="img" aria-label="Sampling inside the graph blocks the gradient; adding scaled external noise does not">
@@ -1092,8 +1093,8 @@ actual $\mathbf{z}$. Drawing one is not a differentiable operation.
 <div v-click class="mt-3 dl-callout">
 
 $\mathbf{z} = \boldsymbol\mu + \boldsymbol\sigma \odot \boldsymbol\epsilon$,
-$\;\boldsymbol\epsilon \sim \mathcal{N}(\mathbf{0}, I)$ — identical distribution,
-and now $\boldsymbol\mu$ and $\boldsymbol\sigma$ sit on a differentiable path.
+$\;\boldsymbol\epsilon \sim \mathcal{N}(\mathbf{0}, I)$ — the same random $\mathbf{z}$,
+but now the gradient can reach $\boldsymbol\mu$ and $\boldsymbol\sigma$.
 
 </div>
 
@@ -1154,7 +1155,7 @@ title: Why VAE samples are soft
 
 # Why VAE samples are soft
 
-A slightly jittered code could have meant **either** of two sharp images.
+A code with a little noise could decode to **either** of two sharp images.
 
 <div class="dl-pixrow mt-4">
   <PixelImage pattern="smiley" :shifts="[-1]" :size="104" label="plausible A" />
@@ -1166,8 +1167,8 @@ A slightly jittered code could have meant **either** of two sharp images.
 
 <div v-click class="mt-5 dl-callout">
 
-Scored by squared error on pixels, the best guess is the **average** — one
-blurry image. The model is not failing. It is succeeding.
+With squared error on pixels, the best single guess is the **average** — a
+blurry image. The model is doing exactly what the loss asks.
 
 </div>
 
@@ -1418,7 +1419,8 @@ $\;\min_G \max_D V$.
 
 <div v-click class="mt-2 dl-secondary">
 
-One objective, two players, opposite signs — a **saddle point**, not a minimum.
+One objective, two players pulling opposite ways. We look for a **saddle point**:
+best for $D$ and best for $G$ at the same time.
 
 </div>
 
@@ -1557,7 +1559,7 @@ $$
 
 <div v-click class="mt-2 dl-callout">
 
-A perfect generator makes the best discriminator useless — coin-flip everywhere.
+Against a perfect generator, the best discriminator can only guess: ½ everywhere.
 
 </div>
 
@@ -1723,7 +1725,9 @@ Two rows, computed two completely different ways.
 
 <div v-click class="mt-2 dl-callout">
 
-At $Q = P$: $V = -1.38629 = -\log 4$, and JS is 0.
+At $Q = P$, JS is 0.
+
+So $V = -\log 4 \approx -1.386$.
 
 </div>
 
@@ -1832,14 +1836,14 @@ plot.
 
 <div v-click class="mt-3 dl-callout">
 
-So **maximise $\log D(G(\mathbf{z}))$** instead. Same fixed point, usable
-gradient.
+So **maximise $\log D(G(\mathbf{z}))$** instead. Same goal, and a gradient
+that works.
 
 </div>
 
 <div v-click class="mt-2 dl-secondary">
 
-One argument in code: train $G$ with BCE against a label of **1**.
+In code it is one change: train $G$ with BCE against the label **1**.
 
 </div>
 
@@ -1972,8 +1976,9 @@ G gets gradient from D's loss
 
 <div v-click class="mt-2 dl-secondary">
 
-Backward follows the graph, not the optimiser. Line 11 saves this loop; zero the
-gradients once at the top instead, and `opt_g` applies D's gradient.
+`backward()` follows the graph — the optimiser does not limit it. Line 11 clears
+the extra gradient in time. Call `zero_grad()` once at the top instead, and
+`opt_g` would apply it.
 
 </div>
 
@@ -2096,10 +2101,10 @@ title: DCGAN — a CNN, run backwards
     <line class="dl-dg-split" x1="8" y1="132" x2="652" y2="132" />
     <text class="dl-dg-lab is-sm" x="8" y="152">generator — the same, run backwards</text>
     <rect class="dl-dg-box is-accent" x="8" y="170" width="16" height="44" rx="3" />
-    <text class="dl-dg-small" x="16" y="228" text-anchor="middle">z</text>
+    <text class="dl-dg-small" x="16" y="236" text-anchor="middle">z</text>
     <g v-for="(s, i) in [9, 18, 36]" :key="`g${i}`">
       <rect class="dl-dg-fill" :x="60 + i * 80" :y="192 - s * 0.75" :width="s * 1.5" :height="s * 1.5" rx="2" />
-      <text class="dl-dg-small" :x="60 + i * 80" y="228">{{ [8, 16, 32][i] }}²</text>
+      <text class="dl-dg-small" :x="60 + i * 80" y="236">{{ [8, 16, 32][i] }}²</text>
     </g>
     <path class="dl-dg-arrow" marker-end="url(#dc-arrow)" d="M28 192 H54" />
     <path class="dl-dg-arrow" marker-end="url(#dc-arrow)" d="M290 192 H320" />
@@ -2112,8 +2117,8 @@ title: DCGAN — a CNN, run backwards
 
 <div v-click class="mt-1 dl-callout">
 
-No pooling in either. Down is a stride, up is a **transposed** convolution — both
-learned.
+DCGAN (deep convolutional GAN): no pooling. Down is a stride, up is a
+**transposed** convolution — both learned.
 
 </div>
 
@@ -2155,14 +2160,14 @@ Not a new operation: insert zeros between the inputs, then convolve.
 <v-clicks>
 
 - Output is $(n-1)s + k$
-- Shading is **how many taps** reach each cell
+- Shading: how many **kernel weights** land on each output cell
 - Try **(3, 2)**
 
 </v-clicks>
 
 <div v-click class="mt-2 dl-callout">
 
-Kernel 3, stride 2: taps of 1, 2 and 4 — a 4× range.
+Kernel 3, stride 2: cells get 1, 2 or 4 weights — a 4× range.
 
 </div>
 
@@ -2199,9 +2204,9 @@ title: The checkerboard, and what to do instead
 
 <v-clicks>
 
-- Uneven taps whenever `stride` does not divide `kernel` — there **before training**
-- **Fix 1:** make stride divide kernel. 4 with stride 2 is DCGAN's choice
-- **Fix 2:** resize, then an ordinary `Conv2d`. What modern code — and section 05's U-Net — does
+- Uneven coverage whenever `stride` does not divide `kernel` — visible **before training**
+- **Fix 1:** make the stride divide the kernel size. DCGAN uses kernel 4, stride 2
+- **Fix 2:** resize, then an ordinary `Conv2d` — what modern code and section 05's U-Net do
 
 </v-clicks>
 
@@ -2264,7 +2269,7 @@ Batch normalisation, in both networks, and it is doing more work here than usual
 
 <div v-click class="mt-3 dl-callout">
 
-Not in $D$'s first layer, not in $G$'s last. Both touch real pixel statistics.
+Leave it out of $D$'s first layer and $G$'s last — those work directly on pixels.
 
 </div>
 
@@ -2318,7 +2323,7 @@ title: The failure that defines GANs
 <v-clicks>
 
 - Nothing in $V$ rewards **variety** — only each sample looking real
-- $D$ learns to reject the smiley, so $G$ jumps to **another** single output. Forever
+- $D$ learns to reject the smiley, so $G$ switches to **another** single output — and the chase repeats
 
 </v-clicks>
 
@@ -2431,7 +2436,7 @@ Three generators, four measures. Read the highlighted row across.
 
 <div v-click class="mt-2 dl-callout">
 
-JS cannot tell these two apart, so there is no gradient between them.
+JS scores these two the same, so its gradient cannot tell $G$ which is better.
 
 </div>
 
@@ -2471,7 +2476,7 @@ title: Wasserstein, and what came after
   <PlotCurve :fn="(t) => Math.abs(t)" color="var(--dl-accent)" :width="2.6" />
   <PlotPoints :points="[{ x: 0, y: 0 }]" color="var(--dl-danger)" :radius="4" />
   <PlotLabel :at="[-1.95, 0.693]" text="JS = log 2, flat" color="var(--dl-danger)" :dy="-8" bold />
-  <PlotLabel :at="[1.1, 1.3]" text="EM = |θ|" color="var(--dl-accent)" bold />
+  <PlotLabel :at="[1.3, 0.95]" text="EM = |θ|" color="var(--dl-accent)" bold />
 </Plot2D>
 
 </div>
@@ -2479,9 +2484,9 @@ title: Wasserstein, and what came after
 
 <v-clicks>
 
-- **WGAN** (2017) — a *critic* with no sigmoid, whose loss estimates EM
-- The critic must be **Lipschitz**: it cannot change faster than a fixed rate
-- **WGAN-GP** enforces that with a gradient penalty
+- **WGAN** (Wasserstein GAN, 2017) — a *critic* with no sigmoid; its loss estimates EM
+- The critic must be **smooth** (*Lipschitz*): its output cannot change faster than a fixed rate
+- **WGAN-GP** (GP = gradient penalty) enforces that with an extra loss term
 - **Spectral normalisation** does it per layer — cheaper, and now common
 
 </v-clicks>
@@ -2491,8 +2496,8 @@ title: Wasserstein, and what came after
 
 <div v-click class="mt-2 dl-callout">
 
-The critic's loss finally **correlates with sample quality** — the training curve
-means something.
+The critic's loss finally **goes down as samples get better** — the training
+curve means something.
 
 </div>
 
@@ -2625,7 +2630,7 @@ Synthetic data where the real thing cannot be shared — our own research area.
 
 <div v-click class="mt-3 dl-callout">
 
-A synthetic sample too close to a training example has leaked the very thing it
+If a synthetic image is almost a copy of a real one, it leaks the patient data it
 was meant to protect.
 
 </div>
@@ -2682,8 +2687,8 @@ Look at a grid of samples
 
 <div v-click class="mt-2 dl-secondary">
 
-Flat noisy losses are normal — there is no minimum to descend to. Sharp samples
-with no variety is mode collapse, invisible in every number you are logging.
+Flat, noisy losses are normal — there is no minimum to reach. Sharp samples that
+are all alike are mode collapse, and none of your logged numbers shows it.
 
 </div>
 
@@ -2723,7 +2728,7 @@ title: Destroying an image is easy
 # Destroying an image is easy
 
 The adversarial game exists because we could not write down a loss. Diffusion
-finds one, by going backwards.
+finds one: learn to reverse a simple noising process.
 
 <div class="mt-2 flex justify-center">
 <svg viewBox="0 0 660 170" class="dl-diagram is-sm-h" role="img" aria-label="Adding noise step by step turns an image into pure noise with no learning; a network learns to undo one step at a time">
@@ -2750,7 +2755,7 @@ finds one, by going backwards.
 <v-clicks>
 
 - Undoing a *little* noise is plain regression — MSE
-- So the hard problem — noise to image — is a thousand easy ones stacked
+- So one hard problem (noise → image) becomes a thousand easy steps
 
 </v-clicks>
 
@@ -2783,7 +2788,7 @@ title: The forward process, in one step
 
 # The forward process, in one step
 
-Because Gaussians add up to a Gaussian, the whole chain has a closed form:
+Adding Gaussian noise many times equals adding it once, with the right amount:
 
 <div class="dl-math-sm">
 
@@ -2809,7 +2814,7 @@ $$
 
 - $t$ is a **noise level**, from 0 (clean) to $T$ (pure noise)
 - $\bar\alpha_t$ falls from $\approx 1$ to $\approx 0$ — a mixing dial between image and noise
-- Any level costs **one** multiply-add. No chain is ever simulated
+- Any noise level in **one** step — no need to run the chain
 
 </v-clicks>
 
@@ -2851,7 +2856,7 @@ The three modes again, as blobs. Drag $t$ from 0 to 47.
 
 <v-clicks>
 
-- $\sqrt{\bar\alpha_t}$ is image left, $\sqrt{1-\bar\alpha_t}$ is noise
+- $\sqrt{\bar\alpha_t}$: how much image is left. $\sqrt{1-\bar\alpha_t}$: how much noise
 - By $t = 47$ the clusters are gone
 - Every frame comes from $\mathbf{x}_0$ **directly**
 
@@ -2953,13 +2958,13 @@ Press **show the field**: the arrows are what the network is trained to output.
 <v-clicks>
 
 - High $t$ — vaguely inward, no mode chosen
-- Low $t$ — it sharpens, samples commit
+- Low $t$ — arrows point to one mode; each sample picks one
 
 </v-clicks>
 
 <div v-click class="mt-2 dl-callout">
 
-Each step needs the one before. Hence slow.
+Each step needs the one before, so sampling is slow.
 
 </div>
 
@@ -3049,7 +3054,7 @@ GANs are one forward pass per sample. Diffusion is many.
     <text class="dl-dg-small" :x="230 + i * 130" y="188" text-anchor="middle">{{ t }}</text>
   </g>
   <text class="dl-dg-small" x="620" y="200" text-anchor="end">forward passes per sample (log scale)</text>
-  <g v-for="(b, i) in [['GAN', 1, 'is-q', '1'], ['DDPM, as published (2020)', 1000, 'is-bad', '1000'], ['DDIM sampler', 50, '', '20–50'], ['distilled / consistency', 4, 'is-q', '1–4']]" :key="i">
+  <g v-for="(b, i) in [['GAN', 1, 'is-q', '1'], ['original diffusion (DDPM, 2020)', 1000, 'is-bad', '1000'], ['DDIM sampler', 50, '', '20–50'], ['distilled / consistency', 4, 'is-q', '1–4']]" :key="i">
     <text class="dl-dg-lab is-sm" x="220" :y="38 + i * 38" text-anchor="end">{{ b[0] }}</text>
     <rect :class="['dl-dg-bar', b[2]]" x="230" :y="24 + i * 38" :width="Math.max(Math.log10(b[1]) * 130, 5)" height="20" rx="4" />
     <text class="dl-dg-small" :x="238 + Math.max(Math.log10(b[1]) * 130, 5)" :y="38 + i * 38">{{ b[3] }}</text>
@@ -3061,7 +3066,7 @@ GANs are one forward pass per sample. Diffusion is many.
 
 <v-clicks>
 
-- **DDIM** takes bigger, noise-free strides with the **same** trained model
+- **DDIM** (denoising diffusion implicit models) takes bigger steps without new noise — same trained model
 - **Distillation** trains a student to do in one step what the teacher did in many
 
 </v-clicks>
@@ -3211,7 +3216,7 @@ $$
 <div v-click class="mt-2 dl-callout">
 
 **Classifier-free guidance.** $w$ is the guidance scale — not a weight vector. It
-is the "follow my prompt" slider in every image tool.
+is the "follow my prompt" slider in most image tools.
 
 </div>
 
@@ -3245,7 +3250,7 @@ aside-width: 19rem
 
 ::aside::
 
-The prompt is *which mode do you want*. Drag $w$ from 0 to 8.
+Here the "prompt" is simply *which mode do you want?* Drag $w$ from 0 to 8.
 
 <v-clicks>
 
@@ -3257,7 +3262,7 @@ The prompt is *which mode do you want*. Drag $w$ from 0 to 8.
 
 <div v-click class="mt-2 dl-callout">
 
-Past $w = 1$: a field no data ever had.
+Above $w = 1$, samples follow a direction no real data has.
 
 </div>
 
@@ -3287,10 +3292,10 @@ title: Do it somewhere cheaper
 
 # Do it somewhere cheaper
 
-A 512 × 512 image is 786 432 numbers, visited fifty times. Most of it is detail.
+A 512 × 512 image is 786 432 numbers — at each of 50 steps.
 
 <div class="mt-2 flex justify-center">
-<svg viewBox="0 0 660 210" class="dl-diagram" role="img" aria-label="Latent diffusion: an encoder shrinks a 512 by 512 image to a 64 by 64 by 4 code, diffusion runs there, and a decoder turns the result back into an image">
+<svg viewBox="0 0 660 210" class="dl-diagram is-sm-h" role="img" aria-label="Latent diffusion: an encoder shrinks a 512 by 512 image to a 64 by 64 by 4 code, diffusion runs there, and a decoder turns the result back into an image">
   <defs>
     <marker id="ld-arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
       <path class="dl-dg-head" d="M0 0 L7 3.5 L0 7 z" />
@@ -3385,7 +3390,7 @@ CNN shaped like a **U**.
 
 - **Down**: the week-4 CNN
 - **Up**: upsample-then-convolve, from section 04
-- **Skips** keep detail the bottom loses
+- **Skip connections** carry detail across that the narrow bottom would lose
 
 </v-clicks>
 
@@ -3534,8 +3539,8 @@ One small step has one plausible answer
 
 <div v-click class="mt-2 dl-secondary">
 
-A VAE averages different images. One small denoising step is nearly
-unambiguous.
+A VAE averages several possible images. One small denoising step has almost only
+one right answer.
 
 </div>
 
@@ -3634,7 +3639,8 @@ No held-out accuracy here. The answer is a **distance between two clouds**.
   <circle v-for="(p, i) in [[240,80],[270,110],[300,85],[280,65],[250,100],[310,110],[235,95]]" :key="`g${i}`" class="dl-dg-dot is-accent" :cx="p[0]" :cy="p[1]" r="4" />
   <text class="dl-dg-small is-good" x="280" y="160" text-anchor="middle">generated</text>
   <path class="dl-dg-arrow" marker-end="url(#fid-arrow)" d="M112 100 H264" />
-  <text class="dl-dg-lab is-sm" x="190" y="92" text-anchor="middle">FID</text>
+  <text class="dl-dg-lab is-sm" x="195" y="28" text-anchor="middle">FID</text>
+  <path class="dl-dg-loss" d="M195 34 V96" />
   <g v-click>
     <ellipse class="dl-dg-line is-bad" style="fill: none; stroke-width: 1.4" cx="96" cy="126" rx="11" ry="8" />
     <circle v-for="(p, i) in [[92,124],[98,128],[95,122],[101,125]]" :key="`c${i}`" class="dl-dg-dot is-bad" :cx="p[0]" :cy="p[1]" r="2.5" />
@@ -3647,9 +3653,9 @@ No held-out accuracy here. The answer is a **distance between two clouds**.
 
 <v-clicks>
 
-- **FID** — features from a fixed pretrained CNN; fit a Gaussian to each set; measure the gap. Lower is better
+- **FID** (Fréchet Inception Distance) — features from a pretrained CNN; a Gaussian fitted to each set; the gap between them. Lower is better
 - It sees **variety** as well as quality
-- Biased by sample count, and gameable
+- It changes with the number of samples, and it can be gamed
 
 </v-clicks>
 
@@ -3707,7 +3713,7 @@ All of today: **sample something simple, learn a map**. Four ways to train the m
 <div v-click class="dl-glyphcard">
   <FamilyGlyph kind="vae" :size="64" />
   <strong>VAE</strong>
-  <span>adds a leash — pays in blur</span>
+  <span>adds a pull toward N(0, I) — costs sharpness</span>
 </div>
 <div v-click class="dl-glyphcard">
   <FamilyGlyph kind="gan" :size="64" />
@@ -3770,8 +3776,8 @@ title: What comes with the capability
 <v-clicks>
 
 - **Memorisation is measurable** — "it looks different" is not a test
-- **Provenance** — C2PA, watermarking. Both removable
-- **The asymmetry** — faking is one forward pass; proving something real is open
+- **Provenance** — content credentials (C2PA) and watermarks. Both can be removed
+- **The asymmetry** — faking takes one forward pass; proving an image is real is still unsolved
 - **Say what is synthetic** — in a paper, a tool, a dataset card
 
 </v-clicks>
@@ -3846,7 +3852,7 @@ title: Reading, and the lab
   <LinkCard
     href="https://github.com/lucidrains/denoising-diffusion-pytorch"
     title="denoising-diffusion-pytorch"
-    blurb="A complete, trainable DDPM in readable PyTorch. The one to start from."
+    blurb="A complete, trainable DDPM (the original 2020 diffusion model) in readable PyTorch."
     icon="💻"
   />
 </div>

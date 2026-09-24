@@ -241,6 +241,8 @@ npm run preview &
 npm run check -- lecture-07
 npm run check -- lecture-07 --dark
 npm run check -- lecture-07 --shots /tmp/deck    # a PNG per slide
+npm run check:layout -- lecture-07               # overlapping text/figures, dead clicks
+python3 .claude/skills/lecture-deck/slide-lint.py lecture-07   # readability, duplicates, clicks
 ```
 
 `check` only catches **vertical** clipping. A widget with a fixed rem grid slides
@@ -330,6 +332,77 @@ once**. The build and `check` passing says nothing about whether the slides are
 Record what was wrong and what changed in `TODO/summary_slideset_XX.md` under a
 dated "Review" heading, so the next review does not re-litigate it.
 
+## 7c. Plain language, duplicates, clicks and overlap
+
+Four more review passes, each with a tool that finds candidates and a human
+judgement that decides. Run them on every new deck and on every review.
+
+```bash
+python3 .claude/skills/lecture-deck/slide-lint.py lecture-07            # read, dup, click
+python3 .claude/skills/lecture-deck/slide-lint.py lecture-07 --only read
+npm run build:all && npm run preview &
+npm run check:layout -- lecture-07                                      # overlap + dead clicks
+npm run check:layout -- lecture-07 --from 30 --to 40 --verbose
+```
+
+### Plain language
+
+The room is second-year students, many reading English as a second language.
+Write every visible sentence so it can be understood **on first reading**:
+
+- **One idea per sentence**, 22 words at most (30 in an aside). A sentence with
+  a dash *and* a semicolon is two sentences.
+- **No idioms or wordplay** — "the plot", "a leash", "pays in blur", "earns its
+  keep", "baked in", "for free". The lint keeps a list; add to it when you find
+  a new one.
+- **Every technical word explained where it first appears**, in the slide text,
+  not only in the notes: *prior*, *Lipschitz*, *invertible*, *tap*,
+  *differentiable path*. If the word is not needed, replace it with the plain
+  one ("smooth", "decodes back", "kernel weight", "the gradient can reach").
+- **Every acronym expanded at first use** on a slide: "the GAN (generative
+  adversarial network)". The lint tracks this across the deck.
+- **Concrete, active wording**: "the model does exactly what the loss asks"
+  rather than "the model is not failing, it is succeeding".
+- Keep the speaker notes for nuance, jokes and history. They have no reading
+  budget, but a slide does.
+
+`slide-lint.py --only read` lists long sentences, listed idioms and unexpanded
+acronyms. It cannot see *unclear* sentences that are short — so after it is
+clean, dump the visible text and read it through once as a student would.
+
+### Duplicates
+
+`--only dup` lists repeated headings, sentences that appear on two slides,
+near-duplicate slides (shared words > 55%) and reused SVG `<marker id>`s — two
+mounted slides with one id make arrowheads resolve to the wrong marker. A
+deliberate repeat (the same widget twice, a recap echoing the overview) is fine
+when the second slide adds something; say so in its notes.
+
+### Clicks
+
+`--only click` finds: bullets outside `<v-clicks>` (they all land at once), a
+callout or answer that is visible before the build-up it concludes, a poll whose
+answer is not behind a click, code-highlight ranges past the last line (a dead
+step), a long code block with no highlight steps, `<v-clicks>` nested in a
+`v-click`, and long slides with no clicks at all.
+
+`check:layout` then walks every click state in the browser and reports a
+**dead click** — a click after which nothing on screen changed. The usual causes
+are a `v-click` on an element already visible, a highlight range past the end
+of the code, and a widget that ignores `$clicks`.
+
+Order matters as much as count: the question before the answer, the picture
+before its caption, the claim before the callout that sums it up.
+
+### Overlap of text and figures
+
+`check:layout` measures the last click state of every slide and reports text on
+top of other text, HTML text lying over a figure it is not part of, and SVG
+labels that **straddle a shape's edge** (inside a box is fine; half in, half
+out is not). Fix by moving the label, widening the box, or shortening the text —
+never by shrinking the font below the theme sizes. Add `data-lint-skip` to an
+element only when the overlap is the point (a label deliberately on a line).
+
 ## 8. Close the loop
 
 Write `TODO/summary_slideset_XX.md`: the through-line, the running example with
@@ -342,6 +415,8 @@ never push a tag unless asked.
 ## Pre-flight checklist
 
 - `slide-stats.py` reports **no picture: 0** — every slide shows something.
+- `slide-lint.py` is clean, and `check:layout` reports no overlaps and no dead
+  clicks.
 - No slide leans on a concept from the plan's *does not have yet* list; grep
   for those words before calling the deck done.
 

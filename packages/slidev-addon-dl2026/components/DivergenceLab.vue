@@ -78,7 +78,7 @@ function groupX(i: number) {
 <template>
   <WidgetFrame max-width="31rem" controls-first>
     <div class="dl-div">
-      <svg class="dl-div__chart" viewBox="0 0 232 120" preserveAspectRatio="xMidYMid meet" role="img"
+      <svg class="dl-div__chart" viewBox="0 0 232 134" preserveAspectRatio="xMidYMid meet" role="img"
            :aria-label="`Real data against the generator: ${current.label}`">
         <line class="dl-div__axis" :x1="LEFT - 8" :x2="224" :y1="BASE" :y2="BASE" />
         <g v-for="(pi, i) in P_REAL" :key="i">
@@ -96,7 +96,7 @@ function groupX(i: number) {
             {{ i + 1 }}
           </text>
         </g>
-        <text class="dl-div__cap" x="116" y="116" text-anchor="middle">
+        <text class="dl-div__cap" x="116" y="129" text-anchor="middle">
           dashed: real P · solid: {{ current.label }}
         </text>
       </svg>
