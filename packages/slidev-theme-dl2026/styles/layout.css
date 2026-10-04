@@ -211,6 +211,24 @@
   padding: 0.24rem 0.6rem;
 }
 
+/*
+ * The symbol legend of a "Reading the equation" slide: symbol | name | what it
+ * is here | example. Up to eight rows beside a worked example, so tighter still,
+ * and the symbol column never wraps.
+ */
+.dl-eq-legend table {
+  font-size: 0.86rem;
+}
+
+.dl-eq-legend table th,
+.dl-eq-legend table td {
+  padding: 0.16rem 0.45rem;
+}
+
+.dl-eq-legend table td:first-child {
+  white-space: nowrap;
+}
+
 /* A quoted prompt or question posed to the room. */
 .dl-prompt {
   font-size: 1.05rem;

@@ -5,7 +5,7 @@
     python3 .claude/skills/lecture-deck/slide-lint.py lecture-07 --only read
     python3 .claude/skills/lecture-deck/slide-lint.py lecture-07 --only dup,click
 
-Three groups of findings, each line prefixed with the slide number:
+Four groups of findings, each line prefixed with the slide number:
 
   read   sentences a student has to work to parse — too long, idioms a
          non-native speaker will miss, acronyms never expanded, rare jargon
@@ -17,6 +17,9 @@ Three groups of findings, each line prefixed with the slide number:
   click  bullets that all appear at once, a punchline callout visible before
          the build-up, a poll answer visible before the poll, code-highlight
          ranges past the end of the code, <v-clicks> nested in a v-click.
+  eq     display equations with a symbol that is never named on the slide
+         (inline maths, a legend table, an SVG label), and equations with no
+         number beside them — no worked example.
 
 It reads source only. `npm run check:layout` is the rendered counterpart —
 it finds overlapping text and clicks that change nothing on screen.
@@ -156,6 +159,74 @@ def read_checks(deck):
     return rows
 
 
+# --- equations --------------------------------------------------------------
+
+GREEK = ("alpha beta gamma delta epsilon varepsilon zeta eta theta vartheta iota kappa "
+         "lambda mu nu xi pi rho sigma tau upsilon phi varphi chi psi omega "
+         "Gamma Delta Theta Lambda Xi Pi Sigma Phi Psi Omega").split()
+UNICODE_GREEK = dict(zip(GREEK, "αβγδεεζηθϑικλμνξπρστυφφχψωΓΔΘΛΞΠΣΦΨΩ"))
+# Accents and fonts that make a different symbol from the bare letter.
+ACCENT = r"hat|tilde|bar|overline|vec|dot"
+FONT = r"mathbf|boldsymbol|bm|mathcal|mathbb|mathrm|mathit|mathsf"
+
+
+def math_symbols(tex):
+    """The symbols a student has to have named to read `tex`: letters, Greek
+    letters and accented letters. Function names, \\text{} labels and multi-letter
+    subscripts (d_{model}) are not symbols; a short run like `mx` is m times x."""
+    t = re.sub(r"\\(?:begin|end)\s*\{[^{}]*\}|\\\\\[[^\]]*\]", " ", tex)   # environments, \\[8pt]
+    t = re.sub(r"\\(?:text\w*|operatorname\*?|mathrm|textrm|texttt|label|tag)\s*\{[^{}]*\}", " ", t)
+    t = re.sub(r"_\{([A-Za-z]{3,})\}", " ", t)                 # d_{model}, d_{out}: labels
+    t = re.sub(rf"\\(?:{FONT})\s*\{{?\s*(\\?[A-Za-z]+)\s*\}}?", r" \1 ", t)  # \mathbf{x} -> x (bold is notation, not a new name)
+    syms = set()
+    for m in re.finditer(rf"\\({ACCENT})(?![A-Za-z])\s*\{{?\s*(\\[A-Za-z]+|[A-Za-z])\s*\}}?", t):
+        syms.add(f"{m.group(1)} {m.group(2).lstrip(chr(92))}")
+    t = re.sub(rf"\\(?:{ACCENT})(?![A-Za-z])\s*\{{?\s*(?:\\[A-Za-z]+|[A-Za-z])\s*\}}?", " ", t)
+    for m in re.finditer(r"\\([A-Za-z]+)", t):
+        if m.group(1) in GREEK:
+            syms.add(m.group(1))
+    t = re.sub(r"\\[A-Za-z]+", " ", t)
+    for run in re.findall(r"[A-Za-z]+", t):
+        if len(run) <= 2:                                          # "mx" is m times x
+            syms.update(run)
+    return syms
+
+
+def eq_checks(deck):
+    """A slide followed by one headed "Reading the equation…" is explained there."""
+    rows = []
+    for n, (layout, label, body) in enumerate(deck, start=1):
+        b = re.sub(r"<!--.*?-->", " ", body, flags=re.S)
+        b = re.sub(r"```.*?```", " ", b, flags=re.S)
+        eqs = re.findall(r"\$\$(.*?)\$\$", b, flags=re.S)
+        if not eqs:
+            continue
+        rest = re.sub(r"\$\$.*?\$\$", " ", b, flags=re.S)
+        if n < len(deck) and deck[n][1].strip("\"' ").lower().startswith("reading the equation"):
+            nxt = re.sub(r"<!--.*?-->|```.*?```|\$\$.*?\$\$", " ", deck[n][2], flags=re.S)
+            rest += "\n" + nxt
+        named = set()
+        for m in re.finditer(r"\$([^$\n]+)\$", rest):
+            named |= math_symbols(m.group(1))
+        for m in re.finditer(r"<Katex\b[^>]*\bexpr=\"([^\"]*)\"", rest):
+            named |= math_symbols(m.group(1))
+        plain = re.sub(r"\$[^$\n]+\$", " ", rest)
+        plain = re.sub(r"<[^>]*>", " ", plain)
+        words = set(re.findall(r"[A-Za-z]+", plain))
+        named |= {w for w in words if len(w) == 1} | {w for w in words if w in GREEK}
+        named |= {g for g, u in UNICODE_GREEK.items() if u in plain}
+        named |= {f"hat {c}" for c in re.findall(r"([A-Za-z])\u0302", plain)} | ({"hat y"} if "ŷ" in plain else set())
+        missing = set()
+        for e in eqs:
+            missing |= math_symbols(e) - named
+        if missing:
+            shown = ", ".join(sorted(missing, key=str.lower))
+            rows.append((n, f"equation symbols never named on this slide: {shown} — add a legend row"))
+        if not re.search(r"\d", re.sub(r"(?m)^#.*$", " ", rest)):
+            rows.append((n, "display equation with no number on the slide — add a worked example"))
+    return rows
+
+
 # --- duplicates -------------------------------------------------------------
 
 def norm(s):
@@ -271,7 +342,8 @@ def main():
     for d in decks:
         path = Path("decks") / d / "slides.md"
         deck = list(slides(path))
-        groups = {"read": read_checks(deck), "dup": dup_checks(deck, path.read_text()), "click": click_checks(deck)}
+        groups = {"read": read_checks(deck), "dup": dup_checks(deck, path.read_text()), "click": click_checks(deck),
+                  "eq": eq_checks(deck)}
         print(f"\n{d} — {len(deck)} slides")
         for g, rows in groups.items():
             if only and g not in only:

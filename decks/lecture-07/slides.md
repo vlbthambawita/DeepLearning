@@ -1092,6 +1092,85 @@ and it is the slider on the widget two slides on.
 
 ---
 layout: default
+title: "Reading the equation: the VAE loss"
+---
+
+# Reading the equation: the VAE loss
+
+<div class="grid grid-cols-[1.45fr_1fr] gap-5 mt-1 items-start">
+<div class="dl-ledger dl-tight dl-eq-legend">
+
+<v-clicks>
+
+| symbol | name | what it is here | example |
+| --- | --- | --- | --- |
+| $\mathbf{x}$ | input | the image (data) | 4 pixels |
+| $q(\mathbf{z}\mid\mathbf{x})$ | encoder distribution | a bell curve over codes (learned) | $\mu = 1,\ \sigma = 0.5$ |
+| $\mathbf{z}$ | latent code | one sample from $q$ | 1.2 |
+| $g(\mathbf{z})$ | decoder output | the rebuilt image (learned) | 4 pixels |
+| $\mathbb{E}_q[\cdot]$ | expectation | average over samples of $\mathbf{z}$ | 1 sample |
+| $\lVert\cdot\rVert^2$ | squared length | sum of squared pixel errors | 0.15 |
+| $\mathrm{KL}$ | KL divergence | gap between two distributions | 0.82 |
+| $\mathcal{N}(\mathbf{0}, I)$ | standard normal | the prior: mean 0, spread 1 | |
+| $\beta$ | KL weight | set by hand | 1 |
+| $\mathcal{L}$ | loss | minimised in training | 0.97 |
+
+</v-clicks>
+
+</div>
+<div>
+
+<svg viewBox="0 0 300 150" class="dl-diagram" role="img" aria-label="Worked example: input pixels 1, 0, 1, 0; decoded pixels 0.9, 0.2, 0.7, 0.1; squared errors 0.01, 0.04, 0.09, 0.01, which sum to 0.15">
+  <g v-for="(row, r) in [['x', ['1', '0', '1', '0']], ['g(z)', ['0.9', '0.2', '0.7', '0.1']], ['error²', ['0.01', '0.04', '0.09', '0.01']]]" :key="r">
+    <text class="dl-dg-small" x="60" :y="30 + r * 44" text-anchor="end">{{ row[0] }}</text>
+    <g v-for="(v, i) in row[1]" :key="i">
+      <rect :class="['dl-dg-box', r === 2 ? 'is-accent' : '']" :x="72 + i * 54" :y="10 + r * 44" width="46" height="30" rx="3" />
+      <text class="dl-dg-lab is-sm" :x="95 + i * 54" :y="30 + r * 44" text-anchor="middle">{{ v }}</text>
+    </g>
+  </g>
+</svg>
+
+<div v-click class="dl-callout">
+
+Rebuild: $0.1^2 + 0.2^2 + 0.3^2 + 0.1^2 = 0.15$
+
+KL, one code number: $\tfrac12(\mu^2 + \sigma^2 - 1 - \ln\sigma^2) = 0.82$
+
+$\mathcal{L} = 0.15 + 1 \times 0.82 = 0.97$
+
+</div>
+
+</div>
+</div>
+
+<!--
+Walk the legend one row at a time, top to bottom: it follows the data through
+the model. x goes in; the encoder turns it into a bell curve q over codes; we
+draw one code z from it; the decoder g turns z back into an image.
+
+Say which symbols are learned (q and g — the two networks), which is data (x),
+and which is set by hand (beta). The room mixes these up every year.
+
+The example is a 4-pixel toy image and a one-number code, so the arithmetic fits
+on the slide. Real MNIST-size images have 144 or 784 pixels and a code of 2 to
+a few hundred numbers; nothing else changes.
+
+E_q in practice: we average over one sample of z per image, and over the batch.
+That is why the reparameterisation trick (next slide) matters — the sample sits
+inside the loss.
+
+The KL line uses the closed form for one code number with mu = 1 and sigma = 0.5:
+0.5 × (1 + 0.25 − 1 − ln 0.25) = 0.5 × (0.25 + 1.386) = 0.818. If mu were 0 and
+sigma 1 the KL would be exactly 0 — the code would sit on the prior. Ask the
+room to check that.
+
+What happens if you delete each term: drop KL (beta = 0) and you are back to the
+plain autoencoder of section 01; drop the rebuild term and every code collapses
+onto the prior and the decoder learns nothing about x.
+-->
+
+---
+layout: default
 title: You cannot backpropagate through a sample
 ---
 
@@ -1509,6 +1588,74 @@ slide.
 
 ---
 layout: default
+title: "Reading the equation: the value function"
+---
+
+# Reading the equation: the value function
+
+<div class="grid grid-cols-[1.45fr_1fr] gap-5 mt-1 items-start">
+<div class="dl-ledger dl-tight dl-eq-legend">
+
+<v-clicks>
+
+| symbol | name | what it is here | example |
+| --- | --- | --- | --- |
+| $D(\mathbf{x})$ | discriminator output | chance that $\mathbf{x}$ is real | 0.9 |
+| $\mathbf{x} \sim p_{\text{data}}$ | real sample | drawn from the data | the heart |
+| $\mathbf{z} \sim p_{\mathbf{z}}$ | noise vector | random numbers, fixed bell curve | |
+| $G(\mathbf{z})$ | generator output | a fake image | the noisy smiley |
+| $\theta^{(D)}, \theta^{(G)}$ | parameters | weights of $D$ and $G$ (learned) | |
+| $\mathbb{E}[\cdot]$ | expectation | average over a batch | |
+| $\log$ | natural logarithm | $\ln$; $\log 1 = 0$, $\log 0.5 = -0.69$ | |
+| $V$ | value | $D$ raises it, $G$ lowers it | $-0.21$ |
+
+</v-clicks>
+
+</div>
+<div>
+
+<svg viewBox="0 0 300 130" class="dl-diagram" role="img" aria-label="A number line for V from minus 1.5 to 0: a guessing discriminator scores minus 1.386, a good discriminator scores minus 0.21">
+  <line class="dl-dg-split" x1="10" y1="70" x2="290" y2="70" />
+  <text class="dl-dg-small" x="10" y="92">−1.5</text>
+  <text class="dl-dg-small" x="290" y="92" text-anchor="end">0</text>
+  <circle class="dl-dg-dot is-bad" cx="31" cy="70" r="6" />
+  <text class="dl-dg-small is-bad" x="31" y="52">guessing: −1.39</text>
+  <circle class="dl-dg-dot" cx="251" cy="70" r="6" />
+  <text class="dl-dg-small is-good" x="251" y="52" text-anchor="middle">good D: −0.21</text>
+  <text class="dl-dg-small" x="150" y="118" text-anchor="middle">D pushes V right, G pushes it left</text>
+</svg>
+
+<div v-click class="dl-callout">
+
+$D(\mathbf{x}) = 0.9$ and $D(G(\mathbf{z})) = 0.1$:
+
+$V = \ln 0.9 + \ln(1 - 0.1) = -0.21$
+
+Guessing, 0.5 on both: $V = 2\ln 0.5 = -1.386$
+
+</div>
+
+</div>
+</div>
+
+<!--
+Read the legend as a story: a real image x and a fake image G(z) go into the
+same discriminator, and D says how sure it is that each one is real.
+
+Point out the two sampling symbols. "x ~ p_data" reads "x drawn from the real
+data"; "z ~ p_z" reads "z drawn from the noise distribution", usually a standard
+normal. E then averages over many such draws — in code, over the batch.
+
+The worked example: a confident and correct D scores −0.21, close to the best
+possible value 0. A D that just guesses 0.5 scores −1.386. Remember that number:
+it comes back two slides from now as −log 4, and that is not a coincidence.
+
+Which symbols are learned: theta^(D) and theta^(G), and nothing else. p_data is
+the data; p_z is chosen by us.
+-->
+
+---
+layout: default
 title: Freeze one, look at the other
 ---
 
@@ -1649,6 +1796,62 @@ Next slide computes all three of these numbers on the running example.
 -->
 
 ---
+layout: default
+title: "Reading the equation: the best discriminator"
+---
+
+# Reading the equation: the best discriminator
+
+<div class="grid grid-cols-[1.35fr_1fr] gap-6 mt-2 items-start">
+<div class="dl-ledger dl-tight dl-eq-legend">
+
+<v-clicks>
+
+| symbol | name | what it is here | example |
+| --- | --- | --- | --- |
+| $\mathbf{x}$ | a point | one possible image | |
+| $p_{\text{data}}(\mathbf{x})$ | data density | how common $\mathbf{x}$ is among real images | 0.3 |
+| $p_g(\mathbf{x})$ | generator density | how often $G$ produces $\mathbf{x}$ | 0.1 |
+| $D^*(\mathbf{x})$ | optimal discriminator | the best $D$ for this frozen $G$ | 0.75 |
+
+</v-clicks>
+
+<div v-click class="mt-3 dl-callout">
+
+$D^*(\mathbf{x}) = \dfrac{0.3}{0.3 + 0.1} = 0.75$: three times as common in the
+real data, so "real" three times out of four.
+
+</div>
+
+</div>
+<div>
+
+<svg viewBox="0 0 300 160" class="dl-diagram" role="img" aria-label="Bars at one point: data density 0.3, generator density 0.1, best discriminator output 0.75">
+  <g v-for="(b, i) in [['p_data', 0.3, 'dl-dg-bar'], ['p_g', 0.1, 'dl-dg-bar is-q'], ['D*', 0.75, 'dl-dg-bar is-bad']]" :key="i">
+    <text class="dl-dg-small" x="58" :y="34 + i * 44" text-anchor="end">{{ b[0] }}</text>
+    <rect class="dl-dg-box" x="66" :y="20 + i * 44" width="200" height="20" rx="3" />
+    <rect :class="b[2]" x="66" :y="20 + i * 44" :width="b[1] * 200" height="20" rx="3" />
+    <text class="dl-dg-lab is-sm" :x="74 + b[1] * 200" :y="35 + i * 44">{{ b[1] }}</text>
+  </g>
+</svg>
+
+</div>
+</div>
+
+<!--
+Four symbols, and the room has all of them already except "density". Say it
+plainly: p_data(x) is how common the image x is among real images, and p_g(x) is
+how often the generator produces it. For a small set of bins, as in the next
+slide, the density is just a probability per bin.
+
+The example point is three times more common in the real data than in the fakes,
+so the best possible D says "real" with probability 3/4. Ask the room what D*
+is at a point where p_data = p_g: one half, the last bullet on the previous slide.
+
+The next slide does the same division on the running example's three modes.
+-->
+
+---
 layout: interactive
 heading: D*, on three modes
 title: D*, on three modes
@@ -1764,6 +1967,69 @@ the same numbers in bits — divide by ln 2. Say it, because a student comparing
 the two decks will otherwise think one of them is wrong.
 
 Next slide checks this equality numerically, live.
+-->
+
+---
+layout: default
+title: "Reading the equation: V at the best discriminator"
+---
+
+# Reading the equation: $V$ at the best discriminator
+
+<div class="grid grid-cols-[1.45fr_1fr] gap-5 mt-1 items-start">
+<div class="dl-ledger dl-tight dl-eq-legend">
+
+<v-clicks>
+
+| symbol | name | what it is here | example |
+| --- | --- | --- | --- |
+| $V(D^*, G)$ | value at the best $D$ | $V$ with $D^*$ plugged in | $-1.352$ |
+| $\log 4$ | a constant | $\ln 4 = 1.386$; $G$ cannot change it | 1.386 |
+| $\mathrm{JS}$ | Jensen–Shannon divergence | gap between distributions (nats); 0 if equal | 0.0173 |
+| $p_{\text{data}}$, $p_g$ | real, generated | $P$ and $Q$, the three modes | $Q = [0.2, 0.5, 0.3]$ |
+
+</v-clicks>
+
+<div v-click class="mt-3 dl-callout">
+
+$V(D^*, G) = -1.386 + 2 \times 0.0173 = -1.352$
+
+Perfect $G$: $\mathrm{JS} = 0$, so $V = -1.386$ — the guessing $D$ again.
+
+</div>
+
+</div>
+<div>
+
+<svg viewBox="0 0 300 130" class="dl-diagram" role="img" aria-label="A zoomed number line from minus 1.40 to minus 1.34: the running example sits at minus 1.352; a perfect generator would sit at minus 1.386">
+  <line class="dl-dg-split" x1="10" y1="70" x2="290" y2="70" />
+  <text class="dl-dg-small" x="10" y="92">−1.40</text>
+  <text class="dl-dg-small" x="290" y="92" text-anchor="end">−1.34</text>
+  <circle class="dl-dg-dot is-bad" cx="75" cy="70" r="6" />
+  <text class="dl-dg-small is-bad" x="75" y="52" text-anchor="middle">perfect G: −1.386</text>
+  <circle class="dl-dg-dot" cx="234" cy="70" r="6" />
+  <text class="dl-dg-small is-good" x="234" y="52" text-anchor="middle">our Q: −1.352</text>
+  <text class="dl-dg-small" x="150" y="118" text-anchor="middle">G moves V left by shrinking JS</text>
+</svg>
+
+</div>
+</div>
+
+<!--
+The same number line as on the value-function legend, zoomed in. The left dot is
+the guessing discriminator from that slide: −1.386 = −ln 4. It is where a perfect
+generator would leave V, because then JS = 0.
+
+All logs here are natural logs, so JS is in nats. The 2025 slides used bits
+(log base 2); in bits the same JS would be 0.0249. Say this if anyone compares.
+
+Have the room do the multiplication: 2 × 0.0173 = 0.0345, and −1.3863 + 0.0345 =
+−1.3518. It matches V computed directly from the three D* fractions, which the
+next slide shows.
+
+JS itself is defined properly in section 04, in the divergence table. Here it is
+enough to know three things: it is never negative, it is 0 only when the two
+distributions are identical, and it is at most ln 2 = 0.693.
 -->
 
 ---
@@ -2945,6 +3211,74 @@ see, is sequential.
 -->
 
 ---
+layout: default
+title: "Reading the equation: one-step noising"
+---
+
+# Reading the equation: one-step noising
+
+<div class="grid grid-cols-[1.45fr_1fr] gap-5 mt-1 items-start">
+<div class="dl-ledger dl-tight dl-eq-legend">
+
+<v-clicks>
+
+| symbol | name | what it is here | example |
+| --- | --- | --- | --- |
+| $\mathbf{x}_0$ | clean image | a training image (data) | pixel = 1.0 |
+| $t$ | noise level (time step) | 0 = clean, $T$ = pure noise | |
+| $T$ | number of levels | set by hand | 1000 (widget: 47) |
+| $\bar\alpha_t$ | "alpha bar" | share of image kept; fixed, not learned | 0.64 |
+| $\boldsymbol\epsilon$ | noise | random numbers, image-shaped | pixel = −0.5 |
+| $\mathcal{N}(\mathbf{0}, I)$ | standard normal | mean 0, spread 1 per pixel | |
+| $\mathbf{x}_t$ | noisy image | the image at level $t$ | pixel = 0.5 |
+
+</v-clicks>
+
+</div>
+<div>
+
+<svg viewBox="0 0 300 110" class="dl-diagram" role="img" aria-label="One pixel: 0.8 times 1.0 plus 0.6 times minus 0.5 equals 0.5">
+  <g v-for="(c, i) in [['x₀', '1.0', 'dl-dg-box'], ['ε', '−0.5', 'dl-dg-box'], ['xₜ', '0.5', 'dl-dg-box is-accent']]" :key="i">
+    <rect :class="c[2]" :x="12 + i * 104" y="30" width="56" height="40" rx="4" />
+    <text class="dl-dg-lab is-sm" :x="40 + i * 104" y="55" text-anchor="middle">{{ c[1] }}</text>
+    <text class="dl-dg-small" :x="40 + i * 104" y="92" text-anchor="middle">{{ c[0] }}</text>
+  </g>
+  <text class="dl-dg-small" x="16" y="20">× 0.8</text>
+  <text class="dl-dg-small" x="84" y="55" text-anchor="middle">+</text>
+  <text class="dl-dg-small" x="120" y="20">× 0.6</text>
+  <text class="dl-dg-small" x="188" y="55" text-anchor="middle">=</text>
+</svg>
+
+<div v-click class="dl-callout">
+
+$\bar\alpha_t = 0.64$: $\sqrt{0.64} = 0.8$ and $\sqrt{0.36} = 0.6$
+
+$\mathbf{x}_t = 0.8 \times 1.0 + 0.6 \times (-0.5) = 0.5$
+
+</div>
+
+</div>
+</div>
+
+<!--
+One pixel is enough to read the equation; every pixel gets the same treatment
+with its own noise value.
+
+Read the subscripts out loud: x_0 is "x at time zero", the clean image; x_t is
+"x at time t". The bar on alpha is part of the name: "alpha bar t". It is the
+running product of the per-step survival alpha_t = 1 − beta_t, but the room
+only needs to know that it falls from about 1 to about 0 as t grows, and that it
+is a fixed table of numbers — nothing about it is learned.
+
+Check the variance: 0.8² + 0.6² = 0.64 + 0.36 = 1. That is why the two weights
+are square roots of numbers that add up to 1 — the overall scale of x_t does not
+drift as t grows.
+
+N(0, I): the I is the identity matrix, which here just means each pixel's noise
+is drawn independently with spread 1.
+-->
+
+---
 layout: interactive
 heading: Forward — no network involved
 title: Forward — no network involved
@@ -3043,6 +3377,69 @@ randomness is re-injected at each one. That is the last poll of the section.
 Why predict epsilon rather than x_0: the target has unit variance at every t, so
 one network with one loss scale handles the whole range. Predicting x_0 directly
 works but trains worse, and Ho et al. found this empirically.
+-->
+
+---
+layout: default
+title: "Reading the equation: the denoising loss"
+---
+
+# Reading the equation: the denoising loss
+
+<div class="grid grid-cols-[1.45fr_1fr] gap-5 mt-1 items-start">
+<div class="dl-ledger dl-tight dl-eq-legend">
+
+<v-clicks>
+
+| symbol | name | what it is here | example |
+| --- | --- | --- | --- |
+| $\boldsymbol\epsilon$ | true noise | the noise we added: the target | $[0.5, -1.0]$ |
+| $\boldsymbol\epsilon_\theta(\mathbf{x}_t, t)$ | noise prediction | the network's guess of $\boldsymbol\epsilon$ | $[0.3, -0.6]$ |
+| $\theta$ | parameters | the network's weights (learned) | |
+| $\mathbf{x}_t$, $t$ | input | noisy image and its level, as before | |
+| $\lVert\cdot\rVert^2$ | squared length | sum of squared differences | 0.20 |
+| $\mathbb{E}_{\mathbf{x}_0, t, \boldsymbol\epsilon}$ | expectation | average over images, levels, noise | a batch |
+| $\mathcal{L}$ | loss | minimised in training | |
+
+</v-clicks>
+
+</div>
+<div>
+
+<svg viewBox="0 0 300 150" class="dl-diagram" role="img" aria-label="A two-pixel example: true noise 0.5 and minus 1.0, predicted noise 0.3 and minus 0.6, squared errors 0.04 and 0.16">
+  <g v-for="(row, r) in [['ε', ['0.5', '−1.0']], ['ε_θ', ['0.3', '−0.6']], ['error²', ['0.04', '0.16']]]" :key="r">
+    <text class="dl-dg-small" x="80" :y="30 + r * 44" text-anchor="end">{{ row[0] }}</text>
+    <g v-for="(v, i) in row[1]" :key="i">
+      <rect :class="['dl-dg-box', r === 2 ? 'is-accent' : '']" :x="92 + i * 70" :y="10 + r * 44" width="60" height="30" rx="3" />
+      <text class="dl-dg-lab is-sm" :x="122 + i * 70" :y="30 + r * 44" text-anchor="middle">{{ v }}</text>
+    </g>
+  </g>
+</svg>
+
+<div v-click class="dl-callout">
+
+$(0.5 - 0.3)^2 + (-1.0 + 0.6)^2 = 0.04 + 0.16 = 0.20$
+
+</div>
+
+</div>
+</div>
+
+<!--
+Stress the second row: the target epsilon is known exactly, because we drew it
+ourselves when we made x_t. That is why this is ordinary supervised learning —
+the labels come for no extra work.
+
+The subscript theta on epsilon marks "the network's version". Same convention as
+everywhere else in the course: theta is the weights.
+
+The three subscripts on E list what is random in one training step: pick an
+image x_0, pick a level t, draw noise epsilon. In code that is one line each, and
+the average is over the batch.
+
+PyTorch's mse_loss averages over pixels instead of summing, so on this example
+it prints 0.10, not 0.20. Same minimum, different scale — mention it so nobody
+thinks their code is wrong.
 -->
 
 ---
@@ -3340,6 +3737,71 @@ slide.
 
 It is called "classifier-free" because earlier work needed a separately trained
 classifier to provide this push.
+-->
+
+---
+layout: default
+title: "Reading the equation: guidance"
+---
+
+# Reading the equation: guidance
+
+<div class="grid grid-cols-[1.45fr_1fr] gap-5 mt-1 items-start">
+<div class="dl-ledger dl-tight dl-eq-legend">
+
+<v-clicks>
+
+| symbol | name | what it is here | example |
+| --- | --- | --- | --- |
+| $\boldsymbol\epsilon_\theta(\mathbf{x}_t, t)$ | unconditional prediction | noise guess without the prompt | 0.2 |
+| $c$ | condition | the prompt, as a vector | |
+| $\boldsymbol\epsilon_\theta(\mathbf{x}_t, t, c)$ | conditional prediction | noise guess with the prompt | 0.5 |
+| $w$ | guidance scale | set by hand at sampling time | 2.5 |
+| $\tilde{\boldsymbol\epsilon}$ | guided prediction | what the sampler removes | 0.95 |
+| $\theta$, $\mathbf{x}_t$, $t$ | as before | weights, noisy image, noise level | |
+
+</v-clicks>
+
+</div>
+<div>
+
+<svg viewBox="0 0 300 130" class="dl-diagram" role="img" aria-label="A number line for one pixel: without the prompt 0.2, with the prompt 0.5, guided with w = 2.5 gives 0.95">
+  <line class="dl-dg-split" x1="10" y1="70" x2="290" y2="70" />
+  <text class="dl-dg-small" x="10" y="92">0</text>
+  <text class="dl-dg-small" x="290" y="92" text-anchor="end">1</text>
+  <circle class="dl-dg-dot is-accent" cx="66" cy="70" r="6" />
+  <text class="dl-dg-small" x="66" y="52" text-anchor="middle">without c</text>
+  <circle class="dl-dg-dot" cx="150" cy="70" r="6" />
+  <text class="dl-dg-small is-good" x="150" y="52" text-anchor="middle">with c</text>
+  <circle class="dl-dg-dot is-bad" cx="276" cy="70" r="6" />
+  <text class="dl-dg-small is-bad" x="262" y="52" text-anchor="middle">w = 2.5</text>
+  <text class="dl-dg-small" x="150" y="118" text-anchor="middle">one pixel of the noise prediction</text>
+</svg>
+
+<div v-click class="dl-callout">
+
+$\tilde{\epsilon} = 0.2 + 2.5 \times (0.5 - 0.2) = 0.95$
+
+With $w = 1$: $0.2 + 1 \times 0.3 = 0.5$, the plain "with $c$" answer.
+
+</div>
+
+</div>
+</div>
+
+<!--
+The same network is run twice per step: once with the prompt and once with it
+switched off (in training the prompt is dropped some of the time, so the network
+learns both). The tilde on epsilon marks "the mixed version".
+
+One pixel again. The difference 0.5 − 0.2 = 0.3 is "what the prompt changes".
+w = 2.5 takes 2.5 times that change, so the result goes past the "with c" value
+— the number line is the vector picture from the previous slide, flattened to
+one axis.
+
+Make sure nobody reads w as a weight vector: it is one number, chosen at
+sampling time, and nothing about it is learned. Real image tools use values
+around 5 to 10; the widget lets the room try 0 to 8.
 -->
 
 ---

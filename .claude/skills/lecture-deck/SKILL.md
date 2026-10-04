@@ -180,6 +180,83 @@ Text that survives the move is the argument the picture cannot make; move
 everything else into the speaker notes, which have no budget at all. A
 `default` slide that is words-only and over budget should be rare and deliberate.
 
+### Explain every equation
+
+An equation on a slide is a sentence written in symbols, and the room cannot
+read it until every symbol has a name. **Every display equation gets four
+things**, on the slide that shows it (or on the slide right after, headed
+"Reading the equation", when there is no room):
+
+1. **One line in words first** — what the equation computes and why we need it,
+   before the symbols appear. "A straight line: the output grows at a fixed rate
+   as the input grows."
+2. **A symbol legend** — every symbol on the left- *and* right-hand side, with
+   its proper name, what it is in this lecture, its shape or units, and a value
+   from the running example. Nothing is left as "obvious": not $\hat{y}$, not
+   $\eta$, not the index $i$, not the $\mathbb{E}$ or $\sum$ either.
+3. **A worked example** — the running example's numbers plugged in, every step
+   shown, ending in a number the room can check by hand (a tiny vector or
+   2×2 matrix if the real one is large).
+4. **A term-by-term reveal** — `\underbrace{…}_{\text{plain name}}` for the
+   parts, then `v-click` so the legend and the example arrive one row at a time
+   instead of all at once.
+
+For $y = mx$, the slide reads:
+
+```markdown
+A straight line through the origin: the output grows at a fixed rate with the input.
+
+$$
+y = m\,x
+$$
+
+<div class="dl-ledger dl-eq-legend">
+
+| symbol | name | what it is here | example |
+| --- | --- | --- | --- |
+| $y$ | output (prediction) | the house price the model predicts | 300 (k NOK) |
+| $m$ | slope (weight) | price added per extra m² — learned | 3 k NOK / m² |
+| $x$ | input (feature) | floor area of the house | 100 m² |
+
+</div>
+
+<div v-click class="dl-callout">
+
+$y = 3 \times 100 = 300$: a 100 m² house is predicted at 300 k NOK.
+
+</div>
+```
+
+For a larger equation (a loss, an update rule), the legend also says:
+
+- **Shapes** for vectors, matrices and tensors — $\mathbf{W} \in \mathbb{R}^{d_{out} \times d_{in}}$,
+  and what each dimension counts.
+- **Which symbols are learned, which are set by hand, and which are data** —
+  the room confuses parameters, hyperparameters and inputs every year.
+- **What every operator does**: $\odot$ "element-wise product", $\lVert\cdot\rVert^2$
+  "squared length", $\mathbb{E}_{q}$ "average over samples drawn from $q$",
+  $\sum_{i=1}^{N}$ "add up over all $N$ examples".
+- **Indices**: what $i$, $j$, $t$ run over, and their range.
+- **Why each term is there** — what goes wrong if you delete it (often the best
+  question for the room, and a good `PollSlide`).
+
+Name things with the **standard name** the field uses (*learning rate*, not
+*step thing*), then the plain meaning in this lecture. The symbol names must
+match the notation rules in §7 and the code on the slide (`lr` for $\eta$, said
+out loud). A symbol already explained earlier in the deck still gets a short
+reminder row ("$\eta$ — learning rate, as before") the first time it reappears
+in a new section.
+
+The legend and the worked example are text, so they count toward the word
+budget. An equation with more than four or five symbols almost always needs its
+own "Reading the equation: <topic>" slide right after it — split rather than
+shrink. Lecture 07 has seven: legend (`dl-ledger dl-eq-legend`, rows inside
+`<v-clicks>`) on the left, a small drawing of the worked example and its
+arithmetic in a `v-click` callout on the right. Copy that layout. Keep derivations,
+history and edge cases in the speaker notes; the slide only has to make the
+equation readable. A recap slide that repeats an equation may skip the legend if
+it links back to the slide that explained it, by name.
+
 Rules that hold on every slide:
 
 - **Every slide declares a `layout:`** from the six theme layouts — `title`,
@@ -203,7 +280,8 @@ Rules that hold on every slide:
 - A `<PollSlide>` for the misconception the cohort makes every year — one per
   section is plenty.
 - Theme classes: `dl-callout`, `dl-card`, `dl-ledger`, `dl-tight`, `dl-rule`,
-  `dl-secondary`, `dl-wrong`, `dl-prompt`, `dl-reveal`, `dl-math-sm`, `dl-math-xs`.
+  `dl-secondary`, `dl-wrong`, `dl-prompt`, `dl-reveal`, `dl-math-sm`, `dl-math-xs`,
+  `dl-eq-legend` (a symbol legend table).
 
 ## 5. Reuse components before building one
 
@@ -272,6 +350,8 @@ grep -o '\\mathbf{[^}]*}\|\\hat{[^}]*}\|\\[a-zA-Z]\+\|\b[A-Za-z]_{[^}]*}' decks/
 Then read the list and confirm, for each symbol:
 
 - It is **introduced before its first use**, in words, on the slide that uses it.
+- Every display equation has its **legend and worked example** (§4 "Explain
+  every equation") — `slide-lint.py --only eq` lists the symbols that have none.
 - It means **one thing in this deck**. Across decks a letter may be reused for a
   different quantity when that is the field's own convention ($\alpha$ is never
   the learning rate in these decks; in L05 and L06 it is an attention weight) —
@@ -319,14 +399,17 @@ once**. The build and `check` passing says nothing about whether the slides are
    things in both places, no summary that contradicts an earlier slide ("all
    four families do this" when one section shows the autoencoder does not).
    Cross-references by slide *name*, and pointing at the right slide.
-7. **Prerequisites.** Grep for the plan's *does not have yet* list, in the deck
+7. **Equations.** Each display equation is said in words, has a legend that
+   names every symbol (name, meaning, shape, example value), and has a worked
+   example whose arithmetic you have re-done. Check `slide-lint.py --only eq`.
+8. **Prerequisites.** Grep for the plan's *does not have yet* list, in the deck
    and in the widgets it uses.
-8. **Overclaims.** "every", "always", "nobody", "the default", "in every image
+9. **Overclaims.** "every", "always", "nobody", "the default", "in every image
    tool" — keep only what you could source; soften the rest.
-9. **Widgets are part of the deck.** Their labels, notes and captions get the
+10. **Widgets are part of the deck.** Their labels, notes and captions get the
    same review, and a fix to shared logic (`composables/`) needs a check that no
    other deck's numbers moved.
-10. **Verify, then look.** `build:all`, `check` light and dark, `--shots`, and
+11. **Verify, then look.** `build:all`, `check` light and dark, `--shots`, and
     eyeball every slide you changed.
 
 Record what was wrong and what changed in `TODO/summary_slideset_XX.md` under a
@@ -334,12 +417,13 @@ dated "Review" heading, so the next review does not re-litigate it.
 
 ## 7c. Plain language, duplicates, clicks and overlap
 
-Four more review passes, each with a tool that finds candidates and a human
+Five more review passes, each with a tool that finds candidates and a human
 judgement that decides. Run them on every new deck and on every review.
 
 ```bash
-python3 .claude/skills/lecture-deck/slide-lint.py lecture-07            # read, dup, click
+python3 .claude/skills/lecture-deck/slide-lint.py lecture-07            # read, dup, click, eq
 python3 .claude/skills/lecture-deck/slide-lint.py lecture-07 --only read
+python3 .claude/skills/lecture-deck/slide-lint.py lecture-07 --only eq   # unexplained symbols
 npm run build:all && npm run preview &
 npm run check:layout -- lecture-07                                      # overlap + dead clicks
 npm run check:layout -- lecture-07 --from 30 --to 40 --verbose
@@ -369,6 +453,16 @@ Write every visible sentence so it can be understood **on first reading**:
 `slide-lint.py --only read` lists long sentences, listed idioms and unexpanded
 acronyms. It cannot see *unclear* sentences that are short — so after it is
 clean, dump the visible text and read it through once as a student would.
+
+### Equations
+
+`--only eq` takes every display equation and lists the symbols that are not
+named anywhere else on the visible slide (inline maths, a legend table, an SVG
+label — speaker notes do not count), and equations on slides with no number on
+them outside the maths, i.e. no worked example. A slide followed by one headed
+"Reading the equation…" is checked against both. It sees symbols, not meaning: once it is
+clean, read each legend and check that the names are the standard ones and the
+example numbers are right.
 
 ### Duplicates
 
@@ -419,6 +513,8 @@ never push a tag unless asked.
   clicks.
 - No slide leans on a concept from the plan's *does not have yet* list; grep
   for those words before calling the deck done.
+- Every display equation is said in words, has a symbol legend (name, meaning,
+  shape, example value) and a worked example with the running example's numbers.
 
 - `<style>` inside a slide is scoped to that slide → deck-wide CSS goes in
   `decks/<id>/style.css`; anything a second deck wants goes in the theme.
