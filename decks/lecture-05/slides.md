@@ -640,6 +640,89 @@ what makes the gradients vanish, which is section 02's problem.
 
 ---
 layout: default
+title: "Reading the equation: one recurrent step"
+---
+
+# Reading the equation: one recurrent step
+
+<div class="grid grid-cols-[1.45fr_1fr] gap-5 mt-1 items-start">
+<div class="dl-ledger dl-tight dl-eq-legend">
+
+<v-clicks>
+
+| symbol | name | what it is here | example |
+| --- | --- | --- | --- |
+| $t$ | time step | which step, from 1 to $T$ | 1 |
+| $\mathbf{x}_t$ | input | this step's data | 1 |
+| $\mathbf{h}_{t-1}$ | previous hidden state | the last step's memory | $\mathbf{h}_0 = [0, 0]$ |
+| $W_{xh},\ W_{hh}$ | input, recurrent weights | $n_h \times n_x$, $n_h \times n_h$; learned | $W_{xh} = [1, -0.5]^\top$ |
+| $\mathbf{b}_h,\ \mathbf{b}_o$ | biases | one per unit; learned | 0 |
+| $\tanh$ | hyperbolic tangent | squashes into $(-1, 1)$ | $\tanh 1 = 0.76$ |
+| $\mathbf{h}_t$ | hidden state | the new memory | $\mathbf{h}_1$ |
+| $\mathbf{o}_t,\ W_{ho}$ | output, its weights | logits at step $t$; $W_{ho}$ learned | $W_{ho} = [1, 1]$ |
+
+</v-clicks>
+
+</div>
+<div>
+
+<svg viewBox="0 0 300 172" role="img" aria-label="Step one: the zero state h0 and the input x1 equal to 1 go into h1, which is 0.76 and minus 0.46; the output o1 is 0.30" style="width: 100%; height: auto; font-family: inherit;">
+  <defs>
+    <marker id="l5-rd1-arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+      <path d="M0 0 L7 3.5 L0 7 z" fill="var(--dl-muted)" />
+    </marker>
+  </defs>
+  <rect x="10" y="68" width="92" height="36" rx="6" fill="var(--dl-surface)" stroke="var(--dl-border)" stroke-width="1.5" />
+  <text x="56" y="91" text-anchor="middle" style="font-size: 13px; fill: var(--dl-body)">h₀ = [0, 0]</text>
+  <path d="M104 86 H176" fill="none" stroke="var(--dl-muted)" stroke-width="1.5" marker-end="url(#l5-rd1-arrow)" />
+  <text x="140" y="78" text-anchor="middle" style="font-size: 12px; fill: var(--dl-muted)">W<tspan dy="3" style="font-size: 9px">hh</tspan></text>
+  <rect x="180" y="68" width="112" height="36" rx="6" fill="var(--dl-accent-soft)" stroke="var(--dl-accent)" stroke-width="1.5" />
+  <text x="236" y="91" text-anchor="middle" style="font-size: 13px; fill: var(--dl-heading)">h₁ = [0.76, −0.46]</text>
+  <text x="236" y="164" text-anchor="middle" style="font-size: 13px; fill: var(--dl-body)">x₁ = 1</text>
+  <path d="M236 150 V108" fill="none" stroke="var(--dl-muted)" stroke-width="1.5" marker-end="url(#l5-rd1-arrow)" />
+  <text x="244" y="134" style="font-size: 12px; fill: var(--dl-muted)">W<tspan dy="3" style="font-size: 9px">xh</tspan></text>
+  <path d="M236 66 V30" fill="none" stroke="var(--dl-muted)" stroke-width="1.5" marker-end="url(#l5-rd1-arrow)" />
+  <text x="244" y="52" style="font-size: 12px; fill: var(--dl-muted)">W<tspan dy="3" style="font-size: 9px">ho</tspan></text>
+  <text x="236" y="20" text-anchor="middle" style="font-size: 13px; fill: var(--dl-accent-strong)">o₁ = 0.30</text>
+</svg>
+
+<div v-click class="dl-callout">
+
+Step 1, $x_1 = 1$:
+
+$W_{xh}x_1 = [1, -0.5]$
+
+$W_{hh}\mathbf{h}_0 = [0, 0]$
+
+$\mathbf{h}_1 = \tanh[1, -0.5] = [0.76, -0.46]$
+
+$o_1 = 0.76 - 0.46 = 0.30$
+
+</div>
+
+</div>
+</div>
+
+<!--
+Read the legend top to bottom as one sentence: at step t, take this step's input
+x_t and the memory h_{t-1}, mix them with two learned matrices, add a bias, squash
+with tanh. That gives the new memory h_t. The output o_t is a plain dense layer on
+top of h_t.
+
+Say which symbols are learned: W_xh, W_hh, W_ho and the two biases. x_t is data.
+h_t is neither — it is computed, fresh, for every sequence.
+
+The numbers are the deck's demo network (useRecurrence.ts), the same ones the
+"One step, by hand" widget uses two slides on. Step 1 is the easy step: h_0 is
+zeros, so W_hh contributes nothing yet. Leave step 2 for the widget, where W_hh
+finally matters — that is the step to hand to the room.
+
+Shapes to say out loud: in the code slides n_x = 64 and n_h = 128, so W_xh is
+128 x 64 and W_hh is 128 x 128. Here n_x = 1 and n_h = 2 so it fits on paper.
+-->
+
+---
+layout: default
 title: The same equation, one matrix
 ---
 
@@ -647,9 +730,16 @@ title: The same equation, one matrix
 
 Stack the two inputs into one vector and the two matrices into one matrix:
 
-<div class="mt-3 dl-math-sm">
+<div class="mt-1 dl-math-sm">
 
 $$ \mathbf{h}_t = \tanh\!\left( W_h \begin{bmatrix} \mathbf{x}_t \\ \mathbf{h}_{t-1} \end{bmatrix} + \mathbf{b}_h \right), \qquad W_h = \begin{bmatrix} W_{xh} & W_{hh} \end{bmatrix} $$
+
+</div>
+
+<div class="dl-secondary">
+
+As before: input $\mathbf{x}_t$, previous state $\mathbf{h}_{t-1}$, bias $\mathbf{b}_h$.
+New: $W_h$, both weight matrices side by side.
 
 </div>
 
@@ -659,15 +749,15 @@ $$ \mathbf{h}_t = \tanh\!\left( W_h \begin{bmatrix} \mathbf{x}_t \\ \mathbf{h}_{
 
 - Identical arithmetic — a block matrix times a stacked vector *is* the sum of the
   two products
-- And it says the useful thing out loud: a recurrent layer is **one dense layer**
-  reading *this step, concatenated with the last state*
+- A recurrent layer is **one dense layer** reading *this step, concatenated with
+  the last state*
 - Every LSTM diagram you will ever see is drawn this way
 
 </v-clicks>
 
 </div>
 
-<div v-click class="mt-5 dl-callout">
+<div v-click class="mt-2 dl-callout">
 
 A 64-wide embedding and 128 hidden units: one $128 \times 192$ matrix, applied once
 per word.
@@ -789,7 +879,8 @@ $$ \underbrace{n_h \times n_x}_{W_{xh}} + \underbrace{n_h \times n_h}_{W_{hh}} +
 <div class="grid grid-cols-2 gap-8 mt-4 dl-tight">
 <div>
 
-A 64-wide embedding into 128 hidden units:
+Input width $n_x$, hidden units $n_h$, one bias $\mathbf{b}_h$. A 64-wide
+embedding ($n_x = 64$) into 128 units ($n_h = 128$):
 
 <div v-click class="mt-2 dl-math-sm">
 
@@ -977,7 +1068,7 @@ $T$ terms, averaged — and each one is the same cross-entropy from Lecture 04.
 <div v-click class="mt-4 dl-callout">
 
 Either way there is **one** set of weights, so every loss term sends its gradient
-into **all** of them. That is the interesting part, and it is the next slide.
+into **all** of them. That is the interesting part: backpropagation through time.
 
 </div>
 
@@ -988,7 +1079,80 @@ different places.
 
 Mention the averaging: sum and mean differ by a factor of T, which changes the
 effective learning rate. PyTorch's default is mean, and with padded batches "mean
-over what" becomes a real question — slide 51.
+over what" becomes a real question — slide 55.
+-->
+
+---
+layout: default
+title: "Reading the equation: the sequence loss"
+---
+
+# Reading the equation: the sequence loss
+
+<div class="grid grid-cols-[1.45fr_1fr] gap-5 mt-1 items-start">
+<div class="dl-ledger dl-tight dl-eq-legend">
+
+<v-clicks>
+
+| symbol | name | what it is here | example |
+| --- | --- | --- | --- |
+| $L$ | loss | one number per sequence | 0.77 |
+| $\ell$ | per-step loss | cross-entropy: $-\ln p$, $p$ = chance of the right answer | $-\ln 0.8 = 0.22$ |
+| $\mathbf{o}_t,\ \mathbf{o}_T$ | output | logits at step $t$, or at the end | |
+| $y,\ y_t$ | true label | data; per sequence or per step | next character |
+| $t,\ T$ | step, sequence length | $t$ runs from 1 to $T$ | $T = 3$ |
+| $\sum_{t=1}^{T},\ \frac{1}{T}$ | sum, average | add the $T$ losses, divide by $T$ | $2.30 / 3$ |
+
+</v-clicks>
+
+</div>
+<div>
+
+<svg viewBox="0 0 300 160" role="img" aria-label="Three bars for the step losses 0.22, 0.69 and 1.39, and a dashed line at their mean, 0.77" style="width: 100%; height: auto; font-family: inherit;">
+  <line x1="20" y1="130" x2="290" y2="130" stroke="var(--dl-border)" stroke-width="1.5" />
+  <rect x="40" y="114" width="44" height="16" fill="var(--dl-accent-soft)" stroke="var(--dl-accent)" stroke-width="1.5" />
+  <rect x="120" y="80" width="44" height="50" fill="var(--dl-accent-soft)" stroke="var(--dl-accent)" stroke-width="1.5" />
+  <rect x="200" y="30" width="44" height="100" fill="var(--dl-accent-soft)" stroke="var(--dl-accent)" stroke-width="1.5" />
+  <text x="62" y="108" text-anchor="middle" style="font-size: 12px; fill: var(--dl-body)">0.22</text>
+  <text x="142" y="74" text-anchor="middle" style="font-size: 12px; fill: var(--dl-body)">0.69</text>
+  <text x="222" y="24" text-anchor="middle" style="font-size: 12px; fill: var(--dl-body)">1.39</text>
+  <line x1="20" y1="75" x2="290" y2="75" stroke="var(--dl-danger)" stroke-width="1.5" style="stroke-dasharray: 5 4" />
+  <text x="22" y="69" style="font-size: 12px; fill: var(--dl-danger)">L = 0.77</text>
+  <text x="62" y="148" text-anchor="middle" style="font-size: 12px; fill: var(--dl-muted)">t = 1</text>
+  <text x="142" y="148" text-anchor="middle" style="font-size: 12px; fill: var(--dl-muted)">t = 2</text>
+  <text x="222" y="148" text-anchor="middle" style="font-size: 12px; fill: var(--dl-muted)">t = 3</text>
+</svg>
+
+<div v-click class="dl-callout">
+
+Next character, $T = 3$, with $p$ = 0.8, 0.5, 0.25:
+
+$L = (0.22 + 0.69 + 1.39) / 3 = 0.77$
+
+One label, $p = 0.9$:
+
+$L = -\ln 0.9 = 0.11$
+
+</div>
+
+</div>
+</div>
+
+<!--
+The legend has nothing new in it except the index t. The loss l is Lecture 04's
+cross-entropy: minus the log of the probability the model gave the right class.
+o_t are the logits at step t; y_t is the right answer at step t.
+
+Worked example, character by character: the model is fairly sure at step 1 (0.8),
+unsure at step 2 (0.5), and mostly wrong at step 3 (0.25). The worst step costs
+the most: 1.39 of the 2.30 total. Averaging gives 0.77.
+
+The sum is ln 10 = 2.30 exactly, because 0.8 x 0.5 x 0.25 = 0.1 — a nice check if
+someone asks.
+
+Sum versus mean: PyTorch's cross_entropy averages by default. With padded batches
+the question "average over what?" becomes real; that is the padding slide in
+section 05.
 -->
 
 ---
@@ -1030,7 +1194,96 @@ The Jacobian is the whole story:
 
 Write that on the board. It is a product of (t - k) copies of the same matrix,
 each pre-multiplied by a diagonal of tanh derivatives, every one of which is at
-most 1. The next slide is that product, with the matrix replaced by one number.
+most 1. The legend slide works it for one unit; the slide after it is that
+product, with the matrix replaced by one number.
+-->
+
+---
+layout: default
+title: "Reading the equation: backpropagation through time"
+---
+
+# Reading the equation: backpropagation through time
+
+<div class="grid grid-cols-[1.45fr_1fr] gap-5 mt-1 items-start">
+<div class="dl-ledger dl-tight dl-eq-legend">
+
+<v-clicks>
+
+| symbol | name | what it is here | example |
+| --- | --- | --- | --- |
+| $L,\ L_t$ | loss, step-$t$ loss | $L = \sum_t L_t$ | $L = L_3 = h_3$ |
+| $\partial L / \partial W_{hh}$ | gradient | how $L$ moves when $W_{hh}$ moves | 1.0 |
+| $W_{hh}$ | recurrent weights | learned; used at every step | 0.5 |
+| $\mathbf{h}_t,\ \mathbf{h}_k$ | hidden states | at step $t$ and earlier step $k$ | $h_1 = 1$ |
+| $\sum_{t=1}^{T},\ \sum_{k=1}^{t}$ | sums | over $t$, then over $k \le t$ | $T = 3$ |
+| $\partial L_t / \partial \mathbf{h}_t$ | state gradient | how $L_t$ reacts to $\mathbf{h}_t$ | 1 |
+| $\partial \mathbf{h}_t / \partial \mathbf{h}_k$ | Jacobian | factor for going back $t - k$ steps | $0.5^{\,t-k}$ |
+| $\partial \mathbf{h}_k / \partial W_{hh}$ | local gradient | effect of step $k$ alone | $h_{k-1}$ |
+
+</v-clicks>
+
+</div>
+<div>
+
+<svg viewBox="0 0 300 150" role="img" aria-label="A chain h1 equal to 1, h2 equal to 0.5, h3 equal to 0.25; the gradient travels back from h3 with factor 1, then 0.5, then 0.25" style="width: 100%; height: auto; font-family: inherit;">
+  <defs>
+    <marker id="l5-rd3-fwd" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+      <path d="M0 0 L7 3.5 L0 7 z" fill="var(--dl-muted)" />
+    </marker>
+    <marker id="l5-rd3-back" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+      <path d="M0 0 L7 3.5 L0 7 z" fill="var(--dl-danger)" />
+    </marker>
+  </defs>
+  <rect x="10" y="40" width="72" height="34" rx="6" fill="var(--dl-surface)" stroke="var(--dl-border)" stroke-width="1.5" />
+  <text x="46" y="62" text-anchor="middle" style="font-size: 13px; fill: var(--dl-body)">h₁ = 1</text>
+  <rect x="114" y="40" width="72" height="34" rx="6" fill="var(--dl-surface)" stroke="var(--dl-border)" stroke-width="1.5" />
+  <text x="150" y="62" text-anchor="middle" style="font-size: 13px; fill: var(--dl-body)">h₂ = 0.5</text>
+  <rect x="218" y="40" width="74" height="34" rx="6" fill="var(--dl-accent-soft)" stroke="var(--dl-accent)" stroke-width="1.5" />
+  <text x="255" y="62" text-anchor="middle" style="font-size: 13px; fill: var(--dl-heading)">h₃ = 0.25</text>
+  <path d="M84 50 H110" fill="none" stroke="var(--dl-muted)" stroke-width="1.5" marker-end="url(#l5-rd3-fwd)" />
+  <path d="M188 50 H214" fill="none" stroke="var(--dl-muted)" stroke-width="1.5" marker-end="url(#l5-rd3-fwd)" />
+  <path d="M214 66 H188" fill="none" stroke="var(--dl-danger)" stroke-width="1.5" marker-end="url(#l5-rd3-back)" />
+  <path d="M110 66 H84" fill="none" stroke="var(--dl-danger)" stroke-width="1.5" marker-end="url(#l5-rd3-back)" />
+  <text x="46" y="98" text-anchor="middle" style="font-size: 12px; fill: var(--dl-danger)">× 0.25</text>
+  <text x="150" y="98" text-anchor="middle" style="font-size: 12px; fill: var(--dl-danger)">× 0.5</text>
+  <text x="255" y="98" text-anchor="middle" style="font-size: 12px; fill: var(--dl-danger)">× 1</text>
+  <text x="150" y="128" text-anchor="middle" style="font-size: 12px; fill: var(--dl-muted)">factor ∂h₃/∂hₖ</text>
+</svg>
+
+<div v-click class="dl-callout">
+
+One unit, no $\tanh$, $W_{hh} = 0.5$, inputs $1, 0, 0$:
+
+$\frac{\partial L}{\partial W_{hh}} = \underbrace{0.25 \cdot 0}_{k=1} + \underbrace{0.5 \cdot 1}_{k=2} + \underbrace{1 \cdot 0.5}_{k=3} = 1.0$
+
+Check: $h_3 = W_{hh}^2$, whose slope is $2 W_{hh} = 1.0$.
+
+</div>
+
+</div>
+</div>
+
+<!--
+The smallest example that still shows the structure: one hidden unit, no tanh,
+so h_t = W_hh h_{t-1} + x_t. Inputs 1, 0, 0 give h_1 = 1, h_2 = 0.5, h_3 = 0.25.
+The loss is just L = h_3, so only the t = 3 term of the outer sum is non-zero,
+and dL_3/dh_3 = 1.
+
+The inner sum has one term per use of W_hh, k = 1, 2, 3. Each term is
+(factor for travelling back from step 3 to step k) x (direct effect at step k):
+  k = 1: 0.5^2 x h_0 = 0.25 x 0 = 0
+  k = 2: 0.5^1 x h_1 = 0.5 x 1 = 0.5
+  k = 3: 0.5^0 x h_2 = 1 x 0.5 = 0.5
+Total 1.0. The check on the slide is the point: h_3 = W_hh^2 as a function of the
+weight, its derivative is 2 W_hh = 1.0, and the sum over k is the chain rule
+doing exactly that bookkeeping.
+
+The red factors are 1, 0.5, 0.25: a power of W_hh. With 40 steps instead of 3 that
+is 0.5^40, about 1e-12. That is the next slide.
+
+With a real tanh RNN, each factor also carries tanh'(z), which is at most 1, and
+W_hh is a matrix, so the factor is a matrix product. Do not go further than that.
 -->
 
 ---
@@ -1480,6 +1733,87 @@ because content should be signed.
 
 ---
 layout: default
+title: "Reading the equation: the LSTM cell"
+---
+
+# Reading the equation: the LSTM cell
+
+<div class="grid grid-cols-[1.45fr_1fr] gap-5 mt-1 items-start">
+<div class="dl-ledger dl-tight dl-eq-legend">
+
+<v-clicks>
+
+| symbol | name | what it is here | example |
+| --- | --- | --- | --- |
+| $\mathbf{f}_t,\ \mathbf{i}_t,\ \mathbf{o}_t$ | forget, input, output gates | fractions in $(0, 1)$ | 0.90, 0.40, 0.70 |
+| $\tilde{\mathbf{c}}_t$ | candidate | new content to write | 0.80 |
+| $\mathbf{c}_{t-1},\ \mathbf{c}_t$ | cell state | long-term memory | 0.6 |
+| $\mathbf{h}_{t-1},\ \mathbf{h}_t$ | hidden state | what the cell shows | 0.5 |
+| $\mathbf{x}_t,\ t$ | input, time step | this step's data | 1 |
+| $W_{x\cdot},\ W_{h\cdot},\ \mathbf{b}_\cdot$ | weights, biases | one set per gate; learned | $W_{xf} = 1.5$ |
+| $\sigma,\ \tanh$ | sigmoid, hyperbolic tangent | into $(0, 1)$ and $(-1, 1)$ | $\sigma(2.2) = 0.90$ |
+| $\odot$ | element-wise product | multiply unit by unit | $0.9 \times 0.6$ |
+
+</v-clicks>
+
+</div>
+<div>
+
+<svg viewBox="0 0 300 140" role="img" aria-label="The sigmoid curve with three points: the input gate at 0.40, the output gate at 0.70 and the forget gate at 0.90" style="width: 100%; height: auto; font-family: inherit;">
+  <line x1="20" y1="110" x2="280" y2="110" stroke="var(--dl-border)" stroke-width="1.5" />
+  <line x1="20" y1="10" x2="280" y2="10" stroke="var(--dl-border)" stroke-width="1" style="stroke-dasharray: 4 4" />
+  <line x1="150" y1="10" x2="150" y2="110" stroke="var(--dl-border)" stroke-width="1" />
+  <path d="M20.0 108.2 L36.2 107.1 L52.5 105.3 L68.8 102.4 L85.0 98.1 L101.2 91.8 L117.5 83.1 L133.8 72.2 L150.0 60.0 L166.2 47.8 L182.5 36.9 L198.8 28.2 L215.0 21.9 L231.2 17.6 L247.5 14.7 L263.8 12.9 L280.0 11.8" fill="none" stroke="var(--dl-accent)" stroke-width="2" />
+  <circle cx="221.5" cy="20.0" r="5" fill="var(--dl-danger)" />
+  <text x="230" y="38" style="font-size: 12px; fill: var(--dl-body)">f = 0.90</text>
+  <circle cx="177.6" cy="39.9" r="5" fill="var(--dl-accent-strong)" />
+  <text x="186" y="58" style="font-size: 12px; fill: var(--dl-body)">o = 0.70</text>
+  <circle cx="137.0" cy="69.9" r="5" fill="var(--dl-accent-strong)" />
+  <text x="146" y="88" style="font-size: 12px; fill: var(--dl-body)">i = 0.40</text>
+  <text x="150" y="128" text-anchor="middle" style="font-size: 12px; fill: var(--dl-muted)">0</text>
+  <text x="280" y="128" text-anchor="end" style="font-size: 12px; fill: var(--dl-muted)">input to σ</text>
+  <text x="22" y="24" style="font-size: 12px; fill: var(--dl-muted)">1</text>
+</svg>
+
+<div v-click class="dl-callout">
+
+Forget gate: $x_t = 1$, $h_{t-1} = 0.5$, $W_{xf} = 1.5$,
+$W_{hf} = 0.8$, $b_f = 0.3$:
+
+$f_t = \sigma(1.5 + 0.4 + 0.3) = \sigma(2.2) = 0.90$
+
+The others: $\sigma(-0.4) = 0.40$, $\tanh(1.1) = 0.80$, $\sigma(0.85) = 0.70$.
+
+</div>
+
+</div>
+</div>
+
+<!--
+Eight rows, because the six equations share most of their symbols. Group them as
+you read: three gates, one candidate, two states, one input, one set of weights per
+gate, two squashing functions, one new operator.
+
+The subscript dot in W_x., W_h., b. stands for the gate's letter: W_xf, W_xi,
+W_xc, W_xo and so on. Four input matrices, four recurrent matrices, four biases —
+which is why the parameter count is 4x the plain RNN's.
+
+The worked example computes where the next slide's numbers come from. The next
+slide starts from f = 0.9, i = 0.4, c~ = 0.8, o = 0.7 (the GatedCell widget's
+defaults); this one shows that each is just sigma or tanh of a weighted sum. Do
+the forget gate in full and only quote the other three pre-activations.
+
+The odot row is the one students get wrong: it multiplies matching entries, unit
+by unit. c_t = f_t odot c_{t-1} means "each unit keeps its own fraction of its own
+memory".
+
+Two letters clash with earlier slides: o_t here is the output GATE, not the
+output o_t of the plain RNN, and W_ho here is the gate's recurrent weight, not the
+output layer. The literature uses the same letters for both; say it once.
+-->
+
+---
+layout: default
 title: One LSTM step, by hand
 ---
 
@@ -1496,7 +1830,7 @@ $f = 0.9$, $i = 0.4$, $\tilde{c} = 0.8$, $o = 0.7$.
 - **kept**: $f \cdot c_{t-1} = 0.9 \times 0.6 = 0.54$
 - **written**: $i \cdot \tilde{c} = 0.4 \times 0.8 = 0.32$
 - **cell state**: $c_t = 0.54 + 0.32 = \mathbf{0.86}$
-- **exposed**: $h_t = 0.7 \times \tanh(0.86) = 0.7 \times 0.696 = \mathbf{0.49}$
+- **exposed**: $h_t = 0.7 \times \tanh(0.86) = \mathbf{0.49}$
 
 </v-clicks>
 
@@ -1522,7 +1856,7 @@ $c_t = 0.6$. Fifty steps of that and $c_{50} = c_0$.
 </div>
 
 <!--
-Have them do it on paper while the widget is still on the previous slide's screen,
+Have them do it on paper while the GatedCell widget ("The LSTM memory block") is still on screen,
 then check against it — the numbers are the widget's defaults precisely so this
 works.
 
@@ -1935,8 +2269,8 @@ $$ (T,\; B,\; \text{features}) $$
 
 </div>
 
-Time first. Convenient for the loop inside cuDNN, and a surprise for everyone
-else.
+Time first: $T$ steps, then $B$ sequences. 32 reviews, 200 words, 64 features: $(200, 32, 64)$.
+Convenient for the loop inside cuDNN, and a surprise for everyone else.
 
 </div>
 <div>
@@ -1949,7 +2283,8 @@ $$ (B,\; T,\; \text{features}) $$
 
 </div>
 
-Batch first, like every other layer in PyTorch, and like `nn.Embedding`'s output.
+Batch first: $(32, 200, 64)$. Like every other layer in PyTorch, and like
+`nn.Embedding`'s output.
 
 </div>
 </div>
@@ -2346,7 +2681,7 @@ step $t$ becomes the input at step $t+1$.
 
 <div v-click class="mt-3 dl-callout">
 
-Teacher forcing is slide 23's `output → hidden` wiring, made trainable — and still
+Teacher forcing is slide 24's `output → hidden` wiring, made trainable — and still
 how a language model is trained.
 
 </div>
@@ -2497,6 +2832,87 @@ alignments.
 
 Bullet one is the bridge: replace a with a scaled dot product, drop the RNN, and
 scaled dot-product attention is what you have. That is next week's first slide.
+-->
+
+---
+layout: default
+title: "Reading the equation: attention"
+---
+
+# Reading the equation: attention
+
+<div class="grid grid-cols-[1.45fr_1fr] gap-5 mt-1 items-start">
+<div class="dl-ledger dl-tight dl-eq-legend">
+
+<v-clicks>
+
+| symbol | name | what it is here | example |
+| --- | --- | --- | --- |
+| $t,\ i,\ j$ | indices | $t$: output step; $i$, $j$: source positions | $i = 1, 2, 3$ |
+| $\mathbf{h}_i$ | encoder state | after source word $i$ | $[1, 0]$ |
+| $\mathbf{s}_{t-1}$ | decoder state | before writing word $t$ | $[1.1, 0]$ |
+| $a(\cdot, \cdot)$ | score function | learned network, or dot product | |
+| $e_{t,i}$ | score | how well word $i$ fits step $t$ | 1.1 |
+| $\exp,\ \sum_j$ | softmax | make positive, divide by the total | |
+| $\alpha_{t,i}$ | attention weight | share on word $i$; sum to 1 | 0.6 |
+| $\mathbf{c}_t$ | context vector | weighted sum of the $\mathbf{h}_i$ (not the LSTM cell) | $[0.6, 0.6]$ |
+
+</v-clicks>
+
+</div>
+<div>
+
+<svg viewBox="0 0 300 150" role="img" aria-label="Three encoder states feed one context vector; the line from the first is thickest, weight 0.6, the other two have weight 0.2" style="width: 100%; height: auto; font-family: inherit;">
+  <rect x="100" y="12" width="100" height="32" rx="6" fill="var(--dl-accent-soft)" stroke="var(--dl-accent)" stroke-width="1.5" />
+  <text x="150" y="33" text-anchor="middle" style="font-size: 13px; fill: var(--dl-heading)">c = [0.6, 0.6]</text>
+  <line x1="50" y1="102" x2="130" y2="46" stroke="var(--dl-accent)" stroke-width="9" />
+  <line x1="150" y1="102" x2="150" y2="46" stroke="var(--dl-accent)" stroke-width="3" />
+  <line x1="250" y1="102" x2="170" y2="46" stroke="var(--dl-accent)" stroke-width="3" />
+  <text x="72" y="70" text-anchor="end" style="font-size: 12px; fill: var(--dl-body)">0.6</text>
+  <text x="158" y="78" style="font-size: 12px; fill: var(--dl-body)">0.2</text>
+  <text x="228" y="70" style="font-size: 12px; fill: var(--dl-body)">0.2</text>
+  <rect x="14" y="104" width="72" height="30" rx="6" fill="var(--dl-surface)" stroke="var(--dl-border)" stroke-width="1.5" />
+  <text x="50" y="124" text-anchor="middle" style="font-size: 12px; fill: var(--dl-body)">h₁ = [1, 0]</text>
+  <rect x="114" y="104" width="72" height="30" rx="6" fill="var(--dl-surface)" stroke="var(--dl-border)" stroke-width="1.5" />
+  <text x="150" y="124" text-anchor="middle" style="font-size: 12px; fill: var(--dl-body)">h₂ = [0, 1]</text>
+  <rect x="214" y="104" width="72" height="30" rx="6" fill="var(--dl-surface)" stroke="var(--dl-border)" stroke-width="1.5" />
+  <text x="250" y="124" text-anchor="middle" style="font-size: 12px; fill: var(--dl-body)">h₃ = [0, 2]</text>
+</svg>
+
+<div v-click class="dl-callout">
+
+Scores $\mathbf{s}_{t-1} \cdot \mathbf{h}_i$: $e = 1.1,\ 0,\ 0$.
+
+$e^{1.1} \approx 3$, so
+
+$\alpha = \tfrac{3}{5}, \tfrac{1}{5}, \tfrac{1}{5} = 0.6, 0.2, 0.2$
+
+$\mathbf{c}_t = 0.6\,[1, 0] + 0.2\,[0, 1] + 0.2\,[0, 2] = [0.6, 0.6]$
+
+</div>
+
+</div>
+</div>
+
+<!--
+Three source words, two-number states, so it fits on paper. The decoder state
+s_{t-1} = [1.1, 0] points the same way as h_1, so h_1 gets the high score.
+
+Score: dot products s . h_i = 1.1, 0, 0.
+Softmax: exp gives 3.0, 1, 1 (e^1.1 = 3.004); total 5; weights 0.6, 0.2, 0.2.
+Weighted sum: 0.6 [1, 0] + 0.2 [0, 1] + 0.2 [0, 2] = [0.6, 0.6].
+
+Connect it to the widget two slides back: writing "read", the weight on
+"gelesen" was 0.85. That number is one alpha_{t,i}, computed exactly like this.
+
+Two clashes of letters to name out loud. c_t here is the context vector, not the
+LSTM's cell state — the 2014 paper and the LSTM paper both chose c. And s is the
+decoder's hidden state; it is called s only so it is not confused with the
+encoder's h.
+
+The index j only appears inside the sum in the softmax: it runs over all source
+positions, so the denominator is the same for every i. That is why the weights
+add up to 1.
 -->
 
 ---

@@ -229,7 +229,7 @@ across positions, then think about each position separately.
 
 The "two thirds of the parameters" line always gets a reaction, and it should —
 students arrive believing a transformer is attention with some plumbing. It is
-closer to the reverse. Slide 30 does the arithmetic.
+closer to the reverse. Slide 32 does the arithmetic.
 -->
 
 ---
@@ -721,6 +721,81 @@ wide heads simply do not train.
 -->
 
 ---
+layout: default
+title: "Reading the equation: scaled scores"
+---
+
+# Reading the equation: scaled scores
+
+<div class="grid grid-cols-[1.45fr_1fr] gap-5 mt-1 items-start">
+<div class="dl-ledger dl-tight dl-eq-legend">
+
+<v-clicks>
+
+| symbol | name | what it is here | example |
+| --- | --- | --- | --- |
+| $i$ | query index | the asking token, $1, \dots, T$ | 3 (*bank*) |
+| $j$ | key index | the token read, $1, \dots, T$ | 2 (*river*) |
+| $\mathbf{q}_i$ | query | $\mathbf{x}_i W_Q$, $d_k$ numbers ($W_Q$ learned) | $[1, 1]$ |
+| $\mathbf{k}_j$ | key | $\mathbf{x}_j W_K$, same shape | $[2, 0]$ |
+| $\cdot$ | dot product | multiply pairwise, then add | 2 |
+| $d_k$ | key width | set by hand | 2 (paper: 64) |
+| $\sqrt{d_k}$ | square root | the divisor | 1.41 |
+| $\operatorname{softmax}_j$ | softmax over $j$ | positive weights, row sums to 1 | |
+| $\alpha_{ij}$ | attention weight | share of $j$ in $i$'s output | 0.67 |
+
+</v-clicks>
+
+</div>
+<div>
+
+<svg viewBox="0 0 300 150" class="dl-diagram" role="img" aria-label="The bank row. Scores 0, 2, 0. Divided by root 2: 0, 1.41, 0. After softmax: 0.16, 0.67, 0.16" style="width: 100%; height: auto">
+  <text v-for="(h, c) in ['the', 'river', 'bank']" :key="'h' + c" :x="113 + c * 64" y="16" text-anchor="middle" style="fill: var(--dl-muted); font-size: 11px; font-style: italic">{{ h }}</text>
+  <g v-for="(row, r) in [['q · k', ['0', '2', '0']], ['÷ √2', ['0', '1.41', '0']], ['softmax', ['0.16', '0.67', '0.16']]]" :key="r">
+    <text x="72" :y="45 + r * 42" text-anchor="end" style="fill: var(--dl-muted); font-size: 11px">{{ row[0] }}</text>
+    <g v-for="(v, c) in row[1]" :key="c">
+      <rect :x="86 + c * 64" :y="25 + r * 42" width="54" height="32" rx="3" :style="r === 2 && c === 1 ? 'fill: var(--dl-accent-soft); stroke: var(--dl-accent); stroke-width: 1.5' : 'fill: var(--dl-surface); stroke: var(--dl-border); stroke-width: 1.5'" />
+      <text :x="113 + c * 64" :y="46 + r * 42" text-anchor="middle" style="fill: var(--dl-heading); font-size: 13px">{{ v }}</text>
+    </g>
+  </g>
+</svg>
+
+<div v-click class="dl-callout">
+
+$\mathbf{q}_3 \cdot \mathbf{k}_2 = 1 \times 2 + 1 \times 0 = 2$, and $2 / \sqrt{2} = 1.41$
+
+$\alpha_{32} = e^{1.41} / (e^{0} + e^{1.41} + e^{0}) = 4.11 / 6.11 = 0.67$
+
+</div>
+
+</div>
+</div>
+
+<!--
+This is the bank row from the AttentionTrace widget, slide 15, with every
+symbol named. Nothing new in the numbers — 0, 2, 0, then 0.16, 0.67, 0.16.
+
+Walk the indices first. i is the token that asks (row of the attention matrix),
+j the token being read (column). In "the river bank", bank is token 3 and river
+is token 2, so the 0.67 is alpha_32. T is the number of tokens, 3 here.
+
+Say which parts are learned: W_Q and W_K, so the queries and keys. d_k is a
+choice made by hand. The softmax and the square root are fixed operations with
+nothing to learn.
+
+The subscript j on softmax says which way it normalises: along a row, over every
+token j that i could read. That is why each row sums to 1 and the columns do
+not.
+
+The check for the room: bank's query is [0, 0, 0, 2] times W_Q = [1, 1]. River's
+key is [0, 2, 0, 1] times W_K = [2, 0]. The other two keys are [0, 0].
+
+Without the division the softmax of 0, 2, 0 is 0.11, 0.79, 0.11 — more peaked
+even at d_k = 2. At d_k = 64 raw scores are about eight times bigger than at
+d_k = 1, so the softmax saturates hard; dividing by 8 undoes exactly that.
+-->
+
+---
 layout: interactive
 heading: Every query at once
 title: Every query at once
@@ -971,7 +1046,7 @@ Eight heads do **not** cost eight times one head. Each head is **narrower**.
 
 - $d_{\text{model}} = 512$, $h = 8$, so each head works at
   $d_k = d_v = 512/8 = 64$
-- Run all eight, **concatenate** the outputs: $8 \times 64 = 512$ again
+- Run all eight and **concatenate**: $8 \times 64 = 512$
 - One more matrix, $W_O$, mixes the heads back together
 
 </v-clicks>
@@ -979,10 +1054,17 @@ Eight heads do **not** cost eight times one head. Each head is **narrower**.
 </div>
 <div>
 
-<div v-click class="dl-math-sm">
+<div v-click>
+<div class="dl-math-sm">
 
 $$ \operatorname{MHA}(X) = \left[\operatorname{head}_1 \,\|\, \cdots \,\|\, \operatorname{head}_h\right] W_O $$
 
+</div>
+<div class="dl-secondary">
+
+Multi-head attention of input $X$: one row per token. $\|$: side by side.
+
+</div>
 </div>
 
 <div v-click class="mt-3 dl-callout">
@@ -1005,7 +1087,7 @@ attention sub-layer costs the same.
 <!--
 The parameter-count invariance is the point and it surprises people. In an
 implementation there is not even a loop: W_Q is one (d, d) matrix, and the heads
-are made by reshaping its output into (h, d/h). Slide 50 shows exactly that line.
+are made by reshaping its output into (h, d/h). Slide 52 shows exactly that line.
 
 W_O is the part most summaries omit. Without it the concatenated output is just
 eight independent blocks of 64 numbers with no communication between them, and
@@ -1098,7 +1180,7 @@ space is large and mostly empty, and the model can learn to keep the two apart.
 
 Why not just learn a position embedding? You can, and BERT and GPT-2 both do.
 Learned embeddings cannot extrapolate past the longest training sequence, which
-is exactly the problem RoPE later solves properly — slide 44.
+is exactly the problem RoPE later solves properly — slide 46.
 -->
 
 ---
@@ -1160,6 +1242,80 @@ points at as the store of factual knowledge.
 automatically. There is no loop and there is no mixing.
 
 Why 4x: no principled reason. It is what the paper used and what stuck.
+-->
+
+---
+layout: default
+title: "Reading the equation: the feed-forward network"
+---
+
+# Reading the equation: the feed-forward network
+
+<div class="grid grid-cols-[1.45fr_1fr] gap-5 mt-1 items-start">
+<div class="dl-ledger dl-tight dl-eq-legend">
+
+<v-clicks>
+
+| symbol | name | what it is here | example |
+| --- | --- | --- | --- |
+| $\mathbf{x}$ | input | one token's vector, $d$ numbers | $[1, 2]$ |
+| $d$ | model width | $d_{\text{model}}$, set by hand | 2 (paper: 512) |
+| $d_{\text{ff}}$ | hidden width | set by hand, usually $4d$ | 3 (paper: 2048) |
+| $W_1$ | first weights | $d_{\text{ff}} \times d$, learned | rows $(1, 0), (0, 1), (1, -1)$ |
+| $\mathbf{b}_1$ | first bias | $d_{\text{ff}}$ numbers, learned | $[0, -1, 0]$ |
+| $\phi$ | activation | ReLU: $\max(0, \cdot)$, per number | $-1 \to 0$ |
+| $W_2$ | second weights | $d \times d_{\text{ff}}$, learned | rows $(1, 1, 1), (0, 1, 2)$ |
+| $\mathbf{b}_2$ | second bias | $d$ numbers, learned | $[0.5, 0]$ |
+| $\operatorname{FFN}$ | feed-forward network | same shape out as in | $[2.5, 1]$ |
+
+</v-clicks>
+
+</div>
+<div>
+
+<svg viewBox="0 0 300 150" class="dl-diagram" role="img" aria-label="Two numbers 1, 2 go in. After the first layer: 1, 1, minus 1. After ReLU: 1, 1, 0. After the second layer: 2.5, 1" style="width: 100%; height: auto">
+  <g v-for="(col, c) in [['x', ['1', '2']], ['W₁x + b₁', ['1', '1', '−1']], ['φ', ['1', '1', '0']], ['FFN(x)', ['2.5', '1']]]" :key="c">
+    <text :x="34 + c * 77" y="142" text-anchor="middle" style="fill: var(--dl-muted); font-size: 11px">{{ col[0] }}</text>
+    <g v-for="(v, r) in col[1]" :key="r">
+      <rect :x="12 + c * 77" :y="(col[1].length === 2 ? 34 : 14) + r * 40" width="44" height="32" rx="3" :style="(c === 2 && r === 2) || c === 3 ? 'fill: var(--dl-accent-soft); stroke: var(--dl-accent); stroke-width: 1.5' : 'fill: var(--dl-surface); stroke: var(--dl-border); stroke-width: 1.5'" />
+      <text :x="34 + c * 77" :y="(col[1].length === 2 ? 55 : 35) + r * 40" text-anchor="middle" style="fill: var(--dl-heading); font-size: 13px">{{ v }}</text>
+    </g>
+  </g>
+  <path v-for="c in [0, 1, 2]" :key="'a' + c" :d="'M ' + (60 + c * 77) + ' 70 h 22'" style="fill: none; stroke: var(--dl-body); stroke-width: 1.8" />
+</svg>
+
+<div v-click class="dl-callout">
+
+$W_1\mathbf{x} + \mathbf{b}_1 = [1,\ 2,\ 1 - 2] + [0, -1, 0] = [1, 1, -1]$
+
+$W_2\,[1, 1, 0] + \mathbf{b}_2 = [2, 1] + [0.5, 0] = [2.5, 1]$
+
+</div>
+
+</div>
+</div>
+
+<!--
+A toy with two numbers per token and a hidden layer of three, so the arithmetic
+fits on the slide. The real one is 512 in, 2048 in the middle, 512 out. The toy
+breaks the 4x rule only to stay small; nothing else changes.
+
+Say which parts are learned: both weight matrices and both biases. d and d_ff
+are set by hand. phi is a fixed function with nothing to learn — ReLU in the
+2017 paper. Later models use GELU (Gaussian error linear unit) or SwiGLU, as
+slide 45 shows.
+
+Walk it left to right. First layer, row by row: 1*1 + 0*2 = 1, then 0*1 + 1*2
+= 2, then 1*1 - 1*2 = -1. Add b1 = [0, -1, 0]: [1, 1, -1]. ReLU sets the
+negative number to 0: [1, 1, 0]. Second layer: 1 + 1 + 0 = 2 and 0 + 1 + 0 =
+1, then add b2 = [0.5, 0]: [2.5, 1].
+
+The equation is written for a single token as a column vector. In code the
+whole (B, T, d) tensor goes through at once and the matrix sits on the right,
+x @ W1 — same numbers, transposed bookkeeping.
+
+Output shape equals input shape. That is what lets the residual add on the next
+slide work.
 -->
 
 ---
@@ -1372,7 +1528,7 @@ around T = 4d.
 
 Memory is worse than compute here: the T x T matrix has to exist per head per
 layer. That is what FlashAttention attacks — not by changing the mathematics but
-by never materialising the matrix. Slide 43.
+by never materialising the matrix. Slide 45.
 -->
 
 ---
@@ -1475,7 +1631,7 @@ output token. So the sequence-level parallelism people attribute to transformers
 is real in the encoder and real during *training* of the decoder, and is gone at
 generation time, where you are back to one token at a time.
 
-That asymmetry is the whole reason the KV cache exists — slide 45.
+That asymmetry is the whole reason the KV cache exists — slide 47.
 -->
 
 ---
@@ -1989,7 +2145,7 @@ better one; they found more compute.
 
 <div v-click class="mt-3 dl-secondary">
 
-Context grew 250-fold. That is the fight the $T^2$ on slide 31 started, and it
+Context grew 250-fold. That is the fight the $T^2$ on slide 33 started, and it
 was won by engineering — better kernels, cached keys, cheaper positions — not by
 replacing attention.
 
@@ -2141,7 +2297,7 @@ One matrix producing Q, K and V at once is standard and is purely an efficiency
 choice — one big matmul beats three small ones. Mathematically it is the three
 matrices from slide 10.
 
-bias=False is the modern convention from slide 43's table.
+bias=False is the modern convention from slide 45's table.
 
 This is nanoGPT's CausalSelfAttention, minus the dropout. Point them at it.
 -->
@@ -2214,7 +2370,7 @@ print(sum(p.numel() for p in encoder.parameters()))     # 18 914 304
 
 - `batch_first=True` — same trap as `nn.LSTM`, same silent failure
 - `norm_first=True` — the default is the 2017 wiring, which needs warmup
-- The parameter count is slide 30's **18.9 M**, to the number
+- The parameter count is slide 32's **18.9 M**, to the number
 
 </v-clicks>
 
@@ -2228,7 +2384,7 @@ Have them run the print. Matching a number they derived by hand against what
 PyTorch reports is the most convincing five seconds available.
 
 Worth saying: most people writing transformers today do not use these classes.
-They write the fourteen lines from slide 50, or they load a pretrained model from
+They write the fourteen lines from slide 52, or they load a pretrained model from
 Hugging Face. nn.TransformerEncoderLayer is a reasonable middle.
 -->
 
@@ -2404,7 +2560,7 @@ title: Reading, and the lab
   <LinkCard
     href="https://github.com/karpathy/nanoGPT"
     title="nanoGPT"
-    blurb="Karpathy. A complete, readable, trainable decoder-only transformer in about 300 lines. Slide 50 is its attention."
+    blurb="Karpathy. A complete, readable, trainable decoder-only transformer in about 300 lines. Slide 52 is its attention."
     icon="💻"
   />
 </div>
@@ -2412,7 +2568,7 @@ title: Reading, and the lab
 
 <div v-click class="mt-4 dl-tight">
 
-**In the lab.** Build the block from slide 51 and train a small decoder-only model
+**In the lab.** Build the block from slide 53 and train a small decoder-only model
 on character-level text. Then break it on purpose — drop `is_causal`, drop the
 $\sqrt{d_k}$, drop the positional encoding, one at a time — and report what each
 one costs.

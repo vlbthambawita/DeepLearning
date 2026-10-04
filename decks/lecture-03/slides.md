@@ -755,7 +755,7 @@ $$ \frac{\partial L}{\partial w_j} = -\frac{1}{n} \sum_i \Bigl(y^{(i)} - \sigma(
 <div v-click class="mt-2">
 
 ```python {all}{lines:false}
-loss = ((y - torch.sigmoid(X @ w + b)) ** 2).mean() / 2
+loss = ((y - (X @ w + b)) ** 2).mean() / 2
 loss.backward()          # w.grad now holds exactly the expression above
 ```
 
@@ -763,8 +763,8 @@ loss.backward()          # w.grad now holds exactly the expression above
 
 <div v-click class="mt-5 dl-callout">
 
-Change the loss to cross-entropy, add a layer, swap the sigmoid for a ReLU — the second line
-is unchanged. That is the whole value of autograd, and it is why the rest of this course can
+Add a sigmoid, change the loss to cross-entropy, add a layer — the second line is
+unchanged. That is the whole value of autograd, and it is why the rest of this course can
 move fast.
 
 </div>
@@ -774,6 +774,92 @@ Worth stating explicitly: autograd is not doing symbolic differentiation and it
 is not approximating with finite differences. It applies the chain rule
 numerically over the graph it recorded, which is exact and costs about as much
 as the forward pass.
+The code has no sigmoid on purpose. Lecture 02's Adaline used the identity as
+its activation, sigma(z) = z, and the formula is only true for that. So here
+w.grad matches the formula exactly. Wrap the prediction in torch.sigmoid and
+the true gradient gains a factor sigma'(z) — autograd adds it, the hand formula
+does not. That is the callout's point.
+
+The next slide names every symbol and works one example by hand.
+-->
+
+---
+layout: default
+title: "Reading the equation: the gradient"
+---
+
+# Reading the equation: the gradient
+
+<div class="grid grid-cols-[1.45fr_1fr] gap-5 mt-1 items-start">
+<div class="dl-ledger dl-tight dl-eq-legend">
+
+<v-clicks>
+
+| symbol | name | what it is here | example |
+| --- | --- | --- | --- |
+| $L$ | loss | squared error, halved, averaged | 0.0925 |
+| $w_j$ | weight $j$ | one per input (learned) | $0.5$ |
+| $\partial L / \partial w_j$ | gradient | slope of $L$ along $w_j$ | $0.4$ |
+| $i$ | example index | a label, not a power | 1, 2 |
+| $n$ | number of examples | in the batch | 2 |
+| $\sum_i$ | sum | over $i = 1, \dots, n$ | |
+| $j$ | input index | $j = 1, \dots, m$ | $m = 1$ |
+| $x_j^{(i)}$ | input (data) | input $j$ of example $i$ | 2, 1 |
+| $y^{(i)}$ | target (data) | the correct answer | 1, 0 |
+| $z^{(i)}$ | net input | $\sum_j w_j x_j^{(i)}$ + bias $b$ | 1.1, 0.6 |
+| $\sigma$ | activation | Adaline's: $\sigma(z) = z$ | 1.1, 0.6 |
+
+</v-clicks>
+
+</div>
+<div>
+
+<svg viewBox="0 0 300 120" class="dl-diagram" role="img" aria-label="Two examples. Example 1: x 2, y 1, sigma of z 1.1, error times x minus 0.2. Example 2: x 1, y 0, sigma of z 0.6, error times x minus 0.6" style="width: 100%; height: auto">
+  <text v-for="(h, c) in ['x', 'y', 'σ(z)', '(y − σ)·x']" :key="'h' + c" :x="88 + c * 56" y="20" text-anchor="middle" style="fill: var(--dl-muted); font-size: 11px">{{ h }}</text>
+  <g v-for="(row, r) in [['i = 1', ['2', '1', '1.1', '−0.2']], ['i = 2', ['1', '0', '0.6', '−0.6']]]" :key="r">
+    <text :x="50" :y="54 + r * 44" text-anchor="end" style="fill: var(--dl-muted); font-size: 11px">{{ row[0] }}</text>
+    <g v-for="(v, c) in row[1]" :key="c">
+      <rect :x="64 + c * 56" :y="32 + r * 44" width="48" height="32" rx="3" :style="c === 3 ? 'fill: var(--dl-accent-soft); stroke: var(--dl-accent); stroke-width: 1.5' : 'fill: var(--dl-surface); stroke: var(--dl-border); stroke-width: 1.5'" />
+      <text :x="88 + c * 56" :y="53 + r * 44" text-anchor="middle" style="fill: var(--dl-heading); font-size: 13px">{{ v }}</text>
+    </g>
+  </g>
+</svg>
+
+<div v-click class="dl-callout">
+
+$z^{(1)} = 0.5 \times 2 + 0.1 = 1.1$
+
+so $y^{(1)} - \sigma(z^{(1)}) = 1 - 1.1 = -0.1$
+
+$\partial L / \partial w = -\tfrac{1}{2}\,(-0.2 - 0.6) = 0.4$
+
+</div>
+
+</div>
+</div>
+
+<!--
+Walk the legend one row at a time. Say which symbols are data (x and y), which
+are learned (w and b), and which are just bookkeeping (i, j, n, the sum).
+
+The superscript (i) is the row that trips people. It is a label, "of example
+i", not a power. Lecture 02's notation slide set this up.
+
+The example uses the widget's numbers two slides back: w = 0.5, b = 0.1, and one
+example with x = 2, y = 1. We add a second example, x = 1, y = 0, so the sum
+has something to add. One input, so j only takes the value 1; on MNIST it runs
+to 784.
+
+The arithmetic: z1 = 0.5 * 2 + 0.1 = 1.1, error 1 - 1.1 = -0.1, times x = -0.2.
+z2 = 0.5 * 1 + 0.1 = 0.6, error 0 - 0.6 = -0.6, times x = -0.6. Sum -0.8.
+Multiply by -1/n = -1/2: the gradient is +0.4. Positive, so gradient descent
+makes w smaller — both predictions are too high, so that is right.
+
+The loss for the record: (0.01 + 0.36) / (2 * 2) = 0.0925. For the bias the
+same recipe without the x gives 0.35.
+
+The widget itself has a sigmoid and no one-half, so its .grad is a different
+number. That difference is the previous slide's callout.
 -->
 
 ---
@@ -901,7 +987,7 @@ Promise them that this diagram is worth memorising, and keep the promise: the
 CNN deck literally reuses this loop and says so.
 
 If asked where validation fits: it is a second loop, outside this one, with the
-optimiser removed. That is slide 41.
+optimiser removed. That is slide 42.
 -->
 
 ---
@@ -1471,7 +1557,7 @@ title: The exercise
 
 <v-clicks>
 
-- The FCNN from slide 33, on MNIST, in PyTorch
+- The FCNN from slide 34, on MNIST, in PyTorch
 - `random_split` for a validation set, seeded
 - `Adam(lr=1e-3)`, ten epochs
 

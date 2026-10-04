@@ -29,7 +29,7 @@ itself, in one dimension and then two. Next: channels, pooling, the training
 pieces, a real CNN in PyTorch, and where CNNs go after classification.
 
 Everything in the first session is arithmetic they must be able to do by hand
-before they touch nn.Conv2d. Do not rush slides 17–23.
+before they touch nn.Conv2d. Do not rush slides 17–25.
 -->
 
 ---
@@ -312,7 +312,7 @@ This is the payoff for slide 4. Put the two numbers side by side on the board if
 the projector is small.
 
 If someone objects that 2,432 weights cannot possibly be enough: correct, which
-is why we stack many such layers. That is slide 39.
+is why we stack many such layers. That is slide 41.
 -->
 
 ---
@@ -448,7 +448,18 @@ That operation is a **discrete convolution** of two vectors:
 
 $$ \mathbf{y} = \mathbf{x} * \mathbf{w} $$
 
-<div class="grid grid-cols-3 gap-8 mt-8">
+<div class="grid grid-cols-4 gap-6 mt-8">
+<div v-click>
+
+$\mathbf{y}$
+
+<div class="dl-secondary">
+
+the **output** — five numbers from the last slide
+
+</div>
+
+</div>
 <div v-click>
 
 $\mathbf{x}$
@@ -544,6 +555,80 @@ filter, of each weight times the input it is sitting on."
 The textbook writes this sum from -inf to +inf with x[i - k], which is the
 flipped version. We come to the flip in a few slides; teaching it first makes
 the code they will write look wrong to them.
+-->
+
+---
+layout: default
+title: "Reading the equation: 1-D convolution"
+---
+
+# Reading the equation: 1-D convolution
+
+<div class="grid grid-cols-[1.45fr_1fr] gap-5 mt-1 items-start">
+<div class="dl-ledger dl-tight dl-eq-legend">
+
+<v-clicks>
+
+| symbol | name | what it is here | example |
+| --- | --- | --- | --- |
+| $y[i]$ | output element | output number $i$ | $y[0] = 5.75$ |
+| $i$ | output index | which output; where the window starts | $0, 1, \dots, 4$ |
+| $\sum_{k=0}^{m-1}$ | sum over the window | add the $m$ products | 4 products |
+| $k$ | kernel index | which weight; runs from $0$ to $m-1$ | $0, 1, 2, 3$ |
+| $m$ | kernel size | number of weights (set by hand) | 4 |
+| $x[i+k]$ | input element | the input under weight $k$ (data) | $x[0] = 3$ |
+| $w[k]$ | weight | weight $k$ of the filter (learned) | $w[0] = 0.5$ |
+
+</v-clicks>
+
+</div>
+<div>
+
+<svg viewBox="0 0 300 128" role="img" aria-label="Worked example: input 3, 2, 1, 7, 1, 2, 5, 4 with the window over the first four; weights 0.5, 0.75, 1, 0.25; products 1.5, 1.5, 1, 1.75, which add up to 5.75" style="width: 100%;">
+  <text x="40" y="27" text-anchor="end" style="font-size: 11px; fill: var(--dl-muted)">x</text>
+  <g v-for="(v, c) in [3, 2, 1, 7, 1, 2, 5, 4]" :key="'x' + c">
+    <rect :x="46 + c * 31" y="10" width="27" height="26" rx="3" :style="c < 4 ? 'fill: var(--dl-accent-soft); stroke: var(--dl-accent)' : 'fill: var(--dl-surface); stroke: var(--dl-border)'" />
+    <text :x="59.5 + c * 31" y="28" text-anchor="middle" style="font-size: 12px; fill: var(--dl-heading)">{{ v }}</text>
+  </g>
+  <text x="40" y="69" text-anchor="end" style="font-size: 11px; fill: var(--dl-muted)">w</text>
+  <g v-for="(v, c) in ['0.5', '0.75', '1', '0.25']" :key="'w' + c">
+    <rect :x="46 + c * 31" y="52" width="27" height="26" rx="3" style="fill: var(--dl-surface); stroke: var(--dl-accent-strong)" />
+    <text :x="59.5 + c * 31" y="70" text-anchor="middle" style="font-size: 10px; fill: var(--dl-heading)">{{ v }}</text>
+  </g>
+  <text x="40" y="111" text-anchor="end" style="font-size: 11px; fill: var(--dl-muted)">x·w</text>
+  <g v-for="(v, c) in ['1.5', '1.5', '1', '1.75']" :key="'p' + c">
+    <rect :x="46 + c * 31" y="94" width="27" height="26" rx="3" style="fill: var(--dl-accent-soft); stroke: var(--dl-accent)" />
+    <text :x="59.5 + c * 31" y="112" text-anchor="middle" style="font-size: 10px; fill: var(--dl-heading)">{{ v }}</text>
+  </g>
+  <text x="180" y="112" style="font-size: 13px; fill: var(--dl-heading)">sum → 5.75</text>
+</svg>
+
+<div v-click class="dl-callout">
+
+$y[0] = 3(0.5) + 2(0.75) + 1(1) + 7(0.25)$
+
+$= 1.5 + 1.5 + 1 + 1.75 = 5.75$
+
+Move the window one step ($i = 1$): $y[1] = 9$.
+
+</div>
+
+</div>
+</div>
+
+<!--
+Walk the legend top to bottom. It follows one output: y[i] on the left, then
+the sum, then the two things inside it.
+
+Say which symbols are data and which are learned: x is the data, w is learned,
+m is set by hand. i and k are only counters. The room mixes up the two indices
+every year, so say it twice: i moves the window, k walks across it.
+
+The numbers are the Conv1DLab example from two slides back: input 3, 2, 1, 7, 1,
+2, 5, 4 and filter 0.5, 0.75, 1, 0.25. The five outputs are 5.75, 9, 7.25, 7.5
+and 8. Ask for y[1] before showing it: 2(0.5) + 1(0.75) + 7(1) + 1(0.25) = 9.
+
+The next slide replays the same arithmetic one line at a time, so do not linger.
 -->
 
 ---
@@ -747,7 +832,7 @@ title: The size of the output
 
 # The size of the output
 
-Everything on the last four slides is one formula:
+Everything on the last four slides is one formula for $o$, the **output size**:
 
 <div class="mt-3">
 
@@ -796,12 +881,85 @@ is also where off-by-one bugs come from.
 
 ---
 layout: default
+title: "Reading the equation: output size"
+---
+
+# Reading the equation: output size
+
+<div class="grid grid-cols-[1.45fr_1fr] gap-5 mt-1 items-start">
+<div class="dl-ledger dl-tight dl-eq-legend">
+
+<v-clicks>
+
+| symbol | name | what it is here | example |
+| --- | --- | --- | --- |
+| $o$ | output size | number of outputs | 5 |
+| $n$ | input size | length of the input (data) | 8 |
+| $p$ | padding | zeros at each end (set by hand) | 0 |
+| $m$ | kernel size | filter length (set by hand) | 4 |
+| $s$ | stride | how far the window jumps (set by hand) | 1 |
+| $\lfloor\cdot\rfloor$ | floor | round down to a whole number | $\lfloor 2.5 \rfloor = 2$ |
+| $+1$ | first position | the window's first place | |
+
+</v-clicks>
+
+</div>
+<div>
+
+<svg viewBox="0 0 300 150" role="img" aria-label="Worked example: eight input cells; a window of four can stand at five places with stride 1, shown as five bars, three of them highlighted for stride 2" style="width: 100%;">
+  <g v-for="c in 8" :key="'n' + c">
+    <rect :x="22 + (c - 1) * 32" y="10" width="28" height="24" rx="3" style="fill: var(--dl-surface); stroke: var(--dl-border)" />
+    <text :x="36 + (c - 1) * 32" y="27" text-anchor="middle" style="font-size: 11px; fill: var(--dl-muted)">{{ c - 1 }}</text>
+  </g>
+  <g v-for="i in 5" :key="'o' + i">
+    <rect :x="22 + (i - 1) * 32" :y="40 + (i - 1) * 16" width="124" height="11" rx="3" :style="(i - 1) % 2 === 0 ? 'fill: var(--dl-accent); stroke: var(--dl-accent-strong)' : 'fill: var(--dl-accent-soft); stroke: var(--dl-accent)'" />
+  </g>
+  <text x="22" y="138" style="font-size: 11px; fill: var(--dl-heading)">s = 1: all 5 places</text>
+  <text x="170" y="138" style="font-size: 11px; fill: var(--dl-accent-strong)">s = 2: dark 3</text>
+</svg>
+
+<div v-click class="dl-callout">
+
+$s = 1$: $\lfloor (8 + 0 - 4)/1 \rfloor + 1 = 5$
+
+$s = 2$: $\lfloor (8 + 0 - 4)/2 \rfloor + 1 = 3$
+
+</div>
+
+</div>
+</div>
+
+<!--
+The numbers are the running Conv1DLab example: n = 8 inputs, a 4-tap filter, no
+padding. Each bar in the drawing is one place the window can stand. Count them
+with the room: five at stride 1. At stride 2 only the dark bars are used: three.
+
+Say which symbols are data and which are set by hand. n comes from the data; p,
+m and s are choices you write into nn.Conv2d. o is not chosen at all, it follows.
+
+The +1 is the row that confuses people: n + 2p - m counts the jumps, and the
+window also stands at its first place before any jump. A floor is needed when the
+last jump would leave the input: n = 10, m = 3, p = 2, s = 2 gives 11/2, which
+rounds down to 5, then +1 gives 6. That is question 2 on the next slide.
+
+With p = 2 the same input gives 9 outputs, and with p = 1 it gives 7. The 1-D
+padding widget showed both.
+-->
+
+---
+layout: default
 title: Your turn
 ---
 
 # Your turn
 
 <div class="dl-math-sm">
+
+<div class="dl-secondary">
+
+$n$ input size, $m$ kernel size, $p$ padding, $s$ stride, $o$ output size.
+
+</div>
 
 **1.** An input vector of size 10, kernel of size 5, padding 2, stride 1.
 
@@ -817,7 +975,7 @@ Same size in, same size out — this is *same* padding.
 
 </div>
 
-<div v-click class="mt-6">
+<div v-click class="mt-3">
 
 **2.** Same input, but kernel 3 and stride 2.
 
@@ -987,48 +1145,75 @@ is why we write one number.
 
 ---
 layout: default
-title: One output cell, all nine terms
+title: "Reading the equation: one output cell, all nine terms"
 ---
 
-# One output cell, all nine terms
+# Reading the equation: one output cell, all nine terms
 
-Take the **centre** cell of that output, $Y_{1,1}$ — the one window that sees the whole input
-and no padded zeros.
+<div class="grid grid-cols-[1.45fr_1fr] gap-5 mt-1 items-start">
+<div class="dl-ledger dl-tight dl-eq-legend">
 
-<div class="grid grid-cols-2 gap-8 mt-3">
-<div class="dl-math-xs">
+<v-clicks>
 
-$$ X = \begin{bmatrix} 2 & 1 & 2 \\ 5 & 0 & 1 \\ 1 & 7 & 3 \end{bmatrix} \qquad W = \begin{bmatrix} 0.5 & 0.7 & 0.4 \\ 0.3 & 0.4 & 0.1 \\ 0.5 & 1.0 & 0.5 \end{bmatrix} $$
+| symbol | name | what it is here | example |
+| --- | --- | --- | --- |
+| $Y_{i,j}$ | output cell | row $i$, column $j$ of the feature map | $Y_{1,1} = 13.1$ |
+| $i, j$ | output row, column | where the window stands; $0$ to $2$ | $1, 1$ (centre) |
+| $\sum_{k_1}\sum_{k_2}$ | double sum | add over every kernel row and column | 9 terms |
+| $k_1, k_2$ | kernel row, column | position inside the kernel | $0, 1, 2$ |
+| $X$ | input image | 3×3, padded with zeros to 5×5 (data) | left grid |
+| $W$ | kernel | 3×3 weights (learned) | middle grid |
 
-<div v-click class="mt-3 dl-secondary">
+</v-clicks>
 
-Multiply the two grids cell by cell — *not* a matrix product — and add up all nine numbers.
+</div>
+<div>
+
+<svg viewBox="0 0 280 120" role="img" aria-label="Worked example: the input window 2, 1, 2; 5, 0, 1; 1, 7, 3 times the kernel 0.5, 0.7, 0.4; 0.3, 0.4, 0.1; 0.5, 1, 0.5, cell by cell, gives 1, 0.7, 0.8; 1.5, 0, 0.1; 0.5, 7, 1.5, which add up to 13.1" style="width: 100%;">
+  <g v-for="(grid, g) in [[2, 1, 2, 5, 0, 1, 1, 7, 3], [0.5, 0.7, 0.4, 0.3, 0.4, 0.1, 0.5, 1, 0.5], [1, 0.7, 0.8, 1.5, 0, 0.1, 0.5, 7, 1.5]]" :key="'g' + g">
+    <text :x="44 + g * 96" y="12" text-anchor="middle" style="font-size: 11px; fill: var(--dl-muted)">{{ ['X window', 'W', 'products'][g] }}</text>
+    <g v-for="(v, c) in grid" :key="'c' + c">
+      <rect :x="8 + g * 96 + (c % 3) * 24" :y="20 + Math.floor(c / 3) * 24" width="22" height="22" rx="2" :style="g === 2 ? 'fill: var(--dl-accent-soft); stroke: var(--dl-accent)' : 'fill: var(--dl-surface); stroke: var(--dl-border)'" />
+      <text :x="19 + g * 96 + (c % 3) * 24" :y="35 + Math.floor(c / 3) * 24" text-anchor="middle" style="font-size: 9px; fill: var(--dl-heading)">{{ v }}</text>
+    </g>
+  </g>
+  <text x="86" y="58" text-anchor="middle" style="font-size: 13px; fill: var(--dl-heading)">⊙</text>
+  <text x="182" y="58" text-anchor="middle" style="font-size: 13px; fill: var(--dl-heading)">=</text>
+  <text x="140" y="112" text-anchor="middle" style="font-size: 12px; fill: var(--dl-accent-strong)">add all nine → 13.1</text>
+</svg>
+
+<div v-click class="dl-callout">
+
+$Y_{1,1} = 1 + 0.7 + 0.8 + 1.5 + 0 + 0.1 + 0.5 + 7 + 1.5 = 13.1$
+
+Cell by cell, then add: **not** a matrix product.
 
 </div>
 
 </div>
-<div v-click class="dl-math-xs">
-
-$$ \begin{aligned} Y_{1,1} =\;& 2(0.5) + 1(0.7) + 2(0.4) \\ +\;& 5(0.3) + 0(0.4) + 1(0.1) \\ +\;& 1(0.5) + 7(1.0) + 3(0.5) \\[2pt] =\;& \mathbf{13.1} \end{aligned} $$
-
-</div>
-</div>
-
-<div v-click class="mt-4 dl-callout">
-
-Nine weights, nine products, **one** number. The two sums in the formula are only "every row
-of the window" and "every column of the window" — two dimensions brings no new mathematics.
-
 </div>
 
 <!--
-Have the room do this one on paper while the widget from the last slide is still
-on screen, then check it against cell (1,1). Everyone gets 13.1 or finds their
-own arithmetic slip, which is the better outcome.
+Take the centre cell of the last widget's output, Y(1,1). It is the one window
+that sees the whole input and no padded zeros, so all nine terms are real
+numbers.
 
-If someone asks why not a matrix product: because a matrix product mixes rows
-with columns, and there is no reason for the pixel above to multiply the weight
-to the left. Elementwise, then sum.
+Walk the legend: Y on the left, then the two indices that place the window,
+then the double sum, then the two indices that walk inside it, then the two
+grids. X is data, W is learned. i, j, k1 and k2 are only counters.
+
+Have the room do the nine products on paper while the widget from the last
+slide is still in their heads, then check it against cell (1,1). Written out:
+2(0.5) + 1(0.7) + 2(0.4) + 5(0.3) + 0(0.4) + 1(0.1) + 1(0.5) + 7(1.0) +
+3(0.5) = 13.1. Everyone gets 13.1 or finds their own slip, which is the better
+outcome.
+
+The two sums are only "every row of the window" and "every column of the
+window". Two dimensions brings no new mathematics.
+
+If someone asks why not a matrix product: a matrix product mixes rows with
+columns, and there is no reason for the pixel above to multiply the weight to
+the left. Element-wise, then sum.
 -->
 
 ---
@@ -1044,7 +1229,7 @@ aside-width: 17rem
 
 The example from the textbook: 3×3 input, 3×3 filter, $p = 1$, $s = 2$, filter rotated.
 
-Step through all four cells. The answer is
+Step through all four cells. The answer, the output map $Y$, is
 
 <div class="mt-1 dl-math-xs">
 
@@ -1243,33 +1428,66 @@ title: Counting a convolution layer's parameters
 
 # Counting a convolution layer's parameters
 
-<div class="mt-4">
+<div class="dl-math-sm">
 
 $$ \text{weights} = m_1 \times m_2 \times C_{\text{in}} \times C_{\text{out}} \;+\; \underbrace{C_{\text{out}}}_{\text{one bias per filter}} $$
 
 </div>
 
-<div v-click class="mt-6 dl-math-sm">
-
-A 5×5 layer taking a colour image to 32 feature maps:
-
-$$ 5 \times 5 \times 3 \times 32 + 32 = 2\,432 $$
-
-</div>
+<div class="grid grid-cols-[1.45fr_1fr] gap-5 mt-1 items-start">
+<div class="dl-ledger dl-tight dl-eq-legend">
 
 <v-clicks>
 
-- $H$ and $W$ do not appear — the layer's size is independent of the image's
-- The kernel side enters **squared**: go from 3×3 to 6×6 and the same layer costs **four
-  times** as much, for the same channels and the same image
+| symbol | name | what it is here | example |
+| --- | --- | --- | --- |
+| $m_1, m_2$ | kernel height, width | size of each filter (set by hand) | $5, 5$ |
+| $C_{\text{in}}$ | input channels | depth of the input; 3 for colour (data) | 3 |
+| $C_{\text{out}}$ | output channels | number of filters (set by hand) | 32 |
+| $\times$ | product | one weight per cell, per channel, per filter | 2 400 |
+| $+\,C_{\text{out}}$ | biases | one learned bias per filter | 32 |
 
 </v-clicks>
+
+</div>
+<div>
+
+<svg viewBox="0 0 260 130" role="img" aria-label="Worked example: one filter is a 5 by 5 grid, 3 channels deep, so 75 weights; the layer has 32 such filters plus 32 biases, 2432 numbers in all" style="width: 100%; max-height: 8.5rem;">
+  <g v-for="d in [2, 1, 0]" :key="'d' + d">
+    <rect :x="14 + d * 10" :y="16 - d * 8" width="70" height="70" rx="2" style="fill: var(--dl-accent-soft); stroke: var(--dl-accent)" />
+  </g>
+  <path d="M28 16V86M42 16V86M56 16V86M70 16V86M14 30H84M14 44H84M14 58H84M14 72H84" style="fill: none; stroke: var(--dl-accent); stroke-width: 0.6" />
+  <text x="54" y="104" text-anchor="middle" style="font-size: 11px; fill: var(--dl-heading)">5×5×3 = 75</text>
+  <text x="54" y="120" text-anchor="middle" style="font-size: 10px; fill: var(--dl-muted)">one filter</text>
+  <text x="120" y="40" style="font-size: 13px; fill: var(--dl-heading)">× 32 filters</text>
+  <text x="120" y="62" style="font-size: 13px; fill: var(--dl-heading)">+ 32 biases</text>
+  <text x="120" y="92" style="font-size: 15px; fill: var(--dl-accent-strong)">= 2 432</text>
+</svg>
+
+<div v-click class="dl-callout">
+
+$5 \times 5 \times 3 \times 32 + 32 = 2\,432$
+
+No $H$ or $W$: image size does not appear. A 6×6 kernel costs four times a 3×3.
+
+</div>
+
+</div>
+</div>
 
 <!--
 Same number as slide 11, now derived rather than asserted.
 
-The second bullet is the setup for the next slide: if the only thing a bigger
-kernel costs is weights, how big should it be? Say "hold that" and go.
+Walk the legend: the kernel's height and width, then how deep it is, then how
+many filters there are. C_in comes from the data (3 for an RGB image, or the
+number of filters in the layer before). m and C_out are choices you write into
+nn.Conv2d. Every one of the 2,432 numbers is learned.
+
+The callout carries the two facts that matter next. H and W do not appear: the
+layer's size does not depend on the image. And the kernel side enters squared:
+3×3 to 6×6 is four times the weights, for the same channels and the same image.
+That is the setup for the next slide: if the only cost of a bigger kernel is
+weights, how big should it be? Say "hold that" and go.
 -->
 
 ---
@@ -1816,12 +2034,88 @@ Worth one mention because every architecture they read about has it, and because
 
 ---
 layout: default
+title: "Reading the equation: batch normalisation"
+---
+
+# Reading the equation: batch normalisation
+
+<div class="grid grid-cols-[1.45fr_1fr] gap-5 mt-1 items-start">
+<div class="dl-ledger dl-tight dl-eq-legend">
+
+<v-clicks>
+
+| symbol | name | what it is here | example |
+| --- | --- | --- | --- |
+| $z$ | activation | one value of one channel, one image | 10 |
+| $\mu_{\text{batch}}$ | batch mean | that channel's average over the mini-batch | 13 |
+| $\sigma^2_{\text{batch}}$ | batch variance | average squared distance from the mean | 5 |
+| $\epsilon$ | epsilon | tiny number, so we never divide by 0 (set by hand) | $10^{-5}$ |
+| $\hat{z}$ | standardised value | mean 0, spread 1 | $-1.34$ |
+| $\gamma$ | scale | learned; starts at 1 | 1 |
+| $\beta$ | shift | learned; starts at 0 | 0 |
+| $\text{out}$ | output | what the next layer receives | $-1.34$ |
+
+</v-clicks>
+
+</div>
+<div>
+
+<svg viewBox="0 0 300 130" role="img" aria-label="Worked example: activations 10, 12, 14, 16 with mean 13 on the top number line map to standardised values minus 1.34, minus 0.45, 0.45, 1.34 around 0 on the bottom line" style="width: 100%;">
+  <text x="6" y="34" style="font-size: 11px; fill: var(--dl-muted)">z</text>
+  <line x1="20" y1="30" x2="280" y2="30" style="stroke: var(--dl-border); stroke-width: 1.5" />
+  <line x1="150" y1="20" x2="150" y2="40" style="stroke: var(--dl-accent-strong); stroke-width: 1.5" />
+  <text x="150" y="14" text-anchor="middle" style="font-size: 10px; fill: var(--dl-accent-strong)">μ = 13</text>
+  <text x="6" y="104" style="font-size: 11px; fill: var(--dl-muted)">ẑ</text>
+  <line x1="20" y1="100" x2="280" y2="100" style="stroke: var(--dl-border); stroke-width: 1.5" />
+  <line x1="150" y1="90" x2="150" y2="110" style="stroke: var(--dl-accent-strong); stroke-width: 1.5" />
+  <g v-for="(pt, k) in [[72, 62.8, '10', '−1.34'], [124, 120.9, '12', '−0.45'], [176, 179.1, '14', '0.45'], [228, 237.2, '16', '1.34']]" :key="'b' + k">
+    <line :x1="pt[0]" y1="30" :x2="pt[1]" y2="100" style="stroke: var(--dl-accent); stroke-width: 1; stroke-dasharray: 3 3" />
+    <circle :cx="pt[0]" cy="30" r="5" style="fill: var(--dl-accent)" />
+    <circle :cx="pt[1]" cy="100" r="5" style="fill: var(--dl-accent-strong)" />
+    <text :x="pt[0]" y="52" text-anchor="middle" style="font-size: 10px; fill: var(--dl-heading)">{{ pt[2] }}</text>
+    <text :x="pt[1]" y="124" text-anchor="middle" style="font-size: 10px; fill: var(--dl-heading)">{{ pt[3] }}</text>
+  </g>
+</svg>
+
+<div v-click class="dl-callout">
+
+$\hat{z} = \dfrac{10 - 13}{\sqrt{5 + 10^{-5}}} = \dfrac{-3}{2.24} = -1.34$
+
+$\text{out} = 1 \times (-1.34) + 0 = -1.34$
+
+</div>
+
+</div>
+</div>
+
+<!--
+The numbers are the four activations from the last slide: 10, 12, 14, 16 in one
+channel, for four images in a mini-batch. Mean 13. Variance: the squared
+distances are 9, 1, 1, 9, and their average is 5. The standard deviation is
+the square root, 2.24. PyTorch divides by 4 here, not by 3, during training.
+
+Say which symbols are data and which are learned. z is data flowing through the
+network. The two batch statistics are computed, not learned. gamma and beta are
+the only learned numbers, one pair per channel. epsilon is set by hand; PyTorch
+uses 1e-5.
+
+gamma = 1 and beta = 0 are the starting values, so at the start the output is
+just z-hat. Training is free to move them. If it learns gamma = 2.24 and beta =
+13, the layer gives back the input again: the network can undo the
+normalisation if that helps.
+
+At eval time the batch mean and variance are replaced by running averages saved
+during training. That is the "train and eval behave differently" bullet.
+-->
+
+---
+layout: default
 title: What the loss actually computes
 ---
 
 # What the loss actually computes
 
-Three classes, one image. The model's last layer emits three raw numbers — the **logits**:
+Three classes, one image. The model's last layer emits three raw numbers — the **logits** $\mathbf{z}$:
 
 <div class="mt-1 dl-math-sm">
 
@@ -1835,7 +2129,7 @@ $$ \mathbf{z} = [\,2.0,\quad 0.5,\quad -1.0\,] $$
 <v-clicks>
 
 - **softmax** turns them into probabilities: $[0.79,\; 0.18,\; 0.04]$
-- the loss then looks at **one** of them — the true class — and takes $-\log$ of it
+- the loss $\ell$ then looks at **one** of them — the true class — and takes $-\log$ of it
 - true class **0**: $-\log 0.79 = \mathbf{0.24}$ — nearly right
 - true class **2**: $-\log 0.04 = \mathbf{3.24}$ — confidently wrong
 
@@ -2416,7 +2710,7 @@ the resolution back up after all that pooling.
 The 172 M number is the argument. Compute it with them: 3136 features in,
 54,756 pixels out.
 
-This is exactly the imbalance the architecture ledger showed on slide 58, taken
+This is exactly the imbalance the architecture ledger showed on slide 61, taken
 to its conclusion.
 -->
 
@@ -2475,6 +2769,81 @@ modern U-Net implementations use it.
 
 Output size: (n - 1)s + m is the output-size formula solved for n. That is the
 one line worth having them notice.
+-->
+
+---
+layout: default
+title: "Reading the equation: transposed convolution"
+---
+
+# Reading the equation: transposed convolution
+
+<div class="grid grid-cols-[1.45fr_1fr] gap-5 mt-1 items-start">
+<div class="dl-ledger dl-tight dl-eq-legend">
+
+<v-clicks>
+
+| symbol | name | what it is here | example |
+| --- | --- | --- | --- |
+| $\mathbf{x}$ | input | the small feature map (data) | $[2, 3]$ |
+| $n$ | input size | length of $\mathbf{x}$ | 2 |
+| $\mathbf{w}$ | kernel | the weights (learned) | $[1, 0.5]$ |
+| $m$ | kernel size | number of weights (set by hand) | 2 |
+| $s$ | stride | how far apart the inputs write (set by hand) | 2 |
+| $\mathbf{y}$ | output | the larger feature map | $[2, 1, 3, 1.5]$ |
+| $o$ | output size | length of $\mathbf{y}$ | 4 |
+
+</v-clicks>
+
+</div>
+<div>
+
+<svg viewBox="0 0 260 140" role="img" aria-label="Worked example: input 2 writes 2 and 1 at output places 0 and 1; input 3 writes 3 and 1.5 at places 2 and 3; the output is 2, 1, 3, 1.5" style="width: 100%;">
+  <text x="52" y="29" text-anchor="end" style="font-size: 11px; fill: var(--dl-muted)">x</text>
+  <g v-for="(v, c) in ['2', '3']" :key="'tx' + c">
+    <rect :x="60 + c * 92" y="12" width="40" height="26" rx="3" style="fill: var(--dl-surface); stroke: var(--dl-border)" />
+    <text :x="80 + c * 92" y="30" text-anchor="middle" style="font-size: 12px; fill: var(--dl-heading)">{{ v }}</text>
+    <line :x1="80 + c * 92" y1="38" :x2="80 + c * 92" y2="56" style="stroke: var(--dl-accent); stroke-width: 1.5" />
+  </g>
+  <text x="52" y="75" text-anchor="end" style="font-size: 11px; fill: var(--dl-muted)">x·w</text>
+  <g v-for="(v, c) in ['2', '1', '3', '1.5']" :key="'tw' + c">
+    <rect :x="60 + c * 46" y="58" width="40" height="26" rx="3" :style="c < 2 ? 'fill: var(--dl-accent-soft); stroke: var(--dl-accent)' : 'fill: var(--dl-surface); stroke: var(--dl-accent-strong)'" />
+    <text :x="80 + c * 46" y="76" text-anchor="middle" style="font-size: 12px; fill: var(--dl-heading)">{{ v }}</text>
+  </g>
+  <text x="52" y="121" text-anchor="end" style="font-size: 11px; fill: var(--dl-muted)">y</text>
+  <g v-for="(v, c) in ['2', '1', '3', '1.5']" :key="'ty' + c">
+    <rect :x="60 + c * 46" y="104" width="40" height="26" rx="3" style="fill: var(--dl-accent-soft); stroke: var(--dl-accent-strong)" />
+    <text :x="80 + c * 46" y="122" text-anchor="middle" style="font-size: 12px; fill: var(--dl-heading)">{{ v }}</text>
+  </g>
+</svg>
+
+<div v-click class="dl-callout">
+
+$o = (n - 1)\,s + m = (2 - 1) \times 2 + 2 = 4$
+
+Each input writes $m$ numbers, $s$ places apart. Where pieces overlap, they are added.
+
+</div>
+
+</div>
+</div>
+
+<!--
+The same 1-D example as the last slide, drawn as the strips you would draw on
+the board. Input 2 writes 2 × [1, 0.5] = [2, 1] at places 0 and 1. Input 3
+writes 3 × [1, 0.5] = [3, 1.5] at places 2 and 3, because the stride is 2.
+
+Say which symbols are data and which are learned: x is data, w is learned, m
+and s are set by hand. o is not chosen, it follows from the formula.
+
+The output-size formula is the convolution formula solved for n, with p = 0:
+a convolution with m = 2, s = 2 on these 4 numbers gives floor((4 - 2)/2) + 1
+= 2 outputs. That is the "transposed" relation.
+
+If there is time, change the kernel to three taps, w = [1, 0.5, 0.25]. Then o =
+(2 - 1) × 2 + 3 = 5, the two pieces overlap at place 2, and y = [2, 1, 3.5, 1.5,
+0.75]. The 3.5 is 0.5 + 3, added. That uneven adding is where checkerboard
+artefacts come from.
 -->
 
 ---
@@ -2548,7 +2917,7 @@ $$ \text{Dice} = \frac{2\,|A \cap B|}{|A| + |B|} $$
 
 <div v-click class="mt-1 dl-math-xs">
 
-Truth 4 pixels, prediction 4 pixels, overlap 3:
+Truth $A$: 4 pixels. Prediction $B$: 4 pixels. Overlap $A \cap B$: 3. $|\cdot|$ counts pixels.
 
 $$ \text{Dice} = \frac{2 \cdot 3}{4 + 4} = 0.75 \qquad (\text{IoU} = \tfrac{3}{5} = 0.6) $$
 
@@ -2557,7 +2926,7 @@ $$ \text{Dice} = \frac{2 \cdot 3}{4 + 4} = 0.75 \qquad (\text{IoU} = \tfrac{3}{5
 </div>
 </div>
 
-<div v-click class="mt-3 dl-callout">
+<div v-click class="mt-1 dl-callout">
 
 Trained per pixel, judged per region. Dice ignores the vast correct background entirely,
 which is exactly why it is the number your project reports.
