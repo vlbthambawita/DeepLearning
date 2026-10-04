@@ -138,7 +138,7 @@ const visited = computed(() =>
         :radius="7"
         color="var(--dl-accent-strong)"
       />
-      <PlotLabel :at="[props.optimum, props.floor]" :dy="26" anchor="middle" :dx="0" text="global minimum" leader />
+      <PlotLabel :at="[props.optimum, props.floor]" :dy="-34" anchor="middle" :dx="0" text="global minimum" leader />
     </Plot2D>
 
     <template #controls>

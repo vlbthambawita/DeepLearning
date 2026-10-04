@@ -21,7 +21,7 @@ email: vajira@simula.no
 # Transformers
 
 Last week ended on an architecture that could look anywhere but had to read in
-order. Delete the reading-in-order part and almost nothing is lost — that is the
+order. Delete the reading-in-order part and almost nothing is lost. That is the
 whole idea, and everything since 2017 is built on it.
 
 <!--
@@ -79,7 +79,7 @@ title: Where last week stopped
 
 # Where last week stopped
 
-We built a recurrent encoder–decoder, found two walls, and knocked one down.
+We built a recurrent encoder–decoder, found two walls (hard limits), and solved one.
 
 <div class="grid grid-cols-2 gap-10 mt-3 dl-tight">
 <div>
@@ -155,7 +155,7 @@ Delete everything it was bolted to.
 - Nothing in a layer waits for anything else in the layer, so the whole sequence
   is processed **at once**
 - The title is not a slogan. It is the experimental result: they removed the RNN
-  to see what would break, and translation quality went **up**
+  (recurrent neural network) to see what would break, and translation quality went **up**
 
 </v-clicks>
 
@@ -237,7 +237,7 @@ layout: default
 ---
 
 <PollSlide
-  question="Which of last week's two walls does attention, on its own, knock down?"
+  question="Which of last week's two walls does attention, on its own, solve?"
   :items="[
     'The bottleneck — one fixed vector for the whole source',
     'The lack of parallelism across time',
@@ -255,8 +255,8 @@ The bottleneck only
 <div v-click class="mt-2 dl-secondary">
 
 Bahdanau's attention still sat on top of an RNN, so the sequential chain was
-untouched. Removing the recurrence is what buys the parallelism — and the point
-of today is that attention turns out not to need it.
+untouched. Only removing the recurrence gives the parallelism. Today's point:
+attention turns out not to need the recurrence.
 
 </div>
 
@@ -303,8 +303,8 @@ store["stream"]       # → KeyError       no match, nothing at all
 
 <div v-click class="mt-4 dl-callout">
 
-Attention is this lookup made **soft**: match by *similarity* rather than
-equality, and return a blend of **every** value, weighted by how well each key
+Attention is this lookup made **soft**. It matches by *similarity* rather than
+equality. It returns a blend of **every** value, weighted by how well each key
 matched.
 
 </div>
@@ -845,8 +845,8 @@ title: The whole layer, in one line
 
 <div class="dl-tight">
 
-Stack the queries into a matrix $Q$, the keys into $K$, the values into $V$ — one
-row per token — and the four steps become one expression:
+Stack the queries into a matrix $Q$, the keys into $K$, the values into $V$, one
+row per token. Then the four steps become one expression:
 
 </div>
 
@@ -1204,10 +1204,11 @@ $$ \operatorname{FFN}(\mathbf{x}) = W_2\,\phi\!\left(W_1\mathbf{x} + \mathbf{b}_
 
 <v-clicks>
 
-- Two linear layers and a non-linearity. Lecture 02's MLP
+- Two linear layers and a non-linearity. Lecture 02's MLP (multilayer perceptron)
 - **Position-wise**: no token sees another. Sixteen tokens is sixteen independent
   applications of one network
-- Wide in the middle — $d_{\text{ff}} = 4d$, so $512 \to 2048 \to 512$
+- Wide in the middle: $d_{\text{ff}} = 4d$<br>
+  Base model: $512 \to 2048 \to 512$
 
 </v-clicks>
 
@@ -1325,7 +1326,7 @@ title: Two wrappers that make it stackable
 
 # Two wrappers that make it stackable
 
-Each sub-layer is wrapped the same way — and that wrapping is what lets you put
+Each sub-layer is wrapped the same way. That wrapping is what lets you stack
 ninety-six of these on top of each other.
 
 <div class="grid grid-cols-2 gap-10 mt-3 dl-tight">
@@ -1457,7 +1458,7 @@ title: What a block costs
 
 <div v-click class="mt-3 dl-callout">
 
-Plus a 37 000-word shared embedding at 512 wide — 18.9 M — and the 2017 base
+Add a 37 000-word shared embedding at 512 wide (18.9 M). Then the 2017 base
 model's **65 M** is accounted for.
 
 </div>
@@ -1510,8 +1511,8 @@ shape.
 
 <div v-click class="mt-3 dl-secondary">
 
-Honest caveat: the feed-forward network costs $O(T d^2)$ and attention
-$O(T^2 d)$, so attention only dominates once $T$ is a few times $d$. At 512
+A caveat: the feed-forward network costs $O(T d^2)$ and attention $O(T^2 d)$.
+So attention only dominates once $T$ is a few times $d$. At 512
 tokens and $d = 512$ it is not the expensive part.
 
 </div>
@@ -1797,10 +1798,10 @@ One
 
 <div v-click class="mt-2 dl-secondary">
 
-Because position $t$ cannot see past $t$, all 100 positions can be computed
-together and each is still an honest next-token prediction. At **generation**
-time it is the other way round: 100 passes, one per token, because token 37 does
-not exist until it has been sampled.
+Position $t$ cannot see past $t$. So all 100 positions are computed together,
+and each is still a fair next-token prediction. At **generation** time it is the
+opposite: 100 passes, one per token. Token 37 does not exist until it has been
+sampled.
 
 </div>
 
@@ -2145,9 +2146,9 @@ better one; they found more compute.
 
 <div v-click class="mt-3 dl-secondary">
 
-Context grew 250-fold. That is the fight the $T^2$ on slide 33 started, and it
-was won by engineering — better kernels, cached keys, cheaper positions — not by
-replacing attention.
+Context grew 250-fold, so the $T^2$ cost from slide 33 grew too. Engineering kept
+it affordable: faster kernels, cached keys, cheaper positions. Attention itself
+was not replaced.
 
 </div>
 
@@ -2263,7 +2264,7 @@ title: Self-attention, written out
 
 # Self-attention, written out
 
-```python {all|5-6|10-11|13|15-16|all}{lines:true}
+```python {all|5-6|10-11|12|13-14|all}{lines:true}
 class SelfAttention(nn.Module):
     def __init__(self, d_model, n_heads):
         super().__init__()
@@ -2309,7 +2310,7 @@ title: A block, and a stack
 
 # A block, and a stack
 
-```python {all|4-8|11-12|16-18|all}{lines:true}
+```python {all|4-8|11-12|15|all}{lines:true}
 class Block(nn.Module):
     def __init__(self, d_model, n_heads, d_ff):
         super().__init__()
@@ -2368,7 +2369,8 @@ print(sum(p.numel() for p in encoder.parameters()))     # 18 914 304
 
 <v-clicks>
 
-- `batch_first=True` — same trap as `nn.LSTM`, same silent failure
+- `batch_first=True` — same trap as last week's `nn.LSTM` (long short-term memory),
+  same silent failure
 - `norm_first=True` — the default is the 2017 wiring, which needs warmup
 - The parameter count is slide 32's **18.9 M**, to the number
 
@@ -2569,8 +2571,8 @@ title: Reading, and the lab
 <div v-click class="mt-4 dl-tight">
 
 **In the lab.** Build the block from slide 53 and train a small decoder-only model
-on character-level text. Then break it on purpose — drop `is_causal`, drop the
-$\sqrt{d_k}$, drop the positional encoding, one at a time — and report what each
+on character-level text. Then break it on purpose. Drop `is_causal`, the
+$\sqrt{d_k}$ and the positional encoding, one at a time, and report what each
 one costs.
 
 </div>

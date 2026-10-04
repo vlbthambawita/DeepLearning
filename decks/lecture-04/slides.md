@@ -135,14 +135,14 @@ title: Two facts about images
 - **Things are local.** A pixel is related to the pixels beside it, far more than to a pixel
   on the other side of the frame. An edge, a corner, a texture — each is a small
   neighbourhood of pixels, not a whole picture.
-- **Things repeat.** The same edge, corner or texture can turn up anywhere in the frame,
-  and it means the same thing wherever it turns up.
+- **Things repeat.** The same edge, corner or texture can turn up anywhere in the frame.
+  It means the same thing wherever it turns up.
 
 </v-clicks>
 
 <div v-click class="mt-6 dl-callout">
 
-Neither fact is true of the tabular data in Lecture 02 — column 3 of the Iris table is not
+Neither fact is true of the tabular data in Lecture 02. Column 3 of the Iris table is not
 "next to" column 4. That is why the fully-connected layer was the right answer then and the
 wrong answer now.
 
@@ -168,7 +168,7 @@ title: Where the idea came from
 
 # Where the idea came from
 
-<div class="dl-callout">
+<div>
 
 Hubel and Wiesel, 1959: a microelectrode in the visual cortex of an anaesthetised cat, and
 patterns of light in front of it. Different neurons fired for different patterns — and the
@@ -176,7 +176,7 @@ layers were **ordered**. Edges and straight lines early, complex shapes late.
 
 </div>
 
-<div v-click class="mt-5">
+<div v-click class="mt-5 dl-callout">
 
 What a CNN borrows is that ordering, and the idea that a unit looks at a **small patch**.
 Everything else comes from the two facts on the last slide.
@@ -293,15 +293,15 @@ $$ 5 \times 5 \times 3 \times 32 + 32 = 2\,432 $$
 
 Roughly **15 800×** fewer weights.
 
-And the convolution layer's count does not depend on the image size at all — the same
+The convolution layer's count does not depend on the image size at all. The same
 2 432 weights work on a 384×384 endoscopy frame.
 
 </div>
 
 <div v-click class="mt-4 dl-callout">
 
-Fewer parameters is the smaller half of the win. The larger half is that a feature learned
-in one corner of the image is available in every other corner for free.
+Fewer parameters is the smaller half of the win. The larger half: a feature learned in one
+corner of the image also works in every other corner, with no extra weights.
 
 </div>
 </div>
@@ -778,10 +778,11 @@ output **shrinks**.
 </div>
 </div>
 
-<div v-click class="mt-6 dl-callout">
+<div v-click class="mt-3 dl-callout">
 
-**Same** is the usual choice, and it is why kernel sizes are odd: $m = 3, 5, 7$ has a middle
-pixel that $p = 1, 2, 3$ centres the filter on. $m = 4$ has none.
+**Same** is the usual choice. It is also why kernel sizes are odd.
+
+$m = 3,\ 5,\ 7$ with $p = 1,\ 2,\ 3$ centres the filter. $m = 4$ has no middle pixel.
 
 </div>
 
@@ -1018,7 +1019,7 @@ title: The same formula, on shapes you will actually meet
   Same in, same out
 - **A max-pool.** $28 \times 28$, $m = 2$, $p = 0$, $s = 2$ → $\mathbf{14}$. Pooling uses the
   *same* formula
-- **A VGG block.** $14 \times 14$, $m = 3$, $p = 1$, $s = 1$ → $\mathbf{14}$. Shape in, shape
+- **A VGG (Visual Geometry Group network) block.** $14 \times 14$, $m = 3$, $p = 1$, $s = 1$ → $\mathbf{14}$. Shape in, shape
   out — which is what lets you stack twenty of them
 
 </v-clicks>
@@ -1084,7 +1085,18 @@ aside-width: 18rem
 
 ::aside::
 
-The formal definition rotates the filter first — $x[i - k]$, not $x[i + k]$.
+The formal definition rotates the filter first.
+
+<div class="mt-1">
+
+Textbook: $x[i - k]$
+
+</div>
+<div class="mt-1">
+
+PyTorch: $x[i + k]$
+
+</div>
 
 <div class="mt-2">
 
@@ -1093,7 +1105,7 @@ Tick **rotate the kernel first**: the same input now gives **7, 9, 8** instead o
 
 </div>
 
-<div v-click class="mt-3 dl-callout">
+<div v-click class="mt-2 dl-callout">
 
 `nn.Conv2d` does **not** flip — it computes *cross-correlation*. It makes no difference:
 $\mathbf{w}$ is learned, so the network learns the flipped filter instead.
@@ -1514,8 +1526,8 @@ title: How big is 11×11?
 </div>
 <div class="dl-tight">
 
-A kernel size is a count of **pixels on a side** — how much of the image one output unit is
-allowed to look at.
+A kernel size is a count of **pixels on a side**. It sets how much of the image one output
+unit can look at.
 
 <v-clicks>
 
@@ -1531,8 +1543,9 @@ allowed to look at.
 
 <div v-click class="mt-3 dl-callout">
 
-Kernel size is a **reach against cost** dial — and reach turned out to be the wrong thing to
-spend on. In a few slides: why a *stack* of 3×3 reaches just as far, for less.
+Kernel size trades **reach** (how far a unit sees) against **cost** (how many weights). Large
+kernels turned out to be a poor way to get reach. In a few slides: why a *stack* of 3×3
+reaches just as far, with fewer weights.
 
 </div>
 
@@ -1606,7 +1619,9 @@ Read it **downwards**, from the dark unit at the top.
 
 - **1 layer**: it reads a window of **3** pixels — nothing else can change it
 - **2 layers**: 3 units of *conv 1*, each reading 3 overlapping pixels → **5**
-- **3 layers** → **7**. Each layer adds $m - 1 = 2$, not $m$: the windows overlap
+- **3 layers** → **7**<br>
+  Each layer adds $m - 1 = 2$, not $m$.<br>
+  The windows overlap.
 
 </v-clicks>
 
@@ -1917,9 +1932,9 @@ In general two conv layers, kernels $a$ and $b$, are **one** layer with kernel $
 
 <div v-click class="mt-3 dl-callout">
 
-Four weights bought a function that three weights already computed. Now put a **ReLU**
-between the layers: $z$ becomes $[2,\; 0,\; 3,\; 0]$, so $y = [2,\; -3,\; 3]$ — and no
-single filter gives that, because *which* entries were clipped depends on the input.
+Four weights compute a function that three weights already compute. Now put a **ReLU**
+between the layers. Then $z$ becomes $[2,\; 0,\; 3,\; 0]$, so $y = [2,\; -3,\; 3]$. No
+single filter gives that, because *which* entries are clipped depends on the input.
 
 </div>
 
@@ -2283,9 +2298,9 @@ title: Which loss, and logits or probabilities
 
 <div v-click class="mt-6 dl-callout">
 
-**The trap.** `CrossEntropyLoss` applies the log-softmax itself. Put a `Softmax` on the end
-of your model as well and you have applied it twice: training still runs, the loss still
-goes down, and the accuracy is quietly worse. Same for `BCEWithLogitsLoss` and `Sigmoid`.
+**The trap.** `CrossEntropyLoss` applies the log-softmax itself. If your model also ends in
+a `Softmax`, the softmax is applied twice. Training still runs and the loss still goes down,
+but the accuracy is lower. The same is true for `BCEWithLogitsLoss` and `Sigmoid`.
 
 </div>
 
@@ -2342,9 +2357,9 @@ title: The double softmax, in numbers
 
 <div v-click class="mt-3 dl-math-sm">
 
-Worse: make the model *certain* — logits $[6.0, 0.5, -1.0]$, so $p_0 = 0.995$ — and the
-doubled version still reports $0.57$, a loss of $\mathbf{0.55}$. However sure the model
-becomes, this loss cannot fall below about $0.55$.
+Worse: make the model *certain*, with logits $[6.0, 0.5, -1.0]$, so $p_0 = 0.995$. The
+doubled version still gives class 0 only $0.57$, a loss of $\mathbf{0.55}$. However sure the
+model becomes, this loss cannot fall below about $0.55$.
 
 </div>
 
@@ -2410,7 +2425,7 @@ title: Defining the module
 
 # The feature extractor
 
-```python {all|6-8|6|8|9-11|all}{lines:true}
+```python {all|7-9|7|9|10-12|all}{lines:true}
 from torch import nn
 
 class MnistCNN(nn.Module):
@@ -2428,8 +2443,8 @@ class MnistCNN(nn.Module):
 
 <div v-click class="mt-3 dl-secondary">
 
-`Conv2d(in_channels, out_channels, …)`. `padding=2` is *same* for a 5×5 kernel, and
-`MaxPool2d` with only a kernel size uses that as its stride too.
+`Conv2d(in_channels, out_channels, …)`. `padding=2` is *same* padding for a 5×5 kernel.
+`MaxPool2d` with only a kernel size also uses it as the stride.
 
 </div>
 
@@ -2478,7 +2493,7 @@ title: forward, and a shape check
 
 # `forward`, and a shape check
 
-```python {all|1-4|6-8|10-12|all}{lines:true}
+```python {all|1-4|6-8|10-11|all}{lines:true}
     def forward(self, x):
         # x is (batch, channels, height, width) — PyTorch is channels-first
         x = self.features(x)         # (B, 64, 7, 7)
@@ -2625,7 +2640,7 @@ aside-width: 17rem
 ---
 
 <CVTaskTriptych>
-  <img src="./figures/polyp-frame.png" alt="An endoscopy frame showing a polyp on the bowel wall">
+  <img data-lint-skip src="./figures/polyp-frame.png" alt="An endoscopy frame showing a polyp on the bowel wall">
   <template #mask>
     <img src="./figures/polyp-mask-overlay.png" alt="The same frame with the polyp region highlighted">
   </template>
@@ -2699,7 +2714,7 @@ $$ 3136 \times 54\,756 + 54\,756 \approx 172 \text{ M weights} $$
 
 <div v-click class="mt-4 dl-callout">
 
-If the output is an image, the network should end in convolutions too — and it has to build
+If the output is an image, the network should end in convolutions too. It also has to build
 the resolution back up after all that pooling.
 
 </div>
@@ -2856,9 +2871,9 @@ title: U-Net
 
 ::caption::
 
-Down the left, the CNN we just built: convolutions and pooling, resolution falling, channels
-rising. Up the right, **up-convolutions** rebuilding it. Across the middle, **skip
-connections** hand the fine detail from each encoder level to the matching decoder level.
+Down the left, the **encoder**: the CNN we just built. Resolution falls and channels rise.
+<span v-click>Up the right, the <strong>decoder</strong>: <strong>up-convolutions</strong> build the resolution back up.</span>
+<span v-click>Across the middle, <strong>skip connections</strong> pass fine detail from each encoder level to the matching decoder level.</span>
 
 ::citation::
 
@@ -2885,8 +2900,8 @@ title: Training on a mask — the loss, and the score
 
 ### The loss: per pixel
 
-A mask is 54 756 independent yes/no decisions, so it is the **binary** loss, averaged over
-pixels: `BCEWithLogitsLoss` straight on the output map.
+A mask is 54 756 separate yes/no decisions. So we use the **binary** loss, averaged over
+pixels: `BCEWithLogitsLoss` applied directly to the output map.
 
 <v-clicks>
 
@@ -2986,7 +3001,7 @@ title: The team project
 
 Train a U-Net to segment polyps in endoscopy frames.
 
-<div class="grid grid-cols-3 gap-4 mt-6">
+<div class="grid grid-cols-3 gap-4 mt-3">
 <div v-click>
   <LinkCard
     href="https://arxiv.org/abs/1505.04597"
@@ -3007,16 +3022,16 @@ Train a U-Net to segment polyps in endoscopy frames.
   <LinkCard
     href="https://datasets.simula.no/kvasir-seg/"
     title="Kvasir-SEG"
-    blurb="1000 annotated frames with clinician-drawn masks."
+    blurb="The segmentation (SEG) set: 1000 frames with clinician-drawn masks."
     icon="🗂"
   />
 </div>
 </div>
 
-<div v-click class="mt-6">
+<div v-click class="mt-3">
 
-**In teams.** Get it training, report a Dice score on a held-out split, and bring one frame
-your model gets wrong — with a sentence on why you think it does.
+**In teams.** Get it training. Report a Dice score on a held-out split (frames the model never
+trained on). Bring one frame your model gets wrong, with one sentence on why you think it fails.
 
 </div>
 

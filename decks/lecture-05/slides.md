@@ -113,22 +113,22 @@ title: The assumption nobody mentioned
 # The assumption nobody mentioned
 
 Every model in this course so far has assumed the training examples are
-**independent and identically distributed** — IID.
+**independent and identically distributed** (IID).
 
 <v-clicks>
 
 - Iris flower 41 tells you nothing about flower 42
 - MNIST digit 17 tells you nothing about digit 18
-- Shuffle the dataset and nothing changes — which is why `shuffle=True` is the
-  default and nobody blinks
+- Shuffle the dataset and nothing changes — which is why `shuffle=True` is safe
+  for training
 
 </v-clicks>
 
 <div v-click class="mt-5 dl-callout">
 
-Now shuffle the words of this sentence. The label does not survive the shuffle,
-so the examples were never independent — and `shuffle=True` on the words inside
-one review would destroy it.
+Now shuffle the words of this sentence. The label does not survive the shuffle.
+So the words were never independent, and `shuffle=True` on the words inside one
+review would destroy it.
 
 </div>
 
@@ -217,7 +217,7 @@ Order matters. There need be no clock.
 <v-clicks>
 
 - the words of a sentence
-- a DNA sequence: `ACGGTTA…`
+- a DNA (genetic code) sequence: `ACGGTTA…`
 - the moves of a chess game
 
 </v-clicks>
@@ -234,7 +234,7 @@ data.
 
 - stock prices, one per minute
 - a speech waveform, 16 000 samples a second
-- an ECG trace
+- an ECG (electrocardiogram, the heart's electrical signal) trace
 - a patient's vitals, sampled irregularly
 
 </v-clicks>
@@ -266,8 +266,8 @@ title: Try it with the network we already have
 
 # Try it with the network we already have
 
-Flatten a review into one long vector and hand it to a dense layer — exactly what
-we did with MNIST in week 3.
+Flatten a review into one long vector and feed it to a dense layer. This is
+exactly what we did with MNIST in week 3.
 
 <div class="grid grid-cols-2 gap-10 mt-3">
 <div class="dl-math-sm">
@@ -329,10 +329,10 @@ than 4 million. It still fails, three times:
 
 <v-clicks>
 
-- **Fixed length.** 12 800 inputs means every review is exactly 200 words — longer
-  is truncated, shorter is padded, and the padding gets weights
-- **Position-locked weights.** *brilliant* at word 3 is read by different weights
-  than *brilliant* at word 180, so the word is learned again at every position
+- **Fixed length.** With 12 800 inputs, every review must be exactly 200 words.
+  Longer reviews are cut, shorter ones are padded, and the padding gets weights
+- **Position-locked weights.** Different weights read *brilliant* at word 3 and
+  *brilliant* at word 180. So the word is learned again at every position
 - **Still bigger.** 3.28 M in that layer plus 1.28 M of embedding, against 1.38 M
   for the whole recurrent model
 
@@ -365,9 +365,9 @@ title: Two facts about sequences
 
 <v-clicks>
 
-- **The same pattern means the same thing wherever it occurs.** *not very good* is
-  bad news at word 4 and bad news at word 140 — so one set of weights should read
-  every position
+- **The same pattern means the same thing wherever it occurs.** *Not very good* is
+  negative at word 4 and at word 140. So one set of weights should read every
+  position
 - **What happened earlier changes what a later element means.** So something has
   to be **carried forward** from one position to the next
 
@@ -468,9 +468,9 @@ layout: default
 <PollSlide
   question="You train a sentiment model on 200-word reviews. At test time a 340-word review arrives. Which model just broke?"
   :items="[
-    'The flattened MLP — its input layer has a fixed width',
+    'The flattened MLP (multi-layer perceptron) — its input layer has a fixed width',
     'The 1D CNN — its filters have a fixed size',
-    'The RNN — it has a fixed number of time steps',
+    'The RNN (recurrent neural network) — it has a fixed number of time steps',
     'All three',
   ]"
 />
@@ -484,7 +484,7 @@ The MLP
 <div v-click class="mt-2 dl-secondary">
 
 A filter slides, so a CNN takes any length. An RNN's loop runs as many times as
-you ask it to. Only the flattened dense layer has a width baked into its weights.
+you ask it to. Only the flattened dense layer has a width built into its weights.
 
 </div>
 
@@ -751,7 +751,7 @@ New: $W_h$, both weight matrices side by side.
   two products
 - A recurrent layer is **one dense layer** reading *this step, concatenated with
   the last state*
-- Every LSTM diagram you will ever see is drawn this way
+- Most diagrams of the LSTM (long short-term memory, section 03) are drawn this way
 
 </v-clicks>
 
@@ -839,8 +839,9 @@ $\mathbf{h}_t$ is a **fixed-size summary of everything up to step $t$**.
 
 <div v-click class="dl-callout">
 
-So it is **lossy by construction**. 300 words do not fit in 128 numbers, and
-nothing about the architecture says which 128 numbers matter.
+So it is **lossy by construction**: it must throw information away. Three hundred
+words do not fit in 128 numbers. Nothing in the architecture says which numbers
+matter.
 
 </div>
 
@@ -939,7 +940,7 @@ title: Your turn — count them
 
 - `nn.RNN(64, 128)` → $128 \cdot 64 + 128 \cdot 128 + 2 \cdot 128 = \mathbf{24\,832}$
 - `nn.LSTM(64, 128)` → four gates, so $4 \times 24\,832 = \mathbf{99\,328}$
-- `nn.GRU(64, 128)` → three, so $3 \times 24\,832 = \mathbf{74\,496}$
+- `nn.GRU(64, 128)` → a GRU (gated recurrent unit) has three, so $3 \times 24\,832 = \mathbf{74\,496}$
 - `nn.Embedding(20000, 64)` → $20\,000 \cdot 64 = \mathbf{1\,280\,000}$
 
 </v-clicks>
@@ -1350,7 +1351,7 @@ The word that decides the answer is four steps back. Any RNN learns this.
 speak fluent **French**."
 
 The word that decides the answer is forty steps back. A plain RNN never learns
-this — not because it lacks capacity, but because the gradient that would teach it
+this. It is big enough; the problem is that the gradient that would teach it
 arrives multiplied by $W^{40}$.
 
 </div>
@@ -1360,7 +1361,7 @@ arrives multiplied by $W^{40}$.
 <div v-click class="mt-5 dl-secondary">
 
 The model is not failing to represent the dependency. It is failing to *receive
-the news* that the dependency exists.
+the training signal* that says the dependency exists.
 
 </div>
 
@@ -1534,7 +1535,7 @@ title: Truncated backpropagation through time
 A 100 000-character book is one sequence — and 100 000 steps of activations do not
 fit in memory.
 
-<div v-click class="mt-3">
+<div class="mt-3">
 
 ```python {all|3|4-5|6|all}{lines:true}
 hidden = None
@@ -1840,8 +1841,8 @@ $f = 0.9$, $i = 0.4$, $\tilde{c} = 0.8$, $o = 0.7$.
 <div v-click class="dl-callout">
 
 The cell holds **0.86** and shows **0.49**. A unit can keep a value and reveal it
-on exactly one step out of fifty — which is what "remembering *France*" looks like
-arithmetically.
+on only one step out of fifty. That is what "remembering *France*" looks like in
+numbers.
 
 </div>
 
@@ -1910,27 +1911,27 @@ title: Where the LSTM came from
 
 # Where the LSTM came from
 
-<div class="dl-callout">
+<div v-click class="dl-callout">
 
 **Hochreiter & Schmidhuber, 1997.** Hochreiter's 1991 diploma thesis had already
-diagnosed the vanishing gradient; the LSTM was the architecture built to defeat it,
-with a "constant error carousel" at its centre — the additive cell state.
+described the vanishing gradient. The LSTM was built to fix it. At its centre is a
+"constant error carousel": the additive cell state.
 
 </div>
 
 <div v-click class="mt-4 dl-callout">
 
-**Gers, Schmidhuber & Cummins, 2000.** The original cell had *no forget gate*: it
-could write and read but never clear, so on a long stream the state saturated.
-The forget gate was added three years later, and it is now the most important of
-the four.
+**Gers, Schmidhuber & Cummins, 2000.** The original cell had *no forget gate*. It
+could write and read, but never clear. So on a long stream the state saturated: it
+filled up and stopped changing. The forget gate was added three years later. It is
+now the most important of the four.
 
 </div>
 
 <div v-click class="mt-5 dl-secondary">
 
-Twenty years of near-total dominance of sequence modelling, ended by an
-architecture with no recurrence in it at all.
+For twenty years the LSTM dominated sequence modelling. Then an architecture with
+no recurrence in it at all replaced it.
 
 </div>
 
@@ -2048,9 +2049,9 @@ c₀, unchanged
 
 <div v-click class="mt-2 dl-secondary">
 
-$c_t = 1 \cdot c_{t-1} + 0 \cdot \tilde{c}_t = c_{t-1}$, fifty times over. And the
-gradient makes the same trip in the other direction with a factor of exactly 1 —
-which is the entire reason the architecture exists.
+$c_t = 1 \cdot c_{t-1} + 0 \cdot \tilde{c}_t = c_{t-1}$, fifty times over. The
+gradient travels back along the same path, multiplied by exactly 1 at each step.
+That is the whole reason the architecture exists.
 
 </div>
 
@@ -2084,8 +2085,8 @@ not. So: 20 000 words, and one vector each.
 <v-clicks>
 
 - One number per word, and arithmetic on it is nonsense
-- It says 4 217 is "more" than 96, and that `great` sits between whatever happens
-  to be numbered 4 216 and 4 218
+- It says 4 217 is "more" than 96. It also puts `great` between whatever words
+  happen to be numbered 4 216 and 4 218
 
 </v-clicks>
 
@@ -2108,7 +2109,8 @@ not. So: 20 000 words, and one vector each.
 
 <div v-click class="mt-3 dl-callout">
 
-And one-hot is what made the dense layer cost a billion weights, back on slide 8.
+And one-hot is what made the dense layer cost a billion weights, back on "Try it
+with the network we already have".
 
 </div>
 
@@ -2170,8 +2172,8 @@ aside-width: 21rem
 
 ::aside::
 
-Nobody wrote these coordinates. They are weights, moved by ordinary gradient
-descent.
+In a trained model, nobody writes these coordinates. They are weights, moved by
+ordinary gradient descent.
 
 <v-clicks>
 
@@ -2270,7 +2272,8 @@ $$ (T,\; B,\; \text{features}) $$
 </div>
 
 Time first: $T$ steps, then $B$ sequences. 32 reviews, 200 words, 64 features: $(200, 32, 64)$.
-Convenient for the loop inside cuDNN, and a surprise for everyone else.
+Convenient for the loop inside cuDNN (the GPU library that runs the LSTM), and a
+surprise for everyone else.
 
 </div>
 <div>
@@ -2292,8 +2295,8 @@ Batch first: $(32, 200, 64)$. Like every other layer in PyTorch, and like
 <div v-click class="mt-5 dl-callout">
 
 Pass `batch_first=True` and never think about it again. Leave it out and the model
-still runs, still trains, and reads your batch dimension as time — a silent
-disaster with no error message.
+still runs and still trains. But it reads your batch dimension as time, and no
+error message tells you.
 
 </div>
 
@@ -2323,7 +2326,7 @@ title: nn.LSTM returns two things, and you want one of them
 
 # `nn.LSTM` returns two things, and you want one of them
 
-```python {all|1-3|5|6|8-9|all}{lines:true}
+```python {all|1-2|4-5|7|8|all}{lines:true}
 lstm = nn.LSTM(input_size=64, hidden_size=128,
                num_layers=1, batch_first=True)
 
@@ -2348,8 +2351,8 @@ print(h_n.shape)         # (1, 32, 128)    — the hidden state at the *last* st
 
 <div v-click class="mt-3 dl-callout">
 
-Which one you take **is** the task shape from slide 12. Pick wrong and the shapes
-still line up often enough to hide it.
+Which one you take **is** the task shape from "Which shapes does a sequence problem
+come in?". Pick wrong and the shapes still line up often enough to hide it.
 
 </div>
 
@@ -2391,8 +2394,8 @@ reserved id.
 <v-clicks>
 
 - 18 real tokens and 14 pad tokens. Nearly half the batch is nothing
-- The LSTM runs 8 steps on row 4, six on padding — so `h_n` holds the state *after
-  the padding*, not after *awful*
+- The LSTM runs 8 steps on row 4, and six of them are padding. So `h_n` holds the
+  state *after the padding*, not after *awful*
 - So the batch has to carry its **lengths** alongside it
 
 </v-clicks>
@@ -2470,7 +2473,7 @@ title: The model
 
 # The model
 
-```python {all|4-6|8-9|11|13-16|all}{lines:true}
+```python {all|4-6|7-8|11|12-15|all}{lines:true}
 class ReviewClassifier(nn.Module):
     def __init__(self, vocab_size, embed_dim=64, hidden=128, n_classes=2):
         super().__init__()
@@ -2490,8 +2493,8 @@ class ReviewClassifier(nn.Module):
 
 <div v-click class="mt-3 dl-secondary">
 
-Three layers, and the only unfamiliar line is the `pack`. `h_n[-1]` is "the last
-layer's final state" — and with `num_layers=2` it is still the line you want.
+Three layers. The only new line is the `pack`. Here `h_n[-1]` means "the last
+layer's final state". With `num_layers=2`, it is still the line you want.
 
 </div>
 
@@ -2522,7 +2525,7 @@ title: Shapes, end to end
 | `ids` | `(32, 200)` | integer token ids, padded |
 | `lengths` | `(32,)` | real length of each row |
 | `embed(ids)` | `(32, 200, 64)` | a vector per token |
-| `lstm(packed)` → `output` | `(32, 200, 128)` | the state at every step |
+| `lstm(packed)` → `output` | packed; unpacked `(32, ≤200, 128)` | the state at every step, up to the longest review in the batch |
 | `lstm(packed)` → `h_n` | `(1, 32, 128)` | the state after the last real token |
 | `h_n[-1]` | `(32, 128)` | one feature vector per review |
 | `head(…)` | `(32, 2)` | logits |
@@ -2531,13 +2534,19 @@ title: Shapes, end to end
 
 <div v-click class="mt-4 dl-callout">
 
-Run a batch of noise through the model before writing the training loop — two lines,
-and every shape mistake on this slide.
+Before writing the training loop, run a batch of random ids through the model. It
+takes a few lines, and it catches every shape mistake on this slide.
 
 </div>
 
 <!--
 This is Lecture 04's shape ledger, for a sequence model. Same habit, same payoff.
+
+The output row: with packed input, output is a PackedSequence, not a tensor.
+pad_packed_sequence turns it back into (32, T, 128), where T is the longest
+review in this batch — 200 only if some review fills the padding. This model
+never uses output (it reads h_n), so the row is there to stop someone indexing
+output[:, -1] and silently reading padding.
 
 The check:
     model = ReviewClassifier(20_000)
@@ -2950,8 +2959,8 @@ positions has nothing sequential in it.
 
 <div v-click class="mt-3 dl-secondary">
 
-Which is why the 2017 paper that removed the recurrence and kept only the attention
-is called *Attention Is All You Need*, and why you have heard of it.
+The 2017 paper that removed the recurrence and kept only the attention is called
+*Attention Is All You Need*. This wall is why that paper matters.
 
 </div>
 
@@ -3008,8 +3017,8 @@ title: Where we got to
 <div v-click class="mt-4 dl-callout">
 
 And two walls: one fixed-size summary of the whole source, and no way to
-parallelise time. Attention knocks the first down. Next week, something knocks
-down both.
+parallelise time. Attention solves the first. Next week, one architecture solves
+both.
 
 </div>
 
@@ -3057,8 +3066,8 @@ title: Reading, and the lab
 <div v-click class="mt-5">
 
 **In the lab.** Train the review classifier on this deck's shapes. Then break it on
-purpose — drop `batch_first`, drop the packing, drop the clipping, one at a time —
-and report what each costs you.
+purpose, one change at a time: drop `batch_first`, drop the packing, drop the
+clipping. Report what each change costs you.
 
 </div>
 

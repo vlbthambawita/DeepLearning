@@ -44,6 +44,23 @@ const VOCAB: Word[] = [
   { word: 'terrible', vec: [-0.9, 0.0, 0.8, 0.0], group: 'negative' },
 ]
 
+/*
+ * Words whose default label (above, on the side away from the axis) would land on
+ * a neighbour's dot: "plot" sits just below "movie", "brilliant" and "terrible"
+ * just beyond "great" and "awful". Their labels go left of, or under, the dot.
+ */
+const LABEL_PLACE: Record<string, { dx: number, dy: number, anchor: 'start' | 'end' }> = {
+  plot: { dx: -10, dy: -9, anchor: 'end' },
+  brilliant: { dx: -10, dy: 16, anchor: 'end' },
+  terrible: { dx: 10, dy: 16, anchor: 'start' },
+}
+
+function labelPlace(w: Word) {
+  return LABEL_PLACE[w.word] ?? (w.vec[0] > 0.3
+    ? { dx: -10, dy: -9, anchor: 'end' as const }
+    : { dx: 10, dy: -9, anchor: 'start' as const })
+}
+
 const props = withDefaults(defineProps<{
   mode?: 'lookup' | 'space'
   /** Vocabulary size used for the "at real scale" arithmetic. */
@@ -135,9 +152,9 @@ const points = computed(() => VOCAB.map((w, i) => ({
         v-for="(w, i) in VOCAB"
         :key="w.word"
         :at="[w.vec[0], w.vec[1]]"
-        :dx="w.vec[0] > 0.3 ? -10 : 10"
-        :dy="-9"
-        :anchor="w.vec[0] > 0.3 ? 'end' : 'start'"
+        :dx="labelPlace(w).dx"
+        :dy="labelPlace(w).dy"
+        :anchor="labelPlace(w).anchor"
         :color="GROUP_COLOR[w.group]"
         :bold="i === selected"
         :size="12"

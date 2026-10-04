@@ -103,7 +103,7 @@ Nervous Activity*: a nerve cell as a simple logic gate.
 ### 1957 — the perceptron
 
 **Frank Rosenblatt**, at the Cornell Aeronautical Laboratory, publishes the
-first perceptron **learning rule** on top of the MCP model.
+first perceptron **learning rule** on top of the McCulloch–Pitts (MCP) model.
 
 </div>
 </div>
@@ -133,8 +133,7 @@ aside-width: 12rem
 
 **Iris**, Fisher 1936. 150 flowers, 50 per species.
 
-**Sepals** are the outer whorl — on an iris, the drooping *falls*. **Petals**
-are the inner *standards*.
+**Sepals** are the outer, drooping parts. **Petals** are the inner, upright ones.
 
 Click a species: both are redrawn to scale from a real row.
 
@@ -145,6 +144,10 @@ Petal length: 1.5 → 4.1 → 5.5 cm. That column does most of the work.
 <!--
 Ask which measurement they would pick if allowed only one. The drawing answers
 it before the scatter plot does.
+
+Botany, if anyone asks: the sepals are the outer whorl, which on an iris are the
+drooping "falls"; the petals are the inner, upright "standards". The aside keeps
+only the plain version so it fits.
 -->
 
 ---
@@ -497,10 +500,14 @@ title: The perceptron learning rule
 <div class="grid grid-cols-2 gap-10 mt-2">
 <div>
 
+<v-clicks>
+
 1. Initialise $\mathbf{w}$ and $b$ to $0$ or small random numbers.
 2. For each training example $\mathbf{x}^{(i)}$:
    - compute the output $\hat{y}^{(i)}$
    - update $\mathbf{w}$ and $b$
+
+</v-clicks>
 
 </div>
 <div>
@@ -616,8 +623,8 @@ aside-width: 13rem
 
 ::aside::
 
-The same neuron as slide 4, with the part the learning rule needs: the output is
-**compared** against the true label $y$, and that error is what travels back to
+The same artificial neuron as before, plus the part the learning rule needs.
+The output is **compared** with the true label $y$. That error travels back to
 the weights.
 
 <div class="mt-3 dl-secondary">
@@ -881,9 +888,9 @@ title: Perceptron vs Adaline — the differences
   <Citation source="Raschka — “Perceptron, Adaline, and neural network models”" url="https://sebastianraschka.com/faq/docs/diff-perceptron-adaline-neuralnet.html" />
 </div>
 
-<div class="mt-2 dl-callout">
-The unit step's derivative is zero everywhere it exists — which is the whole
-reason the perceptron has no loss to descend.
+<div v-click class="mt-2 dl-callout">
+The unit step's derivative is zero everywhere it exists. That is why the
+perceptron has no loss to descend.
 </div>
 
 ---
@@ -1361,21 +1368,25 @@ aside-width: 23rem
 
 One **step** is one update of $\mathbf{w}$ and $b$.
 
-Full-batch descent averages the gradient over the **whole** training set, so all
-$n$ examples must be visited before the weights may move once — here $n = 500$;
-on ImageNet it is 1.3 million.
+Full-batch descent averages the gradient over the **whole** training set. All
+$n$ examples are visited before the weights move once (here $n = 500$).
 
-**Stochastic gradient descent** estimates that same average from one example —
-or a mini-batch — and steps immediately. Noisier, $n$ times cheaper per step,
-and it supports **online learning**.
+**Stochastic gradient descent (SGD)** estimates that average from one example or
+a mini-batch, then steps at once. Noisier, $n$ times cheaper per step, and it
+supports **online learning**.
 
-With SGD we normally use an adaptive learning rate, e.g.
+With SGD we often let the learning rate shrink over time, e.g.
 
 <div class="dl-math-xs">
 
 $$ \eta = \frac{c_1}{[\text{number of iterations}] + c_2} $$
 
 </div>
+
+<!--
+For scale: on ImageNet, n is about 1.3 million, so one full-batch step means
+visiting 1.3 million images.
+-->
 
 ---
 layout: default
@@ -1624,8 +1635,8 @@ $$ \mathbf{a}^{(\text{out})} = \underbrace{W^{(\text{out})}W^{(h)}}_{W'}\,\mathb
 
 <div v-click class="dl-callout">
 
-$W'$ is one matrix and $\mathbf{b}'$ is one vector, so the two layers **are** a
-single layer $\mathbf{a} = W'\mathbf{x} + \mathbf{b}'$ — a straight decision
+$W'$ is one matrix and $\mathbf{b}'$ is one vector. So the two layers **are** a
+single layer $\mathbf{a} = W'\mathbf{x} + \mathbf{b}'$, with a straight decision
 boundary again. Stack a hundred: still one matrix. The depth bought nothing.
 
 </div>
@@ -1756,7 +1767,7 @@ title: Example — labelling handwritten digits
 
 ::caption::
 
-The exercise for this week: an MLP on MNIST, written from scratch. Every box on
+The exercise for this week: an MLP (multilayer perceptron) on MNIST, written from scratch. Every box on
 this diagram is one of the pieces we built today.
 
 ::citation::
@@ -1782,9 +1793,9 @@ aside-width: 20rem
 **Why backpropagation?** To compute the partial derivatives of a complex,
 non-convex function without doing the algebra by hand for every weight.
 
-Select **Unit step**: the derivative is flat zero, which is exactly why the
-perceptron could never be trained this way — and why the choice of activation
-is the first thing that matters in a deep network.
+Select **Unit step**: its derivative is zero everywhere. That is why the
+perceptron could never be trained this way. It is also why the choice of
+activation matters so much in a deep network.
 
 ---
 layout: end

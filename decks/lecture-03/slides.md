@@ -21,8 +21,7 @@ email: vajira@simula.no
 # PyTorch for Deep Learning
 
 A tensor is an array that remembers how it was computed. Everything else in PyTorch is
-bookkeeping built on that one fact — and by the end of today it will have trained a network
-for you.
+built on that one fact. By the end of today, it will have trained a network for you.
 
 <!--
 Two sessions. First: tensors, and nothing but tensors — shape, slicing,
@@ -64,7 +63,7 @@ title: What last week cost us
 
 # What last week cost us
 
-Last week's MLP worked. Three things about writing it hurt.
+Last week's MLP (multilayer perceptron) worked. Writing it hurt in three ways.
 
 <v-clicks>
 
@@ -77,7 +76,7 @@ Last week's MLP worked. Three things about writing it hurt.
 
 </v-clicks>
 
-<div v-click class="mt-5 dl-callout">
+<div v-click class="mt-3 dl-callout">
 
 None of these is a problem with the *idea* of a network. All three are problems with writing
 one down.
@@ -133,7 +132,8 @@ title: Who uses it, and why that matters to you
 
 <v-clicks>
 
-- Over 80% of papers at NeurIPS, ICML and ICLR that name a framework name PyTorch
+- At the three biggest machine-learning conferences, over 80% of the papers that name a
+  framework name PyTorch
 - Hugging Face, Lightning, Diffusers, Detectron, nnU-Net — the ecosystem you will want later
   is PyTorch-first
 - Which means: when you get stuck, someone has already asked your question in public
@@ -142,8 +142,8 @@ title: Who uses it, and why that matters to you
 
 <div v-click class="mt-4 dl-callout">
 
-The honest reason to teach it: reading other people's models is most of how you will learn
-after this course, and those models are in PyTorch.
+The real reason to teach it: after this course, you will learn mostly by reading other
+people's models. Those models are in PyTorch.
 
 </div>
 
@@ -152,6 +152,9 @@ after this course, and those models are in PyTorch.
 </div>
 
 <!--
+The three conferences are NeurIPS, ICML (International Conference on Machine
+Learning) and ICLR (International Conference on Learning Representations).
+
 If someone asks about JAX or TensorFlow: both are fine, neither is wrong, and
 the concepts today transfer to either. What does not transfer is the muscle
 memory, and you only have twelve weeks.
@@ -217,7 +220,7 @@ Every tensor in the second half of today has this shape, or comes from it:
 
 <div class="mt-3 dl-secondary">
 
-Batch first, channels before the spatial axes — **NCHW**.
+Batch first, channels before the spatial axes — **NCHW** (number, channels, height, width).
 
 </div>
 
@@ -486,16 +489,16 @@ aside-width: 17rem
 
 ::aside::
 
-<div class="dl-callout">
+<div class="dl-secondary">
 
-`dim` is the axis that **disappears**.
+Pick a `dim`, then predict the shape that comes back.
 
 </div>
 
-<div class="mt-3 dl-secondary">
+<div v-click class="mt-3 dl-callout">
 
-Reduce over dim 0 and the answers land under their columns; over dim 1, beside their rows.
-`keepdim=True` keeps the axis at length 1.
+`dim` is the axis that **disappears**. Over dim 0 the answers land under their columns;
+over dim 1, beside their rows. `keepdim=True` keeps the axis at length 1.
 
 </div>
 
@@ -679,8 +682,8 @@ title: Your turn — six shapes
 
 <div v-click class="mt-5 dl-callout">
 
-Six answers, three rules: an integer index drops its axis, a reduction drops the axes it
-names, and broadcasting aligns from the right.
+Six answers, three rules. An integer index drops its axis. A reduction drops the axes it
+names. Broadcasting aligns shapes from the right.
 
 </div>
 
@@ -1036,7 +1039,7 @@ title: MNIST, and what one sample is
 ::caption::
 
 70 000 handwritten digits, 28×28 pixels, grey-scale. One sample is a **tensor** of shape
-`(1, 28, 28)` and an **integer** label from 0 to 9 — not a one-hot vector.
+`(1, 28, 28)` and an **integer** label 0–9, not a one-hot vector.
 
 ::citation::
 
@@ -1123,8 +1126,8 @@ train_set, val_set = random_split(
 
 <div v-click class="mt-4 dl-callout">
 
-Tune on the test set and its number stops meaning anything — you have fitted your *choices*
-to it, and there is nothing left to estimate generalisation with.
+If you tune on the test set, its number stops meaning anything. You have fitted your
+*choices* to it, and no unseen data is left to measure generalisation.
 
 </div>
 
@@ -1269,7 +1272,7 @@ title: Loss and optimiser
 
 # Loss and optimiser
 
-```python {all|1|3|5|all}{lines:true}
+```python {all|1|3|4|all}{lines:true}
 loss_fn = nn.CrossEntropyLoss()          # logits in, integer labels in, one scalar out
 
 optimiser = torch.optim.SGD(model.parameters(), lr=0.1)         # Lecture 02's rule
@@ -1293,7 +1296,7 @@ optimiser = torch.optim.Adam(model.parameters(), lr=1e-3)        # a per-paramet
 
 <v-clicks>
 
-- **SGD** is exactly the update from Lecture 02: subtract `lr` times the gradient
+- **SGD** (stochastic gradient descent) is exactly the update from Lecture 02: subtract `lr` times the gradient
 - **Adam** keeps a running scale per parameter, so it needs far less tuning. Start with
   `Adam(lr=1e-3)`
 
@@ -1441,7 +1444,7 @@ aside-width: 17rem
 
 ::aside::
 
-<div class="dl-callout">
+<div>
 
 **precision** — when it said 9, was it right?
 
@@ -1451,11 +1454,11 @@ aside-width: 17rem
 
 <div class="mt-3 dl-secondary">
 
-The same 100 numbers, read two ways. F1 is their harmonic mean.
+The same 100 numbers, read two ways. F1 (their harmonic mean) combines them.
 
 </div>
 
-<div v-click class="mt-3">
+<div v-click class="mt-3 dl-callout">
 
 Report this table, not just the accuracy — three lines with `classification_report`.
 
@@ -1557,7 +1560,7 @@ title: The exercise
 
 <v-clicks>
 
-- The FCNN from slide 34, on MNIST, in PyTorch
+- The FCNN (fully connected network) from “An nn.Module has exactly two parts”, on MNIST
 - `random_split` for a validation set, seeded
 - `Adam(lr=1e-3)`, ten epochs
 

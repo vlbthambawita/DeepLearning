@@ -1,0 +1,200 @@
+/*
+ * Hand-authored SVG diagrams, shared by every deck.
+ *
+ * `<svg class="dl-diagram">` plus the `.dl-dg-*` vocabulary below: boxes for
+ * tensors, trapezoids for networks, arrows for data, dashed lines for losses and
+ * gradients, bars, dots and fills for small charts. Written for lecture 07 and
+ * moved here so every deck draws with the same marks and the same theme colours
+ * (light and dark mode come from the --dl-* variables).
+ *
+ * Note for anyone extending these: never write a literal `opacity="0.5"` on an
+ * SVG element. UnoCSS attributify scans source text and emits a rule that beats
+ * the SVG presentation attribute — see CONTRIBUTING.md.
+ */
+.dl-diagram {
+  width: 100%;
+  max-width: 41rem;
+  height: auto;
+  font-family: inherit;
+}
+
+/* A tensor: something the data is, rather than something done to it. */
+.dl-dg-box {
+  fill: var(--dl-surface);
+  stroke: var(--dl-border);
+  stroke-width: 1.5;
+}
+
+.dl-dg-box.is-accent {
+  fill: var(--dl-accent-soft);
+  stroke: var(--dl-accent);
+}
+
+.dl-dg-box.is-bad {
+  fill: none;
+  stroke: var(--dl-danger);
+  stroke-dasharray: 4 3;
+}
+
+/* A network: the trapezoids the 2025 deck used, kept for continuity. */
+.dl-dg-net {
+  fill: var(--dl-accent-soft);
+  stroke: var(--dl-accent);
+  stroke-width: 1.6;
+}
+
+.dl-dg-net.is-critic {
+  fill: var(--dl-surface);
+  stroke: var(--dl-body);
+}
+
+.dl-dg-op {
+  fill: var(--dl-bg);
+  stroke: var(--dl-heading);
+  stroke-width: 1.6;
+}
+
+.dl-dg-lab {
+  fill: var(--dl-heading);
+  font-size: 17px;
+  font-style: italic;
+  font-weight: 600;
+}
+
+.dl-dg-lab.is-sm {
+  font-size: 13px;
+  font-style: normal;
+}
+
+.dl-dg-in {
+  fill: var(--dl-accent-strong);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.dl-dg-net.is-critic + .dl-dg-in,
+.dl-dg-in.is-critic {
+  fill: var(--dl-body);
+}
+
+.dl-dg-small {
+  fill: var(--dl-muted);
+  font-size: 11px;
+}
+
+.dl-dg-small.is-bad {
+  fill: var(--dl-danger);
+}
+
+.dl-dg-small.is-good {
+  fill: var(--dl-accent-strong);
+}
+
+.dl-dg-arrow {
+  fill: none;
+  stroke: var(--dl-body);
+  stroke-width: 1.8;
+}
+
+/* Arrowheads are <marker> elements, so they are filled rather than stroked. */
+.dl-dg-head {
+  fill: var(--dl-body);
+}
+
+/* Where a loss or a gradient travels, as opposed to where data does. */
+.dl-dg-loss,
+.dl-dg-grad {
+  fill: none;
+  stroke: var(--dl-muted);
+  stroke-width: 1.4;
+  stroke-dasharray: 3 3;
+}
+
+.dl-dg-grad.is-bad {
+  stroke: var(--dl-danger);
+}
+
+.dl-dg-grad.is-good {
+  stroke: var(--dl-accent);
+  stroke-dasharray: none;
+}
+
+.dl-dg-split {
+  stroke: var(--dl-border);
+  stroke-width: 1;
+}
+
+.dl-diagram.is-sm {
+  max-width: 26rem;
+}
+
+.dl-diagram.is-xs {
+  max-width: 18rem;
+}
+
+/* Bars in hand-drawn charts: P is ink, Q is accent, in every chart of the deck. */
+.dl-dg-bar {
+  fill: var(--dl-muted);
+}
+
+.dl-dg-bar.is-q {
+  fill: var(--dl-accent);
+}
+
+.dl-dg-bar.is-bad {
+  fill: var(--dl-danger);
+}
+
+.dl-dg-fill {
+  fill: var(--dl-accent-soft);
+  stroke: var(--dl-accent);
+  stroke-width: 1.4;
+}
+
+.dl-dg-fill.is-muted {
+  fill: var(--dl-surface);
+  stroke: var(--dl-muted);
+}
+
+.dl-dg-fill.is-dashed {
+  stroke-dasharray: 4 3;
+}
+
+.dl-dg-dot {
+  fill: var(--dl-body);
+}
+
+.dl-dg-dot.is-accent {
+  fill: var(--dl-accent);
+}
+
+.dl-dg-dot.is-bad {
+  fill: var(--dl-danger);
+}
+
+.dl-dg-line {
+  fill: none;
+  stroke: var(--dl-accent);
+  stroke-width: 2.2;
+}
+
+.dl-dg-line.is-muted {
+  stroke: var(--dl-muted);
+}
+
+.dl-dg-line.is-bad {
+  stroke: var(--dl-danger);
+}
+
+.dl-dg-emoji {
+  font-size: 30px;
+}
+
+.dl-dg-lab.is-bad-text {
+  fill: var(--dl-danger);
+}
+
+/* Diagrams that share the slide with text below: cap the height, not the width. */
+.dl-diagram.is-sm-h {
+  max-height: 11.5rem;
+}

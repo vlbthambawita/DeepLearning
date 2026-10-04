@@ -33,7 +33,13 @@ layout: section
 index: "01"
 ---
 
-# Introduction to Deep Learning
+# Welcome and introductions
+
+<!--
+This card used to repeat the deck title, "Introduction to Deep Learning", word
+for word. The section is really about who is in the room: me, you and the class
+representatives. The course content starts at section 02.
+-->
 
 ---
 layout: default
@@ -74,6 +80,9 @@ Weeks 9-10 cover GANs. Everything on the bottom row of this slide is built out
 of what we learn then.
 -->
 
+---
+layout: default
+title: Who are you?
 ---
 
 <PollSlide
@@ -335,7 +344,7 @@ title: From a sentence to an image — or a video
 or two minutes of video out. Where that stands in August 2026:
 </div>
 
-<GenerativeFrontier class="mt-3" />
+<GenerativeFrontier v-click class="mt-3" />
 
 <!--
 Read the prompt out first and let the room picture it: no photograph of that
@@ -510,7 +519,7 @@ flowchart LR
 
 <div v-click class="mt-6 dl-callout">
   <strong>We learn this step.</strong> The other three are where most of the real
-  effort goes — and the reason a good dataset is worth more than a clever model.
+  effort goes. That is why a good dataset is worth more than a clever model.
 </div>
 
 ---
@@ -573,14 +582,14 @@ title: Hardware
 </div>
 <div v-click class="dl-hw">
   <h3>TPU</h3>
-  <p class="dl-secondary">Built only for tensor maths. Free ones on Colab, and in edge devices.</p>
+  <p class="dl-secondary">A tensor processing unit (TPU) is built only for tensor maths. Free ones on Colab, and in edge devices.</p>
   <div class="dl-hw__vendors">Google · Coral · Hailo · Graphcore</div>
 </div>
 </div>
 
 <div v-click class="mt-6 dl-callout">
   You do <strong>not</strong> need to own a GPU for this course. Colab and Kaggle both
-  give you one for free.
+  give you one at no cost.
 </div>
 
 ---

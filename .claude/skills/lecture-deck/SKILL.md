@@ -123,7 +123,7 @@ What counts:
 
 | kind | use it for | how |
 | --- | --- | --- |
-| **drawn diagram** | a flow, a pipeline, who-feeds-whom | inline `<svg class="dl-diagram">` with the deck's `.dl-dg-*` classes |
+| **drawn diagram** | a flow, a pipeline, who-feeds-whom | inline `<svg class="dl-diagram">` with the theme's `.dl-dg-*` classes (`styles/diagram.css`) |
 | **plot** | a function, a curve, a trade-off, a comparison of sizes | `Plot2D` + `PlotCurve`/`PlotLine`/`PlotLabel`, or hand SVG bars |
 | **a tiny image** | what the data looks like: clean, noisy, blurred, collapsed | a pixel-grid component driven by a seeded pattern |
 | **a widget** | something that changes as a control moves | an addon component in `WidgetFrame` |
