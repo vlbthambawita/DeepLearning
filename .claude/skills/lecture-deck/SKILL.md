@@ -265,9 +265,8 @@ Rules that hold on every slide:
 - `figure` and `interactive` take their heading from **`heading:`**, not
   `title:`. Set both when you also want the nav and exported outline to name it.
 - `section` slides carry `index: "01"`.
-- **Speaker notes on nearly every slide**, in `<!-- -->`: what to say, what the
-  room gets wrong every year, what to cut when short on time. They are stripped
-  from anything published, so write them for the presenter, not the student.
+- **Speaker notes on every slide** that explain its content — see "Speaker
+  notes: explain the slide" below.
 - Bullets go inside `<v-clicks>`, one idea each. The sentence the room should
   leave with goes in a `<div v-click class="dl-callout">`.
 - Two columns: `default` + `<div class="grid grid-cols-2 gap-10">`.
@@ -282,6 +281,57 @@ Rules that hold on every slide:
 - Theme classes: `dl-callout`, `dl-card`, `dl-ledger`, `dl-tight`, `dl-rule`,
   `dl-secondary`, `dl-wrong`, `dl-prompt`, `dl-reveal`, `dl-math-sm`, `dl-math-xs`,
   `dl-eq-legend` (a symbol legend table).
+
+### Speaker notes: explain the slide
+
+Every slide — `title`, `section` and `end` included — gets a notes block that
+explains what is on it. Someone who has never seen the deck should be able to
+teach the slide from the notes alone. The slide stays sparse because of the word
+budget; the explanation it leaves out goes here, where there is no budget.
+
+Mechanics:
+
+- Slidev reads notes only from the **last `<!-- -->` block at the very end of the
+  slide**. A comment anywhere else is an ordinary HTML comment and never reaches
+  the presenter view. One block per slide, last thing before the next `---`.
+- Notes are stripped from the public build (`--without-notes`), so write them for
+  the presenter, not the student. Plain prose in short paragraphs. Markdown
+  renders, but keep maths as plain text (`p(x | z)`, `W^T x`) — that is easier to
+  read off a laptop mid-lecture than KaTeX.
+
+Cover these, in this order, leaving out any that do not apply:
+
+1. **The point**, one or two sentences: what the room should understand after
+   this slide, and why it comes here in the sequence.
+2. **Walk through what is on screen.** Say what the picture, diagram or widget
+   shows: what the axes, boxes, arrows and colours mean, and where to look first.
+   Explain each bullet in fuller sentences than the slide uses.
+3. **Click by click.** For a slide with clicks, one short paragraph per click
+   saying what appears and what to say about it. Start each paragraph with
+   `Click:` or `Click 2:` so the presenter can keep their place.
+4. **Equations in words.** Read each display equation aloud as a sentence, name
+   every symbol, and go through the worked example's arithmetic step by step with
+   the numbers on the slide.
+5. **Code, line by line.** For each highlight step, say what the highlighted
+   lines do and what shape the tensors have.
+6. **The widget.** What to set, what to point at, and the one setting that shows
+   the effect best ("drag the learning rate to 1.2 — the loss blows up on step 3").
+7. **What the room gets wrong**, if anything: the usual misconception and the
+   sentence that fixes it. For a `PollSlide`, why each wrong answer is tempting.
+8. **Depth and timing**: derivations, history and edge cases that were cut from
+   the slide; roughly how long to spend; and what to drop if short on time.
+
+The notes must agree with the slide: the same numbers, symbols and names, and no
+claim the slide or the widget contradicts. Any concept the notes rely on has to
+be on the slide or on an earlier one, or be in the plan's *already knows* list.
+Notes cannot introduce a concept the room needs. Section and title slides need
+only items 1 and 8: what the section has to land, and how long it takes. The
+reference is lecture 07's notes (e.g. the "Start from what the room owns" slide):
+they name the picture, describe each click and give the arithmetic.
+
+`slide-stats.py` lists every slide with **no notes** and every slide whose notes
+are **thin** (fewer than 40 words on a content slide, or no `Click` paragraph
+on a slide with three or more clicks). The goal is zero on both.
 
 ## 5. Reuse components before building one
 
@@ -406,10 +456,14 @@ once**. The build and `check` passing says nothing about whether the slides are
    and in the widgets it uses.
 9. **Overclaims.** "every", "always", "nobody", "the default", "in every image
    tool" — keep only what you could source; soften the rest.
-10. **Widgets are part of the deck.** Their labels, notes and captions get the
+10. **Every slide has explaining notes.** Run `slide-stats.py` and write or
+   expand notes for every slide it lists under *no notes* or *thin notes*,
+   following "Speaker notes: explain the slide". For each slide you rewrite,
+   make sure the notes still describe what is on screen now.
+11. **Widgets are part of the deck.** Their labels, notes and captions get the
    same review, and a fix to shared logic (`composables/`) needs a check that no
    other deck's numbers moved.
-11. **Verify, then look.** `build:all`, `check` light and dark, `--shots`, and
+12. **Verify, then look.** `build:all`, `check` light and dark, `--shots`, and
     eyeball every slide you changed.
 
 Record what was wrong and what changed in `TODO/summary_slideset_XX.md` under a
@@ -509,6 +563,8 @@ never push a tag unless asked.
 ## Pre-flight checklist
 
 - `slide-stats.py` reports **no picture: 0** — every slide shows something.
+- `slide-stats.py` reports **no notes: 0** and **thin notes: 0**. Every slide
+  has a notes block, as its last element, that explains what is on screen.
 - `slide-lint.py` is clean, and `check:layout` reports no overlaps and no dead
   clicks.
 - No slide leans on a concept from the plan's *does not have yet* list; grep

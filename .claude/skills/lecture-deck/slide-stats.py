@@ -6,7 +6,8 @@ blocks and maths excluded, since none of those are what makes a slide a wall of
 text. Prints the slides over budget so they can become a diagram, be split, or
 move into the speaker notes, and every slide with no picture at all — the
 skill's rule is a visual on every slide, and a table or an equation does not
-count as one.
+count as one. It also lists slides whose speaker notes are missing or too thin
+to explain the slide (see the skill's "Speaker notes: explain the slide").
 
     python3 .claude/skills/lecture-deck/slide-stats.py               # every deck
     python3 .claude/skills/lecture-deck/slide-stats.py lecture-07    # one deck
@@ -90,13 +91,55 @@ def has_picture(body):
     )
 
 
+# A content slide's notes have to walk through what is on screen; this many words
+# is the least that can do it. Section, title and end slides only need the point.
+NOTES_MIN = 40
+NOTES_EXEMPT = {"section", "title", "end"}
+CLICKS_NEED_WALKTHROUGH = 3
+
+
+def notes(body):
+    """Slidev's speaker notes: the last comment, and only if it ends the slide."""
+    b = body.rstrip()
+    if not b.endswith("-->"):
+        return None
+    start = b.rfind("<!--")
+    return b[start + 4:-3].strip() if start != -1 else None
+
+
+def clicks(body):
+    """Rough click count: v-click elements, v-clicks items, code-highlight steps."""
+    b = re.sub(r"<!--.*?-->", " ", body, flags=re.S)
+    n = len(re.findall(r"\bv-click\b(?!s)", b))
+    for block in re.findall(r"<v-clicks\b.*?</v-clicks>", b, flags=re.S):
+        n += len(re.findall(r"(?m)^\s*(?:[-*]|\d+\.)\s", block)) or 1
+    for rng in re.findall(r"```\w+\s*\{([^}]*\|[^}]*)\}", b):
+        n += rng.count("|")
+    return n
+
+
+def notes_problem(layout, body):
+    """None if the notes are fine, else a short reason."""
+    text = notes(body)
+    if text is None:
+        return "none"
+    if layout in NOTES_EXEMPT:
+        return None
+    words = len(text.split())
+    if words < NOTES_MIN:
+        return f"{words}w"
+    if clicks(body) >= CLICKS_NEED_WALKTHROUGH and not re.search(r"(?i)\bclick", text):
+        return "no click walkthrough"
+    return None
+
+
 def report(deck, show_all):
     path = Path("decks") / deck / "slides.md"
     if not path.exists():
         print(f"  no slides.md for {deck}")
         return
 
-    rows, by_layout, bare = [], {}, []
+    rows, by_layout, bare, unnoted, thin = [], {}, [], [], []
     for n, (layout, label, body) in enumerate(slides(path), start=1):
         words = prose_words(body)
         parts = sorted(set(COMPONENT.findall(body)) - {"Citation"})
@@ -104,6 +147,11 @@ def report(deck, show_all):
         rows.append((n, layout, label, words, parts, is_visual(body)))
         if not has_picture(body):
             bare.append((n, layout, label))
+        problem = notes_problem(layout, body)
+        if problem == "none":
+            unnoted.append((n, layout, label))
+        elif problem:
+            thin.append((n, layout, label, problem))
 
     print(f"\n{deck}  —  {len(rows)} slides")
     for layout in ("default", "interactive", "figure"):
@@ -119,6 +167,14 @@ def report(deck, show_all):
     print(f"  no picture: {len(bare)}")
     for n, layout, label in bare:
         print(f"      {n:3d} {layout:12s} {label}")
+
+    print(f"  no notes: {len(unnoted)}")
+    for n, layout, label in unnoted:
+        print(f"      {n:3d} {layout:12s} {label}")
+
+    print(f"  thin notes: {len(thin)}")
+    for n, layout, label, problem in thin:
+        print(f"      {n:3d} {layout:12s} {label}   <- {problem}")
 
     flagged = [r for r in rows if r[3] > BUDGET.get(r[1], 70)]
     if flagged:

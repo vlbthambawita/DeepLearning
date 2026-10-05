@@ -245,25 +245,36 @@ These two reviews run through the whole lecture.
 </div>
 
 <!--
-This is the running example. Write both reviews on the board and leave them
-there for the whole session.
+The point: this is the running example. Two reviews, the same words except
+one, with opposite labels. Write both on the board and leave them there for the
+whole session.
 
-A: "the movie was great" — positive. B: "the movie was not great" — negative.
-The same words except one, and the labels are opposite.
+On screen: review A, "the movie was great" — positive. Review B, "the movie
+was not great" — negative. The word strips show them tile by tile, with "not"
+highlighted in B.
 
 The right-hand picture is the toy embedding: each word becomes two numbers.
 Dimension 1 means "a positive word", dimension 2 means "a negation word". The,
-movie and was carry no sentiment, so they sit at [0, 0]. Real embeddings have 64
-or more dimensions and are learned — section 04 shows where they come from. Here
-we set them by hand so the arithmetic fits on the board.
+movie and was carry no sentiment, so they sit at [0, 0]; great is [1, 0]; not
+is [0, 1]. Real embeddings have 64 or more dimensions and are learned — section
+04 shows where they come from. Here we set them by hand so the arithmetic fits
+on the board.
 
-Get the room to say what "not" does before revealing bullet two. It has no
-sentiment of its own; it changes the meaning of what comes after it. That is
+Click: "Same words except one. Opposite labels." Point at the "not" tile in
+strip B — it is the only difference.
+
+Click 2: before this one appears, get the room to say what "not" does. It has
+no sentiment of its own; it changes the meaning of what comes after it. That is
 exactly what a model of single words cannot see.
 
-An older pair makes the same point and is worth saying aloud:
-"dog bites man" (page 14) and "man bites dog" (front page) — identical words,
-different news.
+Click 3: so the model has to carry something from one word to the next. That
+sentence is the motivation for everything that follows.
+
+Click 4: the callout — these two reviews run through the whole lecture. Every
+section comes back to them, with the same picture.
+
+An older pair makes the same point and is worth saying aloud: "dog bites man"
+(page 14) and "man bites dog" (front page) — identical words, different news.
 -->
 
 ---
@@ -404,31 +415,42 @@ It tells A from B, but learns each word again at every position.
 </div>
 
 <!--
-Flatten a review into one long vector and feed it to a dense layer — exactly what
-the room did with MNIST. Give it 200 slots, one word per slot.
+The point: try the tool the room already has — flatten a review into one long
+vector and feed it to a dense layer, exactly as with MNIST. It works on A and
+B, but it is huge and it learns every word again at every position.
 
-Do the arithmetic aloud. A one-hot vector is 20 000 numbers, all zero except a
-single 1 at the word's index. 200 slots x 20 000 = 4 000 000 inputs. One dense
-layer of 256 units: 4 000 000 x 256 + 256 biases = 1 024 000 256 weights. A
-billion, before the second layer and before anything has been learned.
+On screen: a window of 200 slots, one word per slot. Review A fills slots 1 to
+4, review B slots 1 to 5; the dashed boxes are padding. The highlighted box is
+great: slot 4 in A, slot 5 in B.
 
-Be fair to it: unlike the average on the last slide, the window keeps the order.
-It can tell A from B. The slide shows the worst problem (2); say 1 and 3 aloud.
+Do the arithmetic in the text aloud. A one-hot vector is 20 000 numbers, all
+zero except a single 1 at the word's index. 200 slots x 20 000 = 4 000 000
+inputs. One dense layer of 256 units: 4 000 000 x 256 + 256 biases =
+1 024 000 256 weights. A billion, before the second layer and before anything
+has been learned.
 
-1. Fixed length. Every review must be exactly 200 words. Longer ones are cut — and
-   the cut can remove the word that carries the label. Short ones are padded, and
-   review A is 196 slots of padding out of 200.
-2. Position-locked. great sits in slot 4 in A and slot 5 in B, so different
-   columns of weights read it. The layer must learn great, and not-before-great,
-   separately at every one of the 200 positions. This is the complaint that led
-   to CNNs, with "pixel" replaced by "position", and the answer is the same:
-   share the weights.
-3. Size. Even with a 64-number embedding instead of one-hot (200 x 64 = 12 800
-   inputs), the dense layer is 12 800 x 256 + 256 = 3.28 M weights, plus 1.28 M
-   for the embedding. The LSTM classifier we build in section 05 (embedding
-   20 000 x 64, LSTM 64 to 128, a linear head to 2 classes) has 1 379 586 ≈ 1.38 M
-   parameters in total — and that number does not change when the review gets
-   longer.
+Click: two things appear together — the red marks under slots 4 and 5 in the
+picture ("different weights"), and the "Position-locked" line. great sits in
+slot 4 in A and slot 5 in B, so different columns of weights read it. The layer
+must learn great, and not-before-great, separately at every one of the 200
+positions. This is the complaint that led to CNNs, with "pixel" replaced by
+"position", and the answer is the same: share the weights.
+
+Click 2: the callout. Be fair to it: unlike the average on the last slide, the
+window keeps the order, so it can tell A from B. But it learns each word again
+at every position.
+
+The slide shows the worst problem (position-locking); say the other two aloud.
+
+1. Fixed length. Every review must be exactly 200 words. Longer ones are cut —
+   and the cut can remove the word that carries the label. Short ones are
+   padded, and review A is 196 slots of padding out of 200.
+2. Size. Even with a 64-number embedding instead of one-hot (200 x 64 = 12 800
+   inputs), the dense layer is 12 800 x 256 + 256 = 3.28 M weights, plus
+   1.28 M for the embedding. The LSTM classifier we build in section 05
+   (embedding 20 000 x 64, LSTM 64 to 128, a linear head to 2 classes) has
+   1 379 586 ≈ 1.38 M parameters in total — and that number does not change
+   when the review gets longer.
 -->
 
 ---
@@ -491,18 +513,38 @@ Every time series is a sequence. Today's models see only positions.
 </div>
 
 <!--
-The left picture has positions and nothing else. The right one has a time axis,
-and the uneven gap between samples is itself information.
+The point: a vocabulary check. A sequence is anything where order matters; a
+time series is a sequence on a time axis, where the gaps are data too. The
+models today see only positions.
 
-The distinction matters for one practical reason: with a time series you often
+On screen: the left picture has positions and nothing else — DNA letters in a
+row. The right one has a time axis, and the uneven gap between two samples
+(marked in red) is itself information.
+
+Click: "the words of a sentence" — our reviews are this kind.
+
+Click 2: "a DNA (genetic code) sequence" — order matters, no clock.
+
+Click 3: "stock prices, one per minute" — a time series with regular sampling.
+
+Click 4: "speech: 16 000 samples a second" — also regular, but very long.
+
+Click 5: "an ECG (electrocardiogram) trace" — the heart's electrical signal,
+for anyone with clinical interests.
+
+Click 6: the callout. Every time series is a sequence, but today's models see
+only positions.
+
+That distinction matters for one practical reason: with a time series you often
 have to decide what to do about irregular sampling and missing steps. A plain
-RNN silently treats "one step" as "one row of the tensor", whatever the real gap
-was. A patient's vitals, sampled whenever a nurse comes by, is the classic case.
-Mention it; do not solve it.
+RNN silently treats "one step" as "one row of the tensor", whatever the real
+gap was. A patient's vitals, sampled whenever a nurse comes by, is the classic
+case. Mention it; do not solve it.
 
 More examples if the room wants them: the moves of a chess game (a sequence, no
-clock that matters), and an ECG — the heart's electrical signal — for anyone with
-clinical interests.
+clock that matters).
+
+Short slide: a minute or two.
 -->
 
 ---
@@ -591,19 +633,35 @@ across positions: fact one, already solved.
 </v-clicks>
 
 <!--
-This slide exists so nobody leaves believing recurrence is the only way to read a
-sequence. WaveNet and ByteNet are convolutional; so is most on-device audio.
+The point: this slide exists so nobody leaves believing recurrence is the only
+way to read a sequence. A 1-D convolution reads one too — in parallel, but only
+as far as its filter reaches.
 
-If someone offers n-grams: yes, a bigram catches "not good", and that is exactly
-what a 1D convolution with a width-2 filter learns. It will not catch "not, by any
-stretch of the imagination, good". Unlimited distance is what recurrence buys.
+On screen: the 1-D convolution widget, with the axis read as time. One filter
+slides along the input and every output uses the same weights — weight sharing
+across positions, which already fixes the position-locking problem from the
+dense-layer slide. Try the padding and stride controls: padding keeps the
+output as long as the input, stride 2 halves it.
 
-The filter's reach is its receptive field: stacking layers widens it, but it is
-always a fixed number of positions.
+Click: "Parallel" — every output can be computed at once; no output waits for
+another.
 
-Plant the flag for the last section: the convolution's advantage here is that it
-is parallel. The recurrent network gives that up, and that cost is the second wall
-at the end of today.
+Click 2: context is limited by the filter's reach. The filter's reach is its
+receptive field: stacking layers widens it, but it is always a fixed number of
+positions.
+
+Click 3: nothing about 60 words ago. If the "not" is outside the reach, the
+output never sees it.
+
+Click 4: recurrence gives up the parallelism for unlimited context. Plant the
+flag for the last section: this cost is the second wall at the end of today.
+
+If someone offers n-grams: yes, a bigram catches "not good", and that is
+exactly what a 1-D convolution with a width-2 filter learns. It will not catch
+"not, by any stretch of the imagination, good". Unlimited distance is what
+recurrence buys.
+
+WaveNet and ByteNet are convolutional; so is most on-device audio.
 -->
 
 ---
@@ -751,19 +809,32 @@ New since the dense layer: one extra matrix, one step of delay.
 </div>
 
 <!--
-Press nothing yet. Let them look at the loop.
+The point: a recurrent layer is an ordinary layer with one new wire — its
+output feeds back in as an input at the next step.
 
-The single most common misreading is that the loop is a second layer or a memory
-buffer sitting beside the network. It is neither: it is the same units, reading
-the values they held one step ago. In the toy network there are two units; in the
-code later there are 128.
+On screen: the widget starts folded. Press nothing yet; let them look at the
+loop. The box is one hidden layer, the word comes in from below, and the
+output of the layer comes back round into itself.
 
-The note metaphor: each reader gets one word of review B ("the movie was not
-great") and the note from the person before. They write a new note and pass it
-on. W_xh is how they read the word, W_hh is how they read the old note.
+The single most common misreading is that the loop is a second layer or a
+memory buffer sitting beside the network. It is neither: it is the same units,
+reading the values they held one step ago. In the toy network there are two
+units; in the code later there are 128.
 
-"One step of delay" is worth repeating. Without the delay the definition would be
-circular.
+The note metaphor in the aside: each reader gets one word of review B ("the
+movie was not great") and the note from the person before. They write a new
+note and pass it on.
+
+Click: W_xh reads this word — how the reader reads the word.
+
+Click 2: W_hh reads the note, which is the layer's own last output — how they
+read the old note.
+
+Click 3: W_ho turns the note into an answer — the output layer.
+
+Click 4: the callout. Compared with the dense layer, the only thing new is one
+extra matrix (W_hh) and one step of delay. "One step of delay" is worth
+repeating: without the delay the definition would be circular.
 -->
 
 ---
@@ -794,20 +865,32 @@ At *great*, A and B give the same input. Only the note differs.
 </div>
 
 <!--
-Press "Fold it back" and "Unroll it" a couple of times. Folded is the network;
-unrolled is the computation. Students who only ever see one of the two pictures
-get a specific wrong idea from each: a memory cell, or five layers with five
-sets of weights.
+The point: unrolling draws one copy of the layer per word. It is the same layer
+with the same weights, used once per step.
 
-Then step through review B. "the", "movie", "was" embed as [0, 0], so the note
-stays [0, 0]. "not" sets the first unit: h = [0.96, 0]. "great" arrives with the
-note already marked, and the state becomes [0.45, -0.42]. In review A the same
-"great" arrives with a blank note and gives [0, 0.76].
+On screen: the widget starts unrolled. Press "Fold it back" and "Unroll it" a
+couple of times. Folded is the network; unrolled is the computation. Students
+who only ever see one of the two pictures get a specific wrong idea from each:
+a memory cell, or five layers with five sets of weights.
 
-That is the callout: same word, same weights, different note, opposite answer.
+Click: every W in the unrolled picture is the same matrix — the copies share
+it.
 
-If someone asks whether h_0 could be learned: yes, and it sometimes is. Zeros is
-the default and it is nearly always fine.
+Click 2: the chain grows with the review; the weights do not. A 1000-word
+review is a longer chain, not a bigger model.
+
+Click 3: h_0 = 0 — the note starts blank. If someone asks whether h_0 could be
+learned: yes, and it sometimes is. Zeros is the default and it is nearly always
+fine.
+
+Now press "Next step" and walk through review B. "the", "movie", "was" embed as
+[0, 0], so the note stays [0, 0]. "not" sets the first unit: h = [0.96, 0].
+"great" arrives with the note already marked, and the state becomes
+[0.45, -0.42]. In review A the same "great" arrives with a blank note and gives
+[0, 0.76].
+
+Click 4: the callout. At great, A and B give the same input; only the note
+differs. Same word, same weights, different note, opposite answer.
 -->
 
 ---
@@ -876,21 +959,38 @@ $\mathbf{o}_t$: logits, with no activation.
 </div>
 
 <!--
-Read it aloud in words first: "the new state is a squashed sum of what I am
-looking at and what I already knew". The picture is the same sentence: old note
-in from the left, word in from below, new note out to the right.
+The point: the whole recurrent layer is one equation. The new note is a
+squashed sum of this word and the old note.
+
+Read it aloud in words first: "h_t equals tanh of W_xh times x_t, plus W_hh
+times h_{t-1}, plus a bias b_h" — the new state is a squashed sum of what I am
+looking at and what I already knew. The output is "o_t equals W_ho times h_t
+plus b_o".
+
+On screen: the picture is the same sentence. Old note h_{t-1} in from the left
+through W_hh, word x_t in from below through W_xh, the tanh box in the middle,
+new note h_t out to the right, and the output o_t going up through W_ho.
 
 Nothing on this slide is new mathematics. W_xh x + b is a dense layer; the tanh
-is the familiar activation; the only new symbol is W_hh h_{t-1}. Say that explicitly — it lowers
-the temperature of the slide considerably.
+is the familiar activation; the only new symbol is W_hh h_{t-1}. Say that
+explicitly — it lowers the temperature of the slide considerably.
 
-Why tanh rather than ReLU: h is fed back into itself, so an unbounded activation
-can compound to infinity over 200 steps. tanh keeps the state bounded. It is also
-part of why the gradients vanish, which is section 02's problem.
+Click: x_t is this word's embedding.
 
-The output o_t: for the review we only use the last one, o_T, and turn it into a
-probability with a sigmoid, as in binary cross-entropy. The next
-slide names every symbol.
+Click 2: h_{t-1} is the note — all the layer remembers. Nothing else about the
+earlier words survives.
+
+Click 3: tanh keeps h between -1 and 1. Why tanh rather than ReLU: h is fed
+back into itself, so an unbounded activation can compound to infinity over 200
+steps. tanh keeps the state bounded. It is also part of why the gradients
+vanish, which is section 02's problem.
+
+Click 4: the callout. Delete the second term, W_hh h_{t-1}, and this is a dense
+layer.
+
+Click 5: o_t is logits, with no activation. For the review we only use the last
+one, o_T, and turn it into a probability with a sigmoid, as in binary
+cross-entropy. The next slide names every symbol and puts numbers in.
 -->
 
 ---
@@ -1199,19 +1299,30 @@ $$ 128 \cdot 64 + 128 \cdot 128 + 128 = 24\,704 $$
 </div>
 
 <!--
-The drawing is to scale: one pixel per row and column. W_hh is the big square.
+The point: count the weights of a recurrent layer, and notice that the length
+of the review does not appear in the count.
 
-Same argument as for CNNs, where an image's height and width do not appear in a
-convolution's parameter count. Weight sharing always buys this.
+On screen: the formula reads "n_h times n_x for W_xh, plus n_h times n_h for
+W_hh, plus n_h for the bias b_h". The drawing is to scale: one pixel per row
+and column. W_xh is 128 x 64 = 8 192, W_hh is the big square, 128 x 128 =
+16 384, and the bias is a thin 128 x 1 strip.
 
-The secondary note saves a lab question every year. nn.RNN keeps bias_ih and
-bias_hh, which only ever appear as a sum — mathematically redundant, kept for
-the fast GPU (cuDNN) kernels. A student who counts by hand and then calls
-sum(p.numel()) gets a number that is n_h = 128 too big and assumes they are
-wrong. They are not: 24 704 + 128 = 24 832.
+Click: the sum with our sizes, n_x = 64 and n_h = 128:
+128 x 64 + 128 x 128 + 128 = 8 192 + 16 384 + 128 = 24 704.
 
-Ask what happens to the count if you double the hidden size: W_hh quadruples.
-That is why 128 and 256 are common and 4096 is not.
+Click 2: T does not appear. A 10-word and a 1000-word review share the same
+weights. Same argument as for CNNs, where an image's height and width do not
+appear in a convolution's parameter count. Weight sharing always buys this.
+
+Click 3: W_hh grows with n_h squared — double the units, four times the
+weights. Ask the room first what happens if you double the hidden size. That is
+why 128 and 256 are common and 4096 is not.
+
+Click 4: nn.RNN prints 24 832. This saves a lab question every year. nn.RNN
+keeps bias_ih and bias_hh, which only ever appear as a sum — mathematically
+redundant, kept for the fast GPU (cuDNN) kernels. A student who counts by hand
+and then calls sum(p.numel()) gets a number that is n_h = 128 too big and
+assumes they are wrong. They are not: 24 704 + 128 = 24 832.
 -->
 
 ---
@@ -1255,20 +1366,37 @@ spend the lecture on is 7% of them.
 </div>
 
 <!--
-Do the first row together, let them race the rest.
+The point: an exercise. Count the layers of the classifier we build later, and
+discover that the recurrent part is only 7% of the weights.
 
-Be precise about "blocks": an LSTM has three gates (input, forget, output) plus a
-candidate, so four blocks of the RNN's size: 4 x 24 832 = 99 328. A GRU has two
-gates (update, reset) plus a candidate: 3 x 24 832 = 74 496. "Four gates" is a
-common slip — there are three gates.
+Do the first row together, let them race the rest. Reveal each row after the
+room has had a go.
 
-The bar is to scale: 1 280 000 / 1 379 586 = 92.8% embedding, 99 328 / 1 379 586
-= 7.2% LSTM, and Linear(128, 2) = 128 * 2 + 2 = 258 weights, 0.02%.
+Click: nn.RNN(64, 128) = 128 x 64 + 128 x 128 + 2 x 128 = 24 832, with the two
+PyTorch bias vectors from the last slide.
+
+Click 2: nn.LSTM(64, 128) = 99 328. Be precise about "blocks": an LSTM has
+three gates (input, forget, output) plus a candidate, so four blocks of the
+RNN's size: 4 x 24 832 = 99 328. "Four gates" is a common slip — there are
+three gates. The LSTM itself is the next section.
+
+Click 3: nn.GRU(64, 128) = 74 496. A GRU has two gates (update, reset) plus a
+candidate: 3 x 24 832 = 74 496.
+
+Click 4: nn.Embedding(20000, 64) = 20 000 x 64 = 1 280 000 — a vocabulary of
+20 000 words, 64 numbers each.
+
+Click 5: the bar — the whole classifier drawn to scale. 1 280 000 / 1 379 586 =
+92.8% embedding; 99 328 / 1 379 586 = 7.2% LSTM; and Linear(128, 2) =
+128 x 2 + 2 = 258 weights, 0.02%, the sliver at the right.
+
+Click 6: the callout. 1 280 000 + 99 328 + 258 = 1 379 586. The recurrent part
+we spend the lecture on is 7% of them.
 
 A CNN shows the same imbalance the other way round — most of its weights in one
-dense head. Where a model's parameters live is rarely where its
-ideas live. The 93% also explains why pre-trained embeddings mattered so much: it
-is the part of the model with the most to learn and the least supervision.
+dense head. Where a model's parameters live is rarely where its ideas live. The
+93% also explains why pre-trained embeddings mattered so much: it is the part
+of the model with the most to learn and the least supervision.
 -->
 
 ---
@@ -1282,39 +1410,55 @@ aside-width: 21rem
 
 ::aside::
 
-Three places the recurrence can come from, and two ways to reuse one cell.
-
 <v-clicks>
 
-- **hidden → hidden**, as in `nn.RNN`
-- **output → hidden** squeezes the past through the output layer
-- **stacked**, **bidirectional** are constructor arguments
+- **hidden → hidden**: `nn.RNN`
+- **output → hidden**: the past squeezed through *o*
+- **output → output**: *h* carries nothing forward
+- **stacked**, **bidirectional**: constructor arguments
 
 </v-clicks>
 
 <div v-click class="dl-callout">
 
-Bidirectional needs the whole sequence first — so it cannot predict the next word.
+Bidirectional needs the whole sequence, so it cannot predict the next word.
 
 </div>
 
 <!--
-Walk the first three, then the last two. All three arrows drawn at once on one
-figure is unreadable, so take them one at a time and say which one nn.RNN uses.
+The point: the recurrence can come from different places, and one cell can be
+reused by stacking or by reading both directions. nn.RNN uses hidden to hidden.
 
-In the note picture: hidden to hidden passes the whole note; output to hidden
-passes only the reader's one-word verdict. Bidirectional is a second row of
-readers going right to left, and the two notes are joined at each word.
+On screen: the wiring widget, with one tab per wiring: hidden → hidden, output
+→ hidden, output → output, stacked, bidirectional. All three recurrent arrows
+drawn at once on one figure is unreadable, so take them one tab at a time and
+say which one nn.RNN uses. Walk the first three tabs, then the last two.
 
-That is why it is fine for review B — the whole review is there before we
-classify it — and wrong for generating text.
+Click: hidden → hidden, as in nn.RNN. In the note picture, it passes the whole
+note on.
+
+Click 2: output → hidden passes only the reader's one-word verdict, so
+everything the past contributes is squeezed through the output layer, which is
+usually far smaller than h. Its upside, shown in the widget's note: it is cheap
+to train in parallel when the true outputs are known (teacher forcing).
+
+Click 3: output → output, the third tab. Only the previous output feeds the next
+output; the hidden layer carries nothing across time. Rare on its own — the idea
+survives in models that generate one word at a time and feed each word back in.
+
+Click 4: stacked and bidirectional are constructor arguments (num_layers,
+bidirectional=True). Stacked: one recurrent layer's states are the next one's
+inputs. Bidirectional: a second row of readers going right to left, and the two
+notes are joined at each word. Concatenation, not addition, is how the two
+directions combine — so the output width doubles and the head has to know that.
+
+Click 5: the callout. Bidirectional needs the whole sequence first, so it
+cannot predict the next word. That is why it is fine for review B — the whole
+review is there before we classify it — and wrong for generating text.
 
 The bidirectional caveat catches people out in their own projects: they add
 bidirectional=True to a language model, the loss collapses to nothing, and it
 takes an afternoon to realise the model can see the answer.
-
-Concatenation, not addition, is how the two directions combine — so the output
-width doubles and the head has to know that.
 -->
 
 ---
@@ -1409,18 +1553,32 @@ Either way, **one** set of weights receives gradient from **every** term.
 </div>
 
 <!--
-Nothing new about the loss itself — it is cross-entropy, once or T times. What is new is that one weight matrix now receives gradient from T
+The point: nothing new about the loss itself — it is cross-entropy, once or T
+times. What is new is that one weight matrix now receives gradient from T
 different places.
 
-Review B: the label is negative and the toy network says P(positive) = 0.22, so
-the chance it gave the right answer is 0.78, and the loss is -ln 0.78 = 0.25.
-(Checked: sigmoid(3 * -0.419) = 0.222; -ln(0.778) = 0.251.)
+On screen, left: one label per review. Five cells in a chain, and only the last
+one feeds a loss. Read the equation as "L equals the loss of the last output
+o_T against the label y".
 
-Per-word labels: a tag on every word, or the next character in a text model.
+On screen, right: one label per word. Every cell feeds its own loss. Read it as
+"L equals one over T times the sum, over every step t, of the loss of o_t
+against y_t". Per-word labels: a tag on every word, or the next character in a
+text model.
 
+Click: the left box — one term, at the last word. Review B: the label is
+negative and the toy network says P(positive) = 0.22, so the chance it gave the
+right answer is 0.78, and the loss is -ln 0.78 = 0.25. (Checked:
+sigmoid(3 x -0.419) = 0.222; -ln(0.778) = 0.251.)
+
+Click 2: the right box — T terms, averaged, and each is a cross-entropy.
 Mention the averaging: sum and mean differ by a factor of T, which changes the
-effective learning rate. PyTorch's default is mean, and with padded batches "mean
-over what" becomes a real question — the padding slide in the PyTorch section.
+effective learning rate. PyTorch's default is mean, and with padded batches
+"mean over what" becomes a real question — the padding slide in the PyTorch
+section.
+
+Click 3: the callout. Either way, one set of weights receives gradient from
+every term. The next slide names every symbol in these two equations.
 -->
 
 ---
@@ -1547,15 +1705,33 @@ $$ \frac{\partial L}{\partial W_{hh}} = \sum_{t=1}^{T} \frac{\partial L_t}{\part
 </div>
 
 <!--
+The point: the unrolled network is just a deep feed-forward network, so
+ordinary backpropagation trains it. The one twist is that W_hh is shared by
+every step, and that twist is where the trouble starts.
+
 Backpropagation through time is often shortened to BPTT. Do not derive this.
 Point at three things: the outer sum, the inner sum, and the Jacobian in the
 middle.
 
-The picture is review B: five copies of the cell, the loss at the end, and the
-gradient running back through each W_hh arrow. Every red arrow is one factor in
-the product.
+On screen: the equation reads "the gradient of the loss with respect to W_hh is
+a sum over every time step t; for each one, a sum over every earlier step k of:
+how the loss at t depends on h_t, times how h_t depends on h_k, times how h_k
+depends on W_hh directly." The underbrace marks the middle factor as the trip
+back through t - k steps.
 
-The Jacobian is the whole story:
+The picture is review B: five copies of the cell, the loss L at the end, and the
+gradient running back through each W_hh arrow (four of them, hence "W_hh x 4").
+Every red arrow is one factor in the product.
+
+Click: the outer sum. W_hh was used at every step, so its gradient collects a
+contribution from every step — the same rule as any shared weight, like a
+convolution filter used at every position.
+
+Click 2: the inner factor dh_t/dh_k, the cost of travelling back from step t to
+step k. Point at the underbrace.
+
+Click 3: that factor is a product of t - k terms — that is the trouble. The
+Jacobian is the whole story:
 
   dh_t/dh_k = prod_{j=k+1..t} diag(tanh'(z_j)) W_hh^T
 
@@ -1691,10 +1867,27 @@ that says it should.
 </div>
 
 <!--
-The note metaphor: going backwards, the loss passes a correction down the row.
-Every person copies it and the copy is fainter. Twenty copies later, the person
-who read "not" gets 1% of the message. The bars are to scale: 0.8^k for k steps
-back, so "great" gets 1, five words back 0.33, ten back 0.11, and "not" 0.012.
+The point: on a long review the word that decides the label is 20 steps before
+the end, and the training signal that would teach the network to remember it
+arrives at about 1% strength. Forward the state could carry it; backward the
+learning signal cannot survive the trip.
+
+On screen: a 21-word review. "not" is the first word, highlighted; "great" is
+the last. The loss sits after "great", so the gradient has to travel 20 steps
+back to reach "not".
+
+Click: the bar chart under the words — the gradient reaching each word from the
+loss. The bars are to scale: 0.8^k for k steps back, so "great" gets 1, five
+words back 0.33, ten back 0.11, and "not" 0.012. Use the note metaphor: going
+backwards, the loss passes a correction down the row. Every person copies it and
+the copy is fainter. Twenty copies later, the person who read "not" gets 1% of
+the message.
+
+Click 2: the callout names the simplification: each step back multiplies by 0.8,
+the sentiment unit's self-weight, and 0.8^20 = 0.012.
+
+Click 3: the punchline. The layer could carry the flag forward; it never
+receives the training signal that says it should.
 
 Be honest — this is a simplification, and say so if asked:
 - The real factor per step is a 2 x 2 matrix: diag(tanh'(z)) W_hh. tanh' is at
@@ -1713,9 +1906,7 @@ would ask for that change arrives at 1% strength or less.
 The classic version of this (Olah's): "I grew up in France ... [forty words] ...
 so I speak fluent French." The word that decides the answer is forty steps back.
 A plain RNN is big enough to represent it; it never receives the signal to learn
-it. Forward, the state could carry the information; backward, the learning
-signal cannot survive the trip. Fix the backward path and the forward one takes
-care of itself.
+it. Fix the backward path and the forward one takes care of itself.
 -->
 
 ---
@@ -1747,21 +1938,35 @@ Drag $W$ slowly through 1. There is no safe band — only a point.
 </div>
 
 <!--
-It opens on the review's number: W = 0.8, twenty steps, and the readout says
-0.8^20 = 0.012. Then drag it. The lesson is the shape of the curve on a log
-axis: a straight line whose slope is log W, so the damage is exponential in the
-distance, not linear.
+The point: with one unit the backward factor is a single weight W raised to the
+power of the distance, so the damage is exponential in distance — and only
+W = 1 exactly is safe.
 
-Ask how far back a 0.9 weight reaches at 1% strength: about 43 steps. At 0.6,
-nine. At 0.8, twenty — exactly the review.
+On screen: the GradientFlow widget. It opens on the review's number: W = 0.8,
+twenty steps, and the readout says 0.8^20 = 0.012. The chart shows the gradient
+strength against steps back on a log axis: a straight line whose slope is
+log W, so the damage is exponential in the distance, not linear. The aside says
+the same in words: k steps back, the gradient is multiplied by W^k.
+
+Click: W < 1 means vanishing. Drag W down and watch the line tilt steeper. Ask
+how far back a 0.9 weight reaches at 1% strength: about 43 steps. At 0.6, nine.
+At 0.8, twenty — exactly the review.
+
+Click 2: W > 1 means exploding. Drag above 1 and the line climbs instead.
+Exploding happens, but it announces itself with a NaN (not a number); vanishing
+is silent.
+
+Click 3: W = 1 is stable, but nothing in training keeps the weight there.
+
+Click 4: the callout — drag W slowly through 1 so the room sees the line swing
+from falling to rising. There is no safe band, only a point.
 
 Then say the part that makes it worse: the real factor is W times tanh'(z), and
 tanh' is at most 1 and usually well under it. So the effective W is smaller than
-the weight, and vanishing is the common case by a wide margin. Exploding happens,
-but it announces itself with a NaN (not a number); vanishing is silent.
+the weight, and vanishing is the common case by a wide margin.
 
 Tick gradient clipping with W above 1 and point out that the vanishing end of the
-chart does not move at all.
+chart does not move at all: clipping fixes exploding, never vanishing.
 -->
 
 ---
@@ -1793,8 +1998,25 @@ optimistic case.
 </div>
 
 <!--
-The vanishing-gradient story is usually told about depth. This widget shows the
-same fact about length.
+The point: the real factor per step is W times tanh', and tanh' is at most 1 —
+so the activation itself shrinks the gradient further, and a confident unit
+passes almost nothing back.
+
+On screen: the ActivationExplorer widget. Choose Tanh. The solid curve is tanh,
+the dashed curve is its derivative. The vanishing-gradient story is usually told
+about depth; this widget shows the same fact about length.
+
+Click: the derivative peaks at 1, at input 0, and falls away on both sides.
+Point at the top of the dashed curve.
+
+Click 2: a saturated unit — one whose input is far from 0, so tanh sits near
++1 or -1 — has a derivative near zero. Move along the flat part of the curve.
+
+Click 3: every backward step multiplies by one of these derivatives, once per
+step, so the shrinking compounds.
+
+Click 4: the callout. The real factor is W times tanh', with tanh' at most 1, so
+the 0.012 on the long review was the optimistic case.
 
 Tie it to the review: after "not" the flag unit sits at 0.964, where tanh' is
 1 - 0.964^2 = 0.07. A unit that is sure of itself passes almost no gradient back.
@@ -1878,16 +2100,31 @@ memory.
 </div>
 
 <!--
-Being explicit about the ranking matters. A list of three fixes side by side
-invites a student to pick one.
+The point: there are three standard responses to the gradient problem, and they
+are not equals. Being explicit about the ranking matters: a list of three fixes
+side by side invites a student to pick one.
 
-BPTT is backpropagation through time, from two slides back; truncated BPTT is the
-last slide of this section.
+On screen: three columns, each revealed on its own click, each with a small
+picture. Nothing is visible but the heading at first.
 
-Clipping is not a hack — it is standard in essentially every recurrent training
-script. Truncation is a memory and compute decision first and a gradient decision
-second. Gating is the only one that touches the 0.012: section 03 turns it into
-0.82.
+Click: gradient clipping. The picture is a tall red arrow cut off at a dashed
+ceiling; the accent part below the line is what survives. Cap the gradient's
+length. It fixes exploding only — a gradient that is already tiny is never above
+the cap. Clipping is not a hack: it is standard in essentially every recurrent
+training script.
+
+Click 2: truncated BPTT (backpropagation through time, from the "Backpropagation
+through time" slide). The picture is a chain of four cells with a red cut after
+the second. Backpropagate k steps, then cut; nothing beyond k steps is learned.
+Truncation is a memory and compute decision first and a gradient decision second.
+It is the last slide of this section.
+
+Click 3: gated cells, with the gate emblem. Make the gradient's path add instead
+of multiply. This is the real fix and the next section. Gating is the only one of
+the three that touches the 0.012: section 03 turns it into 0.82.
+
+Click 4: the callout gives the practical rule. Use clipping and a gated cell
+together; truncate only when a sequence is too long for memory.
 -->
 
 ---
@@ -1947,12 +2184,35 @@ If $\|\mathbf{g}\| > c$, use $c \cdot \mathbf{g} / \|\mathbf{g}\|$: same **direc
 </div>
 
 <!--
-Symbols: g is the gradient of all parameters, stacked into one long vector;
-||g|| is its length; c is the cap, max_norm in the code. The picture: a gradient
-of length 900 with c = 1 becomes length 1, pointing exactly where it did. The
-dashed circle is every vector of length 1.
+The point: clipping is one line of code, and the only way to get it wrong is to
+put it in the wrong place — between backward() and step(), nowhere else.
 
-The placement is the bug students actually write. Say it twice.
+On screen: a training step on the left, and on the right a picture of what
+clipping does. The picture: a gradient of length 900 (red) with cap c = 1
+becomes length 1 (accent), pointing exactly where it did. The dashed circle is
+every vector of length 1.
+
+Click: lines 1-3 — the forward pass, the loss, and zero_grad(). Nothing new.
+
+Click 2: line 5, loss.backward(). Only now do the gradients exist.
+
+Click 3: line 6, clip_grad_norm_ with max_norm=1.0. It rescales all the
+gradients together so their combined length is at most 1.
+
+Click 4: line 7, optimiser.step() — it uses the gradients, which are now bounded.
+
+Click 5: the whole block again. Read the order top to bottom once more.
+
+Click 6: the callout. It goes between backward() and step(): before, there is
+nothing to clip; after, it is too late. The placement is the bug students
+actually write. Say it twice.
+
+Click 7: the rule as a formula. Read it: "if the length of g is bigger than c,
+replace g by c times g divided by its length". Symbols: g is the gradient of all
+parameters, stacked into one long vector; ||g|| is its length; c is the cap,
+max_norm in the code. Dividing by the length makes a vector of length 1, and
+multiplying by c makes it length c — same direction, capped length. With the
+picture's numbers: 1 x g / 900 has length 1.
 
 Norm clipping, not value clipping: clip_grad_value_ exists and clamps each
 component independently, which changes the direction of the update. Almost nobody
@@ -2025,20 +2285,38 @@ for chunk in chunks_of(book, size=128):       # 128 steps
 </div>
 
 <!--
-The picture: the accent line is the state, flowing forward through every chunk.
-The red arrows are the gradient, flowing back only inside each chunk of 128
-steps. The dashed cuts are the detach() calls.
+The point: a very long sequence cannot be backpropagated in one go, so it is cut
+into chunks. Truncated BPTT truncates learning, not memory: the state still
+crosses every chunk boundary, only the gradient stops.
 
-The distinction in bullet one is the thing to get right: truncated BPTT
-truncates learning, not memory. The forward context is as long as you like. In
-the note metaphor: the note keeps being passed along the whole row, but a
-correction only travels back as far as the start of the current chunk.
+On screen: the problem in one line — a 100 000-character book is one sequence,
+and 100 000 steps of activations do not fit in memory. Left, the loop over
+chunks of 128 steps. Right, the picture: the accent line is the state, flowing
+forward through every chunk. The red arrows are the gradient, flowing back only
+inside each chunk of 128 steps. The dashed cuts are the detach() calls.
 
-detach() returns a tensor sharing the same storage with no graph history. This is
-also the answer to "why is my loop using more memory every iteration" for anyone
-who ever accumulates losses in a list.
+Click: line 3 — skip the cut on the very first chunk, when there is no state yet.
 
-The tuple is there because an LSTM's state is a pair, (h, c) — next section.
+Click 2: lines 4-5 — detach the state: keep the values, cut the graph. detach()
+returns a tensor sharing the same storage with no graph history. The tuple is
+there because an LSTM's state is a pair, (h, c) — next section.
+
+Click 3: line 6 — run the model on the chunk, starting from the carried-over
+state, and get the new state back.
+
+Click 4: the whole loop again; the loss, backward and step happen once per chunk.
+
+Click 5: the state still flows forward across chunks, so the model's context is
+not cut. This is the thing to get right. In the note metaphor: the note keeps
+being passed along the whole row, but a correction only travels back as far as
+the start of the current chunk.
+
+Click 6: only the gradient stops at the boundary — that is what detach() does.
+Point at the dashed lines.
+
+Click 7: forget the detach and the graph grows across every chunk until the run
+runs out of memory. This is also the answer to "why is my loop using more memory
+every iteration" for anyone who ever accumulates losses in a list.
 
 k = 128 or 256 is typical for character models. It is a memory decision.
 -->
@@ -2266,18 +2544,42 @@ each with its own weights. Only the last two are new.
 </div>
 
 <!--
-Reveal them in this order and say what changes each time: the first four are
-identical in form and differ only in their weights and their activation. That is
-why the parameter count is exactly 4x the plain RNN's, and why nn.LSTM stores one
-weight_ih of shape (4H, input) rather than four matrices.
+The point: the LSTM looks like six equations, but four of them are the same
+layer with different weights. Only the last two — the updates of c and h — are
+new ideas.
 
-The picture under the equations is the same point drawn: one input, four boxes of
-the same shape, then the update.
+On screen: at first only the heading, the line "three gates and a candidate,
+then two lines that update the states", and the picture underneath. The picture
+is the same point drawn: one input (x, h), four boxes of the same shape — three
+sigmoids giving the gates f, i and o, one tanh giving the candidate c~ — then
+all four feed the update of c and h.
 
-The odot is elementwise, not a matrix product. Every gate decision is per unit.
+Reveal the equations in order and say what changes each time: the first four
+are identical in form and differ only in their weights and their activation.
 
-Sigmoid for a gate because a gate is a fraction in (0, 1); tanh for the candidate
-because content should be signed.
+Click: the forget gate. Read it: "f at step t is the sigmoid of W_xf times x_t,
+plus W_hf times the previous h, plus a bias." Point at the first sigma box.
+
+Click 2: the input gate i_t — the same shape, its own weights.
+
+Click 3: the candidate c~_t — the same shape again, but with tanh. Sigmoid for a
+gate because a gate is a fraction in (0, 1); tanh for the candidate because
+content should be signed.
+
+Click 4: the output gate o_t, top of the right column — the fourth copy.
+
+Click 5: the cell update. "c_t is f_t times the old c, plus i_t times the
+candidate." Keep a fraction of the old memory, add a fraction of the new
+content. The odot is elementwise, not a matrix product: every gate decision is
+per unit.
+
+Click 6: the output. "h_t is o_t times tanh of c_t" — squash the memory, then
+let the output gate decide how much of it to show.
+
+Click 7: the callout. Four of the six are the same layer, sigma or tanh of
+Wx + Wh + b, each with its own weights. That is why the parameter count is
+exactly 4x the plain RNN's, and why nn.LSTM stores one weight_ih of shape
+(4H, input) rather than four matrices.
 
 Every symbol is named on the next slide, "Reading the equation: the LSTM cell".
 -->
@@ -2587,9 +2889,23 @@ The GRU (gated recurrent unit): one state, two gates.
 </v-clicks>
 
 <!--
-Drive the reset gate to 0 first: the candidate bar jumps, because it has stopped
-reading the state. Then drive z to 0 and 1 in turn: frozen state, then total
-overwrite.
+The point: the GRU is the same gating idea with fewer parts — one state instead
+of two, two gates instead of three — and it works about as well.
+
+On screen: the GatedCell widget in its GRU variant: a slider for each gate, bars
+for the old state, the candidate and the new state. The aside: the GRU (gated
+recurrent unit) has one state and two gates.
+
+Click: the update gate z does the forget and input jobs at once. One number
+decides both how much to keep and how much to write.
+
+Click 2: the reset gate r sets how much of the past the candidate may read. Drive
+the reset gate to 0 now: the candidate bar jumps, because it has stopped reading
+the state.
+
+Click 3: the blend. Read it: "h_t is (1 - z) times the old h, plus z times the
+candidate." The two shares sum to 1. Now drive z to 0 and 1 in turn: at 0 the
+state is frozen, at 1 it is totally overwritten.
 
 The structural consequence worth naming: an LSTM can forget without writing
 (f = 0, i = 0) and a GRU cannot, because its kept and written shares are tied.
@@ -2876,11 +3192,26 @@ unnamed axes.
 </div>
 
 <!--
-The honest caveat in the secondary line matters. The widget's axes, "sentiment"
-and "is a film noun", are hand-written to look like a trained table; they are not
-the toy review's axes ("positive word", "negation word"), and this is not the same
-table. Do not let anyone leave thinking dimension 1 is "sentiment" in a real
-model.
+The point: an embedding table is not a list of arbitrary codes; after training,
+words that are used alike sit near each other, and that geometry is what the
+model has learned.
+
+On screen: the EmbeddingLab widget in "space" mode — each word is a dot in two
+dimensions. The aside opens with the key fact: in a trained model these
+coordinates are weights, moved by gradient descent like any other.
+
+Click: great and brilliant end up together. Point at the pair in the widget.
+
+Click 2: awful and terrible too, at the far end of the same axis.
+
+Click 3: the and a sit near zero on both axes — they carry neither sentiment nor
+meaning about films.
+
+Click 4: the honest caveat in the secondary line, and it matters. The widget's
+axes, "sentiment" and "is a film noun", are hand-written to look like a trained
+table; they are not the toy review's axes ("positive word", "negation word"), and
+this is not the same table. A real table has 64 unnamed axes. Do not let anyone
+leave thinking dimension 1 is "sentiment" in a real model.
 
 The useful consequence: a word the model saw twice can inherit from a word it saw
 a thousand times, because they sit near each other. That is what "extraction of
@@ -2948,23 +3279,41 @@ Or start from a table pre-trained on billions of words: **word2vec**, **GloVe**,
 </div>
 
 <!--
-The two reviews, as a batch. Review A is one word shorter, so it is padded with
-id 0 to length 5. The ids are made up (a real tokeniser assigns them); 4217 is
-"great", the same number as on "A word is not a number".
+The point: an embedding layer is a lookup table — integer ids in, one learned
+row of 64 numbers per id out — and it is usually most of the model's weights.
 
-Line 2: padding_idx is the practical line. Row 0 is pinned at zero and gets no
-gradient. Without it the pad row drifts during training and quietly contributes
-to every short sequence in the batch.
+On screen: the shape picture across the top. Token ids of shape (2, 5) go into
+the table of 20 000 x 64 and come out as vectors of shape (2, 5, 64). Below, the
+code that does it, with the two reviews as a batch.
 
-Line 6: (B, T) in, (B, T, d) out: batch 2, time 5, width 64.
+Click: lines 1-2 — the table: 20 000 words, 64 numbers each. padding_idx is the
+practical line. Row 0 is pinned at zero and gets no gradient. Without it the pad
+row drifts during training and quietly contributes to every short sequence in
+the batch.
 
-20 000 x 64 = 1 280 000 numbers. Put an LSTM(64, 128) and a Linear(128, 1) on top
-and the embedding is 93% of all the weights (1 280 000 of 1 379 457; checked in
-Python). They start random unless you load a pre-trained table.
+Click 2: lines 4-5 — the two reviews as ids. Review B is the first row; review
+A is one word shorter, so it is padded with id 0 to length 5. The ids are made up
+(a real tokeniser assigns them); 4217 is "great", the same number as on "A word
+is not a number".
 
+Click 3: line 6 — the lookup. (B, T) in, (B, T, d) out: batch 2, time 5, width 64.
+
+Click 4: line 7 — the table itself is a weight matrix of shape (20000, 64).
+
+Click 5: the whole block again.
+
+Click 6: integer ids in, shape (batch, time) — no one-hot vectors anywhere.
+
+Click 7: padding_idx=0 keeps row 0 at zero, as on line 2.
+
+Click 8: 1.28 M learned numbers, starting random. 20 000 x 64 = 1 280 000. Put an
+LSTM(64, 128) and the Linear(128, 2) head on top and the embedding is 92.8% of
+all the weights (1 280 000 of 1 379 586, the same classifier as section 05).
+
+Click 9: the callout — or start from a table pre-trained on billions of words.
 Pre-trained tables (word2vec 2013, GloVe 2014, fastText 2016) were the transfer
-learning of language models from 2013 to 2018, the same idea as starting a network
-from pre-trained weights. The words came pre-trained but the model
+learning of language models from 2013 to 2018, the same idea as starting a
+network from pre-trained weights. The words came pre-trained but the model
 reading them did not.
 -->
 
@@ -3115,15 +3464,45 @@ Pick by the **task shape**. Pick wrong, and the shapes can still line up.
 </div>
 
 <!--
-The callout points back to "Which shapes does a sequence problem come in?":
-classifying a review is many to one, a tag per word is many to many.
+The point: nn.LSTM hands back two things, and which one you keep depends on the
+task shape. Classifying a review needs one vector per review; tagging every word
+needs one vector per word.
 
-The picture is the code: five steps over review B, each with an output vector on
-top. `output` is all five; `h_n` is the last one, drawn in the accent colour.
+On screen: the code on the left, and on the right the same code as a picture —
+five LSTM steps over review B, each with an output vector on top. `output` is all
+five of them; `h_n` is the last one, drawn in the accent colour.
 
-Have them check bullet three as an assertion in the lab:
+Click: the first two lines light up. One LSTM layer, 64 numbers in per word (the
+embedding size), 128 numbers of state. batch_first=True means the batch is the
+first axis, which is how our data loader hands it over.
+
+Click 2: lines 4–5. A fake batch: 32 reviews, 200 steps, 64 numbers per step, so
+(B, T, embed). The call returns output and a tuple (h_n, c_n).
+
+Click 3: line 7. output is (32, 200, 128): the state at every one of the 200
+steps, for every review. That is the row of five vectors in the picture.
+
+Click 4: line 8. h_n is (1, 32, 128): only the last step. The leading 1 is the
+number of layers (times directions); with num_layers=2 it would be 2.
+
+Click 5: the whole block again. Ask the room which of the two they would hand to
+a classifier head before the bullets answer it.
+
+Click 6: classify a review — take h_n[-1], shape (32, 128). The [-1] picks the
+last layer, so it stays correct if you stack layers later.
+
+Click 7: a label per word — take output, (32, 200, 128), and put a head on every
+step.
+
+Click 8: the two agree: output[:, -1] equals h_n[-1], as long as nothing is
+padded. Have them check it as an assertion in the lab:
 torch.allclose(output[:, -1, :], h_n[-1]). It is true, and the "when nothing is
 padded" caveat is the whole subject of the next two slides.
+
+Click 9: the callout. Pick by the task shape. This points back to "Which shapes
+does a sequence problem come in?": classifying a review is many to one, a tag
+per word is many to many. Pick the wrong one and the shapes can still line up
+after a reshape, so nothing crashes — the model just learns the wrong thing.
 
 c_n is the cell state and you almost never touch it — except to pass it back in
 when continuing a sequence, as in truncated backpropagation through time.
@@ -3162,23 +3541,32 @@ token, id 0.
 </div>
 
 <!--
-Faint tiles are padding. Draw attention to the last row: two real words, six
-steps of padding, and the final hidden state is the state after six updates on a
-token that means nothing. Nothing crashes; the model just gets a worse feature
-vector for every short review in every batch.
+The point: a batch is one rectangle, but reviews have different lengths. The
+gaps get filled with a pad token, and unless the model is told the real lengths,
+it reads the padding as if it were words.
 
-The third row is the long one: our review B with three more words. Lengths are
-5, 3, 8 and 2: 18 real tokens out of 32 slots, 14 pads.
+On screen: four reviews as rows of word tiles, padded out to 8 slots. Faint
+tiles are padding. The third row is the long one: our review B with three more
+words ("but well acted"). Lengths are 5, 3, 8 and 2. In the tensor each tile is
+an integer id; the pad id is 0 by convention, and nn.Embedding(padding_idx=0)
+keeps its vector at zero.
 
-In the tensor each tile is an integer id; the pad id is 0 by convention, and
-nn.Embedding(padding_idx=0) keeps its vector at zero.
+Click: count it. 18 real tokens out of 32 slots, 14 pads — nearly half the batch
+is nothing.
 
-This is why a length tensor is part of the batch and why the collate function has
-to build it. It is also the single most common reason a student's RNN scores worse
-than their bag-of-words baseline.
+Click 2: draw attention to the last row, "utterly awful". The LSTM runs all 8
+steps on it: two real words, then six steps reading padding.
 
-Sorting a batch by length reduces the padding a lot. Bucketing by length reduces
-it further.
+Click 3: so h_n is the state after six updates on a token that means nothing.
+Nothing crashes; the model just gets a worse feature vector for every short
+review in every batch. That is why the batch has to carry its lengths: a length
+tensor is part of the batch, and the collate function has to build it.
+
+This is the single most common reason a student's RNN scores worse than their
+bag-of-words baseline.
+
+If asked how to waste less: sorting a batch by length reduces the padding a lot.
+Bucketing by length reduces it further.
 -->
 
 ---
@@ -3233,19 +3621,38 @@ row.
 </div>
 
 <!--
-The picture: the same four reviews, sorted by length. Dashed cells are padding;
-the accent cell in each row is where h_n is now read. The numbers underneath are
-what a PackedSequence actually stores as batch_sizes: 4, 4, 3, 2, 2, 1, 1, 1,
-which add up to the 18 real tokens. At step 6 only one review is still going.
+The point: packing tells the LSTM where each review really ends, so it stops
+each row at its own length. Without it, h_n is the wrong vector for every padded
+row.
 
-enforce_sorted=False is the modern convenience; older code sorts the batch by
-length by hand and then has to unsort the outputs. Show them the flag exists.
+On screen: the code on the left. On the right, the same four reviews sorted by
+length, 8, 5, 3, 2. The accent cell in each row is the last real token — where
+h_n is now read; the cells after it are padding. The numbers underneath are what
+a PackedSequence actually stores as batch_sizes: 4, 4, 3, 2, 2, 1, 1, 1 — how
+many reviews are still going at each step. They add up to the 18 real tokens. At
+step 6 only one review is still going.
 
-lengths must be on the CPU — a real error message people hit and do not expect.
+Click: lines 1–4. Import the two helpers and pack the embedded batch with its
+lengths. enforce_sorted=False is the modern convenience; older code sorts the
+batch by length by hand and then has to unsort the outputs. Show them the flag
+exists. lengths must be on the CPU — a real error message people hit and do not
+expect.
+
+Click 2: line 5. The LSTM takes the packed batch directly and skips the pad
+steps. Nothing else about the call changes.
+
+Click 3: lines 6–8. h_n[-1] is now the state after the last real token of each
+row. output comes back as a PackedSequence; pad_packed_sequence turns it into a
+padded tensor again, with zeros where the padding was.
+
+Click 4: the whole block again — five lines of code, and only one of them is
+the LSTM.
+
+Click 5: the callout. This is not an optimisation; it is a correctness fix.
 
 For a many-to-many model you could skip packing and mask the loss instead, and
-that is a legitimate choice. For many-to-one you cannot: there is nothing to mask,
-the damage is already inside h_n.
+that is a legitimate choice. For many-to-one you cannot: there is nothing to
+mask, the damage is already inside h_n.
 -->
 
 ---
@@ -3306,15 +3713,38 @@ final state, so it stays right with `num_layers=2`.
 </div>
 
 <!--
-Read the shape comments aloud; every one of them is checkable and they should
-check them. The strip on the right is the same ledger drawn as boxes: the 200
-disappears at the LSTM. That is where the sequence becomes a vector.
+The point: the whole review classifier is three layers — embedding, LSTM,
+linear — and the only new line compared with an MLP or CNN is the pack.
 
-The dropout sits on the final state, between the recurrence and the head — the
-same place as in the CNN, for the same reason. Dropout *inside* the recurrence
-needs care: dropping a different set of units every step destroys the state.
-nn.LSTM's own `dropout=` argument applies between stacked layers, not across time,
-and it does nothing at all with num_layers=1 (PyTorch warns about this).
+On screen: the model class on the left, and on the right a shape strip: ids
+(32, 200), Embedding, emb (32, 200, 64), LSTM packed, h_n[-1] (32, 128) in the
+accent colour, Linear, logits (32, 2). The 200 disappears at the LSTM. That is
+where the sequence becomes a vector.
+
+Click: lines 4–5. The embedding turns each id into 64 numbers; padding_idx=0
+keeps the pad token's vector at zero. The LSTM reads 64 and keeps 128 numbers of
+state, batch first.
+
+Click 2: lines 6–7. Dropout of 0.3, and a linear head to 2 logits, positive and
+negative. The dropout sits on the final state, between the recurrence and the
+head — the same place as in the CNN, for the same reason.
+
+Click 3: line 10. Read the shape comment aloud: (B, T, 64). Every shape comment
+on this slide is checkable and they should check them.
+
+Click 4: lines 11–14. Pack with the lengths, run the LSTM, keep only h_n,
+(1, B, 128). Take h_n[-1], dropout, head: (B, 2).
+
+Click 5: the whole class again; point at the shape strip and walk down it once.
+
+Click 6: the note underneath. Three layers, and the only new line is the pack.
+h_n[-1] is the last layer's final state, so the code stays right with
+num_layers=2.
+
+Dropout *inside* the recurrence needs care: dropping a different set of units
+every step destroys the state. nn.LSTM's own `dropout=` argument applies between
+stacked layers, not across time, and it does nothing at all with num_layers=1
+(PyTorch warns about this).
 
 No softmax, because CrossEntropyLoss applies it — the same trap as for CNNs.
 -->
@@ -3433,16 +3863,35 @@ class.
 </div>
 
 <!--
-Say the thing the slide is for: the pipeline is the same one used for MLPs and
-CNNs.
-A new architecture is a new nn.Module.
+The point: the training loop is the same one used for MLPs and CNNs. A new
+architecture is a new nn.Module, plus one line: gradient clipping.
 
-The clip line is the only addition ("Gradient clipping, in one line" in section
-03), and it is the one that keeps a recurrent run from dying on its first long
-batch. It sits between backward() and step(), which the strip shows.
+On screen: the loop, and under it a strip — forward, loss, backward, clip, step
+— with clip in the accent colour and "gradient length ≤ 1.0" under it.
 
-`lengths` stays on the CPU deliberately — pack_padded_sequence requires it, and
-the model does the .cpu() itself, so this loop does not have to care.
+Click: lines 1–3. The model, CrossEntropyLoss, Adam with learning rate 1e-3.
+Nothing here is specific to sequences.
+
+Click 2: lines 6–7. model.train() and the loader. The loader now yields three
+things: ids, lengths and labels. `lengths` stays on the CPU deliberately —
+pack_padded_sequence requires it, and the model does the .cpu() itself, so this
+loop does not have to care.
+
+Click 3: lines 8–11. Move ids and labels to the device, forward with the
+lengths, compute the loss, zero the gradients. Familiar.
+
+Click 4: lines 12–14. backward, then the clip, then step. The clip line is the
+only addition ("Gradient clipping, in one line" in section 03), and it is the one
+that keeps a recurrent run from dying on its first long batch. It sits between
+backward() and step(), which the strip shows: it rescales the whole gradient so
+its length is at most 1.0, after the gradients exist and before the weights
+move.
+
+Click 5: the whole loop again. Ask: which line would you delete to make this a
+CNN loop? Only the clip, and the lengths argument.
+
+Click 6: the note. The MLP's loop, the CNN's loop and this one differ by one line
+and one model class.
 -->
 
 ---
@@ -3459,7 +3908,7 @@ title: Four bugs, and what each one looks like
 
 - **`batch_first` left out**: the batch is read as time
 - **No packing**: `h_n` is read after the padding
-- **Loss on padding**: fix with `ignore_index=0`
+- **Loss on padding**, with a label per word: fix with `ignore_index=0`
 - **No clipping**: one `nan` loss, then every weight is `nan`
 
 </v-clicks>
@@ -3467,7 +3916,7 @@ title: Four bugs, and what each one looks like
 </div>
 <div>
 
-<svg class="dl-diagram" viewBox="0 0 280 170" role="img" aria-label="A sketch of three loss curves against training steps. The correct model goes lowest. A silent bug flattens out higher. The run without clipping stops at nan.">
+<svg class="dl-diagram" viewBox="-14 0 294 170" role="img" aria-label="A sketch of three loss curves against training steps. The correct model goes lowest. A silent bug flattens out higher. The run without clipping stops at nan.">
   <path class="dl-dg-line is-muted" d="M24 10 V146 H272" style="stroke-width: 1.2;" />
   <text class="dl-dg-small" x="18" y="16" text-anchor="end">loss</text>
   <text class="dl-dg-small" x="272" y="162" text-anchor="end">steps</text>
@@ -3490,20 +3939,35 @@ enough.
 </div>
 
 <!--
-This slide is the lab's FAQ, written in advance. The habit that catches all
-three silent ones: print your shapes, and check h_n against lengths. The plot is a sketch, not a
-measured run: it shows what the three silent bugs look like (the grey curve)
-against the correct model, and what missing clipping looks like (the red curve
-stops).
+The point: this slide is the lab's FAQ, written in advance. Four bugs everyone
+makes, and three of them give no error message at all.
 
-Bug 1: the model reads 32 reviews as 32 time steps and still trains.
-Bug 2: h_n is the state after the padding, so every short review gets a worse
-feature vector.
-Bug 3: nn.CrossEntropyLoss(ignore_index=0) is the one-argument fix, and it is
+On screen: the bullets on the left reveal one bug per click. The plot on the
+right is a sketch, not a measured run: the green curve is the correct model and
+goes lowest; the grey "bug" curve is what any of the three silent bugs looks
+like — it trains, it flattens out, just higher; the red curve is the run without
+clipping, which stops at nan.
+
+Click: batch_first left out. The LSTM defaults to (T, B, features), so the model
+reads 32 reviews as 32 time steps and still trains.
+
+Click 2: no packing. h_n is the state after the padding, so every short review
+gets a worse feature vector.
+
+Click 3: loss on padding. The slide says when: a label per word (many to many),
+as in tagging or next-word prediction. Our review classifier has one label per
+review, so its labels are never padding — this bug waits for the generation
+model. nn.CrossEntropyLoss(ignore_index=0) is the one-argument fix, and it is
 why the pad id is conventionally 0 and conventionally reserved. Without it the
 model spends most of its capacity predicting the pad token.
-Bug 4: once a nan reaches the weights, nothing recovers — every later forward
-pass is nan. If a run goes to nan, restart it; do not wait.
+
+Click 4: no clipping. Point at the red curve. Once a nan reaches the weights,
+nothing recovers — every later forward pass is nan. If a run goes to nan,
+restart it; do not wait.
+
+Click 5: the callout. Three of the four give no error message: the loss still
+falls, just not far enough. The habit that catches all three silent ones: print
+your shapes, and check h_n against lengths.
 -->
 
 ---
@@ -3601,12 +4065,28 @@ bottleneck.
 </div>
 
 <!--
-Drag the slider from 2 to 8 slowly and say the number out loud each time: still
-256. That is the whole slide.
+The point: an encoder–decoder squeezes the whole source sentence into one
+context vector of fixed size. That size does not grow with the sentence, and
+that is the bottleneck.
 
-Encoder: an RNN that reads the source sentence. Decoder: a second RNN that writes
-the target sentence, one word at a time, exactly as on the previous slide — but
-starting from the encoder's final state instead of from zero.
+On screen: the widget. Bottom row: the encoder, an RNN that reads the German
+source sentence. Top row: the decoder, a second RNN that writes the English
+target one word at a time, exactly as on the previous slide — but starting from
+the encoder's final state instead of from zero. In the middle, the context box:
+256 numbers. The slider sets how many words are in the source, from 2 to 8.
+
+Before the clicks: read the aside's first line. Lengths and word order differ
+between the languages, and nothing is written until the whole source is read.
+
+Click: the encoder's final state, the context vector, is all the decoder knows
+about the source.
+
+Click 2: drag the slider from 2 to 8 slowly and say the number out loud each
+time: still 256. That is the whole slide. The readout also says how many more
+updates the first word has to survive before the encoder is done.
+
+Click 3: the callout. Eight words into 256 numbers is generous. Forty into the
+same 256 is the bottleneck.
 
 The second half of the argument, which the picture cannot show: the first word of
 the source has to survive every later update of the encoder state before the
@@ -3647,9 +4127,32 @@ them.
 </div>
 
 <!--
-Step through all five and stop on "read". The German verb is at the end of the
-clause and the English one is in the middle; the attention weights cross, and the
-crossing is the evidence that the model is not just copying word order.
+The point: attention drops the single fixed summary. The decoder keeps every
+encoder state and builds a fresh context for each word it writes.
+
+On screen: the same widget in attention mode, on "Ich habe ein Buch gelesen" →
+"I have read a book". Each press of Next word writes one English word; the
+weights over the five German encoder states appear above them, and the readout
+says which German word gets most of the weight.
+
+Press Next word once: writing "I", the weight is 0.90 on "Ich". Then press again
+for "have" before the first click.
+
+Click: "have" — the weight sits on "habe", 0.85.
+
+Press Next word to reach "read".
+
+Click 2: "read" — 0.85 of the weight on "gelesen", the last German word. Stop
+here. The German verb is at the end of the clause and the English one is in the
+middle; the attention lines cross, and the crossing is the evidence that the
+model is not just copying word order.
+
+Click 3: the alignment is learned, not given. Nobody told the model that "read"
+goes with "gelesen". Press on through "a" (0.88 on "ein") and "book" (0.86 on
+"Buch") if there is time.
+
+Click 4: the callout. No fixed summary to overflow: the decoder looks words up
+instead of remembering them.
 
 This is Bahdanau, Cho & Bengio, 2014 — attention added to a recurrent
 encoder–decoder. The recurrence is still there: the encoder is an RNN and the
@@ -3742,20 +4245,36 @@ weight.
 
 
 <!--
-Three lines, revealed one at a time, and then stop. The picture on the right is
-the worked example from the next slide, drawn as the three stages: scores 1.1, 0,
-0; softmax weights 0.6, 0.2, 0.2; context [0.6, 0.6].
+The point: attention is three lines of maths — score, softmax, weighted sum —
+and all three are differentiable, so the alignment is learned like any other
+weight.
 
-The score function a is a small MLP (multi-layer perceptron) in the 2014 paper;
-later papers often use a plain dot product, which is what the worked example on
-the next slide does.
+On screen: the heading says it in words — a new context at every output step, a
+weighted average of encoder states. The equations reveal one at a time on the
+left. The picture on the right is the worked example from the next slide, drawn
+as the three stages: scores 1.1, 0, 0; softmax weights 0.6, 0.2, 0.2 as bars;
+the three states feeding one context vector [0.6, 0.6], with line widths
+proportional to the weights.
 
-The one thing to point at: everything on this slide is differentiable, so the
-alignment is learned by the same gradient descent as the rest. Nobody supplies
-alignments.
+Click: the score. "e t i equals a of s t minus 1 and h i": for output step t,
+score each encoder state h_i against the decoder's state before writing,
+s_{t-1}. The score function a is a small MLP (multi-layer perceptron) in the 2014
+paper; later papers often use a plain dot product, which is what the worked
+example on the next slide does.
 
-Do not go further than this today. "The other wall" names the problem attention
-does not fix.
+Click 2: the softmax. "alpha t i is e to the score, divided by the sum of e to
+every score." The weights are positive and add up to 1 across the source words.
+In the picture: 1.1, 0, 0 become 0.6, 0.2, 0.2.
+
+Click 3: the weighted sum. "c t is the sum over i of alpha t i times h i." The
+context for this step is mostly h_1, a little of the others.
+
+Click 4: the callout — the one thing to point at. Everything on this slide is
+differentiable, so the alignment is learned by the same gradient descent as the
+rest. Nobody supplies alignments.
+
+Three lines, then stop. Do not go further than this today. "The other wall" names
+the problem attention does not fix.
 -->
 
 ---
@@ -3892,11 +4411,25 @@ step at a time.
 </div>
 
 <!--
-This is the slide that explains the last eight years. Spend two minutes.
+The point: there is a second wall, and attention does not fix it. h_t needs
+h_{t-1}, so the steps of a recurrent network cannot run in parallel. Spend two
+minutes; this slide explains why recurrent models were set aside.
 
-The picture: against clock time, the RNN computes one state per tick, because h2
-needs h1. A convolution, or an attention weighted sum on its own, computes every
-position in the first tick — the stacked boxes.
+On screen: against clock time. The top row is the RNN: one state per tick, h1 to
+h5, five ticks for five words, because h2 needs h1. The bottom row is a
+convolution, or an attention weighted sum on its own: every position computed in
+the first tick — the stacked boxes, "all at once".
+
+Click: 200 tokens means 200 matrix multiplies, one after another.
+
+Click 2: the batch runs in parallel — 32 reviews at once is fine. Time cannot:
+step 7 of every review waits for step 6.
+
+Click 3: more hardware does not shorten the chain. A bigger GPU makes each step
+faster, not the number of steps smaller.
+
+Click 4: the callout. Attention fixed the bottleneck, but the encoder and decoder
+are still RNNs: one step at a time.
 
 Both walls matter, and they are different: the bottleneck is about what the model
 can represent, and attention fixed it in 2014. Parallelism is about what a GPU can
@@ -4037,13 +4570,32 @@ at a time, and report what each change costs. That report is the graded part.
 </div>
 
 <!--
-The deliberate-breakage exercise is the point. A student who has watched
-batch_first cost them six accuracy points never forgets it, and no amount of
+The point: three things to read, and the lab — where the bugs from this lecture
+get made on purpose.
+
+On screen: three link cards, then the lab description with a small picture on
+the right: three runs, each with one thing removed — no batch_first, no packing,
+no clipping — and each run's accuracy a question mark to measure.
+
+Click: Olah, "Understanding LSTMs" (2015). The clearest explanation of the
+gates; read it once before the lab.
+
+Click 2: Karpathy, "The Unreasonable Effectiveness of RNNs" (2015). A
+character-level LSTM writing Shakespeare, C code and LaTeX — the generation
+slide, at scale.
+
+Click 3: the nn.LSTM documentation. Worth reading for the shapes, the two bias
+vectors, and the GRU gate written the other way round.
+
+Click 4: the lab. Train the review classifier, then break it on purpose, one
+change at a time, and report what each change costs. That report is the graded
+part. The deliberate-breakage exercise is the point. A student who has watched
+batch_first quietly cost them accuracy never forgets it, and no amount of
 saying it from the front achieves that.
 
 The three runs on the right are three of the bugs from "Four bugs, and what each
-one looks like": two silent ones, and clipping, the loud one. Each run changes exactly one
-thing against a working baseline.
+one looks like": two silent ones, and clipping, the loud one. Each run changes
+exactly one thing against a working baseline.
 
 Practicalities — dataset, deadline, what to hand in — belong on the course page.
 -->

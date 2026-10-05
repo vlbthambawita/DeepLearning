@@ -23,12 +23,21 @@ npm run export -- --only lecture-01    # printable PDF (needs Chromium: npx play
 npm run preview                        # serve dist/ at http://localhost:4173
 npm run check -- lecture-01            # overflow/clipping check against a running preview (see below)
 npm run check                          # every deck; --dark and --shots <dir> also available
+npm run check:layout -- lecture-07 --from 30 --to 40   # overlapping text + dead clicks (--no-clicks = faster)
+python3 .claude/skills/lecture-deck/slide-lint.py lecture-07 [--only read,dup,click,eq]  # source-level lint
+python3 .claude/skills/lecture-deck/slide-stats.py lecture-07   # per-slide stats, lists "no picture" slides
 python3 scripts/extract_figures.py --only lecture-02   # pull figures out of a 2025 PDF
 ```
 
-There is no test suite and no linter. `npm run check` is the closest thing to a test — it
-must run against a live `npm run preview` (build first). CI (`.github/workflows/ci.yml`)
-only runs `npm run build:all` and asserts `dist/` contains the Space's `index.html`/`README.md`.
+There is no test suite. The checks above are the closest thing: `check` (content clipped
+off-canvas/behind the footer) and `check:layout` (colliding text, clicks that reveal nothing)
+render the deck in Playwright and must run against a live `npm run preview` (build first);
+`slide-lint.py`/`slide-stats.py` read source only. All exit non-zero on findings. CI
+(`.github/workflows/ci.yml`) only runs `npm run build:all` and asserts `dist/` contains the
+Space's `index.html`/`README.md`.
+
+The project skill `.claude/skills/lecture-deck/SKILL.md` (invoke as `lecture-deck`) is the
+authoring/review checklist for decks and widgets — load it before building or reviewing slides.
 
 ## Architecture
 
@@ -56,6 +65,10 @@ only runs `npm run build:all` and asserts `dist/` contains the Space's `index.ht
 - `export-pdf.mjs` renders each deck to `<id>/slides.pdf` (one page per click step).
 - `publish-hf.mjs` uploads `dist/` via the `hf` CLI. `--mode full` passes `--delete "*"`
   (replace whole Space); `--mode deck --only <id>` uploads one deck without deleting others.
+
+**Staging:** every push to `main` builds the published decks (plus PDFs) to GitHub Pages
+(`pages.yml`). Pushing to the `diagnostics` branch runs `diagnose-space.yml`, which reports
+what is actually deployed on the Space and commits the report back to that branch.
 
 **Publishing is tag-driven** (`.github/workflows/release.yml`). Nothing reaches students
 until a tag is pushed:
