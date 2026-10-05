@@ -85,7 +85,10 @@ function sci(v: number): string {
   if (v === 0)
     return '0'
   const abs = Math.abs(v)
-  if (abs >= 0.001 && abs < 10000)
+  /* Two significant figures below 1, matching how the slides round (0.012, 0.82). */
+  if (abs >= 0.001 && abs < 1)
+    return String(Number(v.toPrecision(2)))
+  if (abs >= 1 && abs < 10000)
     return String(Number(v.toPrecision(3)))
   const [mantissa, exponent] = v.toExponential(1).split('e')
   return `${mantissa} \u00d7 10${[...exponent].map(c => SUPERSCRIPT[c] ?? c).join('')}`
@@ -97,7 +100,7 @@ function sci(v: number): string {
     <Plot2D
       :x-domain="[0, props.steps]"
       :y-domain="[Y_MIN, Y_MAX]"
-      :x-ticks="[0, 5, 10, 15, 20, 25]"
+      :x-ticks="[0, 5, 10, 15, 20, 25].filter(t => t <= props.steps)"
       :y-ticks="[-12, -9, -6, -3, 0, 3]"
       x-label="time steps back through the sequence"
       y-label="log₁₀ of the gradient's size"

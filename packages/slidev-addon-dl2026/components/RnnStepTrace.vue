@@ -10,23 +10,38 @@
  * added. Once a student can produce that line they can hand-run an RNN.
  *
  * The numbers come from `useRecurrence`, so this widget and the unrolled chain
- * cannot drift apart, and the sequence is x = 1, 0, 1, 0 so that step 2 makes
- * the point on its own: zero input, non-zero state.
+ * cannot drift apart. `example="pulse"` runs x = 1, 0, 1, 0 so that step 2 makes
+ * the point on its own: zero input, non-zero state. `example="review"` runs the
+ * lecture's running example, "the movie was not great", word by word — the step
+ * that matters there is *great*, where the flag left by *not* flips the sentiment.
  */
 import { computed, ref } from 'vue'
 import { num } from '../composables/useConvolution'
-import { DEMO_RNN, rnnForward } from '../composables/useRecurrence'
+import { DEMO_RNN, REVIEW_B, REVIEW_RNN, reviewInputs, rnnForward, sigmoid } from '../composables/useRecurrence'
 
 const props = withDefaults(defineProps<{
+  /** Number of steps for the pulse example; the review has one per word. */
   steps?: number
+  example?: 'pulse' | 'review'
 }>(), {
   steps: 4,
+  example: 'pulse',
 })
 
-const inputs = computed(() =>
-  Array.from({ length: props.steps }, (_, i) => [i % 2 === 0 ? 1 : 0]))
+const isReview = computed(() => props.example === 'review')
+const params = computed(() => isReview.value ? REVIEW_RNN : DEMO_RNN)
+const nSteps = computed(() => isReview.value ? REVIEW_B.length : props.steps)
 
-const trace = computed(() => rnnForward(inputs.value, DEMO_RNN))
+const inputs = computed(() => isReview.value
+  ? reviewInputs(REVIEW_B)
+  : Array.from({ length: props.steps }, (_, i) => [i % 2 === 0 ? 1 : 0]))
+
+/** What the x strip prints: the word, or the number. */
+const xLabels = computed(() => isReview.value
+  ? REVIEW_B
+  : inputs.value.map(x => String(x[0])))
+
+const trace = computed(() => rnnForward(inputs.value, params.value))
 
 /** Which time step we are deriving. */
 const index = ref(0)
@@ -35,15 +50,15 @@ const line = ref(1)
 
 const LINES = 4
 
-const current = computed(() => trace.value[Math.min(index.value, props.steps - 1)])
-const atEnd = computed(() => index.value === props.steps - 1 && line.value === LINES)
+const current = computed(() => trace.value[Math.min(index.value, nSteps.value - 1)])
+const atEnd = computed(() => index.value === nSteps.value - 1 && line.value === LINES)
 
 function step() {
   if (line.value < LINES) {
     line.value += 1
     return
   }
-  index.value = (index.value + 1) % props.steps
+  index.value = (index.value + 1) % nSteps.value
   line.value = 1
 }
 
@@ -63,7 +78,7 @@ const derivation = computed(() => {
 
   const rows = [
     `h_{${t}} &= \\tanh\\!\\left(W_{xh}\\,x_{${t}} + W_{hh}\\,h_{${t - 1}} + b_h\\right)`,
-    `&= \\tanh\\!\\left(${mat(DEMO_RNN.wxh)}${col(s.x)} + ${mat(DEMO_RNN.whh)}${col(s.hPrev)}\\right)`,
+    `&= \\tanh\\!\\left(${mat(params.value.wxh)}${col(s.x)} + ${mat(params.value.whh)}${col(s.hPrev)}\\right)`,
     `&= \\tanh\\!\\left(${col(s.fromInput)} + ${col(s.fromState)}\\right)`,
     `&= \\tanh${col(s.z)} = \\mathbf{${col(s.h)}}`,
   ].slice(0, line.value)
@@ -88,11 +103,11 @@ const caption = computed(() => CAPTIONS[line.value - 1])
       <div class="dl-rtrace__strip">
         <div class="dl-rtrace__key">x</div>
         <div
-          v-for="(x, i) in inputs"
+          v-for="(x, i) in xLabels"
           :key="`x${i}`"
           class="dl-rtrace__cell"
           :class="{ 'is-current': i === index }"
-        >{{ x[0] }}</div>
+        >{{ x }}</div>
       </div>
 
       <div class="dl-rtrace__strip">
@@ -116,13 +131,21 @@ const caption = computed(() => CAPTIONS[line.value - 1])
     </template>
 
     <template #readout>
-      Step <strong>{{ current.t }}</strong> of {{ props.steps }}, line {{ line }} of {{ LINES }} —
+      Step <strong>{{ current.t }}</strong> of {{ nSteps }}, line {{ line }} of {{ LINES }} —
       {{ caption }}.
-      <span v-if="line === LINES">
+      <span v-if="line === LINES && !isReview">
         The output is then o<sub>{{ current.t }}</sub> = W<sub>ho</sub>h<sub>{{ current.t }}</sub> =
         <strong>{{ num(current.o[0]) }}</strong>.
       </span>
-      <span v-if="line === LINES && current.x[0] === 0" class="dl-rtrace__note">
+      <span v-if="line === LINES && isReview && current.t === nSteps" class="dl-rtrace__note">
+        Last word read: ŷ = σ(3 × {{ num(current.h[1]) }}) =
+        <strong>{{ num(sigmoid(current.o[0])) }}</strong> — negative. Without <em>not</em>, the
+        same weights give 0.91.
+      </span>
+      <span v-else-if="line === LINES && isReview && xLabels[index] === 'not'" class="dl-rtrace__note">
+        The first unit is now a flag: “a <em>not</em> just happened”.
+      </span>
+      <span v-if="line === LINES && !isReview && current.x[0] === 0" class="dl-rtrace__note">
         x<sub>{{ current.t }}</sub> = 0, and h<sub>{{ current.t }}</sub> ≠ 0. Every number in it came
         from earlier steps.
       </span>

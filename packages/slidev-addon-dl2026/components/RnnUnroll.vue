@@ -13,11 +13,12 @@
  *
  * Stepping through the unrolled chain prints the actual hidden state from
  * `useRecurrence`, so the sequence x = 1, 0, 1, 0 does the arguing: at t = 2 the
- * input is zero and the state is not.
+ * input is zero and the state is not. `example="review"` runs the lecture's
+ * running example instead — "the movie was not great", one word per step.
  */
 import { computed, ref } from 'vue'
 import { num } from '../composables/useConvolution'
-import { DEMO_RNN, rnnForward } from '../composables/useRecurrence'
+import { DEMO_RNN, REVIEW_B, REVIEW_RNN, reviewInputs, rnnForward } from '../composables/useRecurrence'
 
 const props = withDefaults(defineProps<{
   /** Time steps in the unrolled chain. */
@@ -28,30 +29,41 @@ const props = withDefaults(defineProps<{
   values?: boolean
   /** Show the weight name on every arrow — the parameter-sharing point. */
   weights?: boolean
+  /** `pulse`: x = 1, 0, 1, 0. `review`: the running example, one word per step. */
+  example?: 'pulse' | 'review'
 }>(), {
+  example: 'pulse',
   steps: 4,
   start: 'fold',
   values: true,
   weights: true,
 })
 
-/** x = 1, 0, 1, 0, … — a pulse, so the state between pulses is visibly non-zero. */
-const inputs = computed(() =>
-  Array.from({ length: props.steps }, (_, i) => [i % 2 === 0 ? 1 : 0]))
+const isReview = computed(() => props.example === 'review')
+const nSteps = computed(() => isReview.value ? REVIEW_B.length : props.steps)
 
-const trace = computed(() => rnnForward(inputs.value, DEMO_RNN))
+/** x = 1, 0, 1, 0, … — a pulse, so the state between pulses is visibly non-zero. */
+const inputs = computed(() => isReview.value
+  ? reviewInputs(REVIEW_B)
+  : Array.from({ length: props.steps }, (_, i) => [i % 2 === 0 ? 1 : 0]))
+
+const trace = computed(() => rnnForward(inputs.value, isReview.value ? REVIEW_RNN : DEMO_RNN))
+
+/** No input this step, yet a state: the memory, as a fact on the screen. */
+const remembers = (step: { x: number[], h: number[] }) =>
+  step.x.every(v => v === 0) && step.h.some(v => Math.abs(v) > 1e-9)
 
 const folded = ref(props.start === 'fold')
 /** How many steps of the chain have been computed. -1 = none yet. */
 const at = ref(-1)
 
-const cursor = computed(() => Math.min(at.value, props.steps - 1))
+const cursor = computed(() => Math.min(at.value, nSteps.value - 1))
 const current = computed(() => (cursor.value < 0 ? null : trace.value[cursor.value]))
-const done = computed(() => cursor.value >= props.steps - 1)
+const done = computed(() => cursor.value >= nSteps.value - 1)
 
 function step() {
   folded.value = false
-  at.value = cursor.value < props.steps - 1 ? cursor.value + 1 : -1
+  at.value = cursor.value < nSteps.value - 1 ? cursor.value + 1 : -1
 }
 
 const vec = (v: number[]) => v.map(n => num(n)).join(', ')
@@ -67,7 +79,7 @@ const Y_OUT = 18
 const Y_CELL = 92
 const Y_IN = 172
 
-const U_WIDTH = computed(() => LEFT + (props.steps - 1) * PITCH + BOX_W + 30)
+const U_WIDTH = computed(() => LEFT + (nSteps.value - 1) * PITCH + BOX_W + 30)
 const U_HEIGHT = 226
 
 const colX = (i: number) => LEFT + i * PITCH
@@ -141,7 +153,7 @@ const F_MID = F_CY + CELL_H / 2
       :viewBox="`0 0 ${U_WIDTH} ${U_HEIGHT}`"
       preserveAspectRatio="xMidYMid meet"
       role="img"
-      :aria-label="`The same recurrent layer unrolled across ${props.steps} time steps, every copy using the same weights`"
+      :aria-label="`The same recurrent layer unrolled across ${nSteps} time steps, every copy using the same weights`"
     >
       <defs>
         <marker id="dl-unroll-arrowu" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
@@ -157,7 +169,7 @@ const F_MID = F_CY + CELL_H / 2
       />
       <text class="dl-unroll__h0" :x="LEFT - 38" :y="Y_CELL + CELL_H / 2 + 4" text-anchor="end">0</text>
 
-      <g v-for="i in props.steps" :key="`col${i}`">
+      <g v-for="i in nSteps" :key="`col${i}`">
         <!-- state in from the previous step -->
         <template v-if="i > 1">
           <line
@@ -172,8 +184,11 @@ const F_MID = F_CY + CELL_H / 2
 
         <rect class="dl-unroll__io" :x="colX(i - 1)" :y="Y_IN" :width="BOX_W" :height="IO_H" rx="4" />
         <text class="dl-unroll__iolabel" :x="midX(i - 1)" :y="Y_IN + IO_H / 2 + 4" text-anchor="middle">
-          x<tspan class="dl-unroll__sub" dy="3">{{ i }}</tspan>
-          <tspan class="dl-unroll__val" dy="-3"> = {{ inputs[i - 1][0] }}</tspan>
+          <template v-if="isReview">{{ REVIEW_B[i - 1] }}</template>
+          <template v-else>
+            x<tspan class="dl-unroll__sub" dy="3">{{ i }}</tspan>
+            <tspan class="dl-unroll__val" dy="-3"> = {{ inputs[i - 1][0] }}</tspan>
+          </template>
         </text>
         <line
           class="dl-unroll__feed" :class="{ 'is-live': cursor === i - 1 }"
@@ -235,12 +250,12 @@ const F_MID = F_CY + CELL_H / 2
           W<sub>hh</sub>h<sub>{{ current.t - 1 }}</sub> = [{{ vec(current.fromState) }}]
           → h<sub>{{ current.t }}</sub> = tanh([{{ vec(current.z) }}]) = [<strong>{{ vec(current.h) }}</strong>]
         </span>
-        <span v-if="current.x[0] === 0" class="dl-unroll__note">
+        <span v-if="remembers(current)" class="dl-unroll__note">
           The input at this step is <strong>0</strong> — and the state is not. That is the memory.
         </span>
       </template>
       <template v-else>
-        {{ props.steps }} copies of one layer. Every W<sub>xh</sub>, every W<sub>hh</sub>, every
+        {{ nSteps }} copies of one layer. Every W<sub>xh</sub>, every W<sub>hh</sub>, every
         W<sub>ho</sub> on this picture is the <strong>same matrix</strong>. Press
         <strong>Next step</strong>.
       </template>

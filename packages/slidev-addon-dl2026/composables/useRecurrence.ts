@@ -78,6 +78,54 @@ export const DEMO_RNN: RnnParams = {
 /** x = 1, 0, 1, 0 — a pulse, so the decay of the state between pulses is visible. */
 export const DEMO_INPUTS: number[][] = [[1], [0], [1], [0]]
 
+/* ---- the running example: one word that flips a review ------------------- */
+
+/*
+ * Lecture 05's running example, carried through every section:
+ *
+ *   A: "the movie was great"       → positive
+ *   B: "the movie was not great"   → negative
+ *
+ * Two learned features per word, named so the room can read them: dimension 1 is
+ * "a positive word", dimension 2 is "a negation word". Two hidden units with
+ * hand-set weights: unit 1 is a flag, "a *not* just happened"; unit 2 is the
+ * sentiment so far. The −1.5 in W_hh is the wire that lets the flag flip *great*.
+ * Every number is small enough to do on paper, and was checked in Python:
+ *
+ *   A: h after "great" = [0, 0.762]          ŷ = σ(3 · 0.762)  = 0.91
+ *   B: h after "not"   = [0.964, 0]
+ *      h after "great" = [0.448, −0.419]     ŷ = σ(3 · −0.419) = 0.22
+ */
+export const REVIEW_VOCAB: Record<string, number[]> = {
+  the: [0, 0],
+  movie: [0, 0],
+  was: [0, 0],
+  not: [0, 1],
+  great: [1, 0],
+}
+
+export const REVIEW_A = ['the', 'movie', 'was', 'great']
+export const REVIEW_B = ['the', 'movie', 'was', 'not', 'great']
+
+/** W_ho reads only the sentiment unit; the output is a logit for "positive". */
+export const REVIEW_RNN: RnnParams = {
+  wxh: [[0, 2], [1, 0]],
+  whh: [[0.5, 0], [-1.5, 0.8]],
+  who: [[0, 3]],
+  bh: [0, 0],
+  bo: [0],
+}
+
+export function reviewInputs(words: string[]): number[][] {
+  return words.map(w => REVIEW_VOCAB[w] ?? [0, 0])
+}
+
+/** P(positive) after the last word: σ(W_ho h_T). */
+export function reviewProbability(words: string[]): number {
+  const steps = rnnForward(reviewInputs(words), REVIEW_RNN)
+  return sigmoid(steps[steps.length - 1].o[0])
+}
+
 export function rnnForward(xs: number[][], p: RnnParams = DEMO_RNN): RnnStep[] {
   const hidden = p.whh.length
   let h = zeros(hidden)
@@ -150,9 +198,10 @@ export interface GruState {
 }
 
 /**
- * GRU, in Cho et al.'s orientation: z is how much to *update*.
+ * GRU, in Chung et al.'s (2014) orientation: z is how much to *update*.
  *
- * `nn.GRU` inverts it — its z multiplies h_{t-1} — so a student reading the
+ * Cho et al. (2014) and `nn.GRU` both write the other way round — their z
+ * multiplies h_{t-1}, so it is how much to *keep* — and a student reading the
  * PyTorch docs beside this slide sees the gate apparently backwards. The deck
  * says so explicitly rather than quietly picking one.
  */
