@@ -37,9 +37,8 @@ The picture is the running example, review B: "the movie was not great". The
 in section 01 — negative, as it should be. Do not explain it now; say "by the
 end of section 01 you can compute that number yourself".
 
-Prerequisites, deliberately: the MLP and the neuron, gradient descent, PyTorch
-training loops, CNNs (Lecture 04), and Lecture 07's generative models —
-especially PixelCNN, which wrote an image one pixel at a time. Nothing here
+What the room already knows: the MLP and the neuron, gradient descent, PyTorch
+training loops, CNNs, cross-entropy, Adam, and generative models. Nothing here
 depends on anything the room has not seen. Attention appears in section 06, in
 its original recurrent form only.
 
@@ -48,57 +47,62 @@ and a student who has only been told "gradients vanish" cannot see why the fixes
 are shaped the way they are.
 
 Sections 04 and 05 (embeddings, PyTorch) are the compressible ones if the session
-runs late — the lab covers them. Today ends on two walls a recurrent network hits;
-Lecture 06 starts from them.
+runs late — the lab covers them. Today ends on two walls a recurrent network hits.
 -->
 
 ---
-layout: interactive
-heading: Where we are
-title: Where we are
-aside-width: 15rem
+layout: default
+title: Today, in seven parts
 ---
 
-<SyllabusTimeline
-  :current-week="8"
-  :entries="[
-    { section: 'Introduction to DL', description: 'Course content and evaluation. What deep learning is, where it is used, and a working Colab or Jupyter environment.', weeks: [1] },
-    { section: 'Basics of Neural Networks', description: 'The neuron, the perceptron, Adaline and gradient descent; a multilayer network from scratch.', weeks: [2] },
-    { section: 'PyTorch for DL', description: 'Tensors, autograd and the PyTorch training loop.', weeks: [3] },
-    { section: 'Deep Convolutional Neural Networks', description: 'Convolution, padding, pooling and BatchNorm. CNN models in PyTorch.', weeks: [4, 5] },
-    { section: 'Generative Models and GANs', description: 'Autoencoders, VAEs, GANs and diffusion. PixelCNN wrote an image one pixel at a time.', weeks: [6, 7] },
-    { section: 'Recurrent Networks, and what came after', description: 'Today: recurrent networks, LSTM and GRU, and an RNN in PyTorch. Then Lecture 06, and large language models.', weeks: [8, 9, 10] },
-    { section: 'Deep Reinforcement Learning', description: 'What reinforcement learning is, its basic algorithms, and deep Q-learning in PyTorch.', weeks: [11, 12] },
-  ]"
-/>
+# Today, in seven parts
 
-::aside::
+Today's network reads a review of any length **one word at a time**.
 
-Lecture 07 wrote an image **one pixel at a time**.
+<div class="grid grid-cols-4 gap-x-4 gap-y-2 mt-3">
+<div class="flex flex-col items-center text-center gap-1">
+  <RnnGlyph kind="sequence" :size="64" />
+  <span class="dl-secondary">00 Order matters</span>
+</div>
+<div class="flex flex-col items-center text-center gap-1">
+  <RnnGlyph kind="loop" :size="64" />
+  <span class="dl-secondary">01 One cell with a loop</span>
+</div>
+<div class="flex flex-col items-center text-center gap-1">
+  <RnnGlyph kind="fade" :size="64" />
+  <span class="dl-secondary">02 Training through time</span>
+</div>
+<div class="flex flex-col items-center text-center gap-1">
+  <RnnGlyph kind="gate" :size="64" />
+  <span class="dl-secondary">03 Gates that keep the past</span>
+</div>
+<div class="flex flex-col items-center text-center gap-1">
+  <RnnGlyph kind="map" :size="64" />
+  <span class="dl-secondary">04 Words as vectors</span>
+</div>
+<div class="flex flex-col items-center text-center gap-1">
+  <RnnGlyph kind="shape" :size="64" />
+  <span class="dl-secondary">05 The network in PyTorch</span>
+</div>
+<div class="flex flex-col items-center text-center gap-1">
+  <RnnGlyph kind="generate" :size="64" />
+  <span class="dl-secondary">06 Generating text</span>
+</div>
+</div>
 
-Today: **text**, one word at a time, of any length.
+<div v-click class="mt-3 dl-callout">
 
-<div class="mt-2 grid grid-cols-[auto_1fr] items-center gap-x-2 text-sm">
-  <RnnGlyph kind="sequence" :size="28" /><span>00 the data</span>
-  <RnnGlyph kind="loop" :size="28" /><span>01 the loop</span>
-  <RnnGlyph kind="fade" :size="28" /><span>02 through time</span>
-  <RnnGlyph kind="gate" :size="28" /><span>03 gates</span>
-  <RnnGlyph kind="map" :size="28" /><span>04 word vectors</span>
-  <RnnGlyph kind="shape" :size="28" /><span>05 PyTorch</span>
-  <RnnGlyph kind="generate" :size="28" /><span>06 generating</span>
+Sections 01 to 03 are the core. Sections 04 and 05 are practice for the lab.
+
 </div>
 
 <!--
-The teaching order changed this year: the generative-models block (Lecture 07)
-came before this one, so the timeline shows it first. Lecture 06 follows today.
-
-The previous lecture is Lecture 07, not Lecture 04. CNNs were three lectures ago;
-say "Lecture 04" when you point back to them, never "the previous lecture".
-
-The glyph row is the map of today. Point at three of them: the loop (section 01,
+The glyph grid is the map of today, and the same seven glyphs come back on the
+section dividers and on the recap. Point at three of them: the loop (section 01,
 the one new wire), the fading arrows (section 02, why it is hard to train), and the
-valve (section 03, the fix). Those three sections are the lecture. Sections 04
-and 05 can shrink to one slide each if time is short — the lab carries them.
+valve (section 03, the fix). Those three sections are the lecture — the click
+says so. Sections 04 and 05 can shrink to one slide each if time is short — the
+lab carries them.
 -->
 
 ---
@@ -116,9 +120,9 @@ index: "00"
 Section 00, about fifteen minutes. The glyph: word tiles in a row, read left to
 right. The middle tile is marked — one word that changes the others.
 
-What this section has to land, in order: text is written one token after another,
-like PixelCNN's pixels; a fixed window does not fit text; averaging the words
-loses the order; and two facts about sequences that become the recurrent layer.
+What this section has to land, in order: text is written one token after another;
+a fixed window does not fit text; averaging the words loses the order; and two
+facts about sequences that become the recurrent layer.
 -->
 
 ---
@@ -128,42 +132,35 @@ title: One step at a time, through a window
 
 # One step at a time, through a window
 
-<svg viewBox="0 0 640 220" class="dl-diagram" role="img" aria-label="Left: PixelCNN writes a smiley pixel by pixel, each pixel read through a fixed window of earlier pixels. Right: the review B written word by word, with a window of three words; in a long review the word not is fifteen words back, outside the window">
-  <text class="dl-dg-small" x="20" y="16">Lecture 07 · PixelCNN</text>
-  <PixelImage in-svg :x="20" :y="26" :size="156" pattern="smiley" />
-  <rect x="86" y="104" width="84" height="12" :style="{ fill: 'var(--dl-bg)', opacity: 0.85 }" />
-  <rect x="26" y="116" width="144" height="60" :style="{ fill: 'var(--dl-bg)', opacity: 0.85 }" />
-  <path class="dl-dg-line" d="M62 80 H122 V104 H86 V116 H62 Z" />
-  <rect class="dl-dg-box is-accent" x="86" y="104" width="12" height="12" />
-  <text class="dl-dg-small" x="20" y="200">one pixel at a time,</text>
-  <text class="dl-dg-small" x="20" y="214">fixed window</text>
-  <text class="dl-dg-small" x="230" y="16">Today · one word at a time</text>
-  <rect class="dl-dg-box" x="230" y="30" width="62" height="28" rx="4" />
-  <rect class="dl-dg-box" x="300" y="30" width="62" height="28" rx="4" />
-  <rect class="dl-dg-box" x="370" y="30" width="62" height="28" rx="4" />
-  <rect class="dl-dg-box" x="440" y="30" width="62" height="28" rx="4" />
-  <rect class="dl-dg-box is-accent" x="510" y="30" width="62" height="28" rx="4" />
-  <text class="dl-dg-lab is-sm" x="261" y="49" text-anchor="middle">the</text>
-  <text class="dl-dg-lab is-sm" x="331" y="49" text-anchor="middle">movie</text>
-  <text class="dl-dg-lab is-sm" x="401" y="49" text-anchor="middle">was</text>
-  <text class="dl-dg-lab is-sm" x="471" y="49" text-anchor="middle">not</text>
-  <text class="dl-dg-lab is-sm" x="541" y="49" text-anchor="middle">?</text>
-  <rect class="dl-dg-line" x="295" y="25" width="212" height="38" rx="6" />
-  <text class="dl-dg-small" x="300" y="78">window of 3</text>
+<svg viewBox="0 0 640 190" class="dl-diagram" role="img" aria-label="Top: review B read word by word, with a window of the last three words, movie was not, used to predict the next word. Bottom: in a long review the word not is fifteen words before great, outside the window of three">
+  <text class="dl-dg-small" x="30" y="14">Review B</text>
+  <rect class="dl-dg-box" x="30" y="30" width="100" height="34" rx="4" />
+  <rect class="dl-dg-box" x="146" y="30" width="100" height="34" rx="4" />
+  <rect class="dl-dg-box" x="262" y="30" width="100" height="34" rx="4" />
+  <rect class="dl-dg-box" x="378" y="30" width="100" height="34" rx="4" />
+  <rect class="dl-dg-box is-accent" x="494" y="30" width="100" height="34" rx="4" />
+  <text class="dl-dg-lab is-sm" x="80" y="52" text-anchor="middle">the</text>
+  <text class="dl-dg-lab is-sm" x="196" y="52" text-anchor="middle">movie</text>
+  <text class="dl-dg-lab is-sm" x="312" y="52" text-anchor="middle">was</text>
+  <text class="dl-dg-lab is-sm" x="428" y="52" text-anchor="middle">not</text>
+  <text class="dl-dg-lab is-sm" x="544" y="52" text-anchor="middle">?</text>
+  <rect class="dl-dg-line" x="140" y="24" width="344" height="46" rx="6" />
+  <text class="dl-dg-small" x="146" y="86">window of 3</text>
+  <text class="dl-dg-small" x="544" y="86" text-anchor="middle">next word</text>
   <g v-click>
-    <text class="dl-dg-small" x="230" y="108">5 words, or 500</text>
-    <rect class="dl-dg-box is-accent" x="230" y="118" width="36" height="22" rx="3" />
-    <text class="dl-dg-small" x="248" y="133" text-anchor="middle">not</text>
-    <rect v-for="k in 14" :key="k" class="dl-dg-box" :x="252 + k * 20" y="118" width="16" height="22" rx="2" />
-    <rect class="dl-dg-box" x="572" y="118" width="46" height="22" rx="3" />
-    <text class="dl-dg-small" x="595" y="133" text-anchor="middle">great</text>
-    <rect class="dl-dg-line" x="488" y="114" width="64" height="30" rx="4" />
-    <text class="dl-dg-small is-bad" x="230" y="160">15 words back:</text>
-    <text class="dl-dg-small is-bad" x="230" y="174">outside</text>
+    <text class="dl-dg-small" x="30" y="114">5 words, or 500</text>
+    <rect class="dl-dg-box is-accent" x="30" y="124" width="50" height="28" rx="3" />
+    <text class="dl-dg-small" x="55" y="142" text-anchor="middle">not</text>
+    <rect v-for="k in 14" :key="k" class="dl-dg-box" :x="60 + k * 28" y="124" width="22" height="28" rx="2" />
+    <rect class="dl-dg-box" x="482" y="124" width="70" height="28" rx="3" />
+    <text class="dl-dg-small" x="517" y="142" text-anchor="middle">great</text>
+    <rect class="dl-dg-line" x="391" y="119" width="88" height="38" rx="4" />
+    <text class="dl-dg-small" x="395" y="174">window of 3</text>
+    <text class="dl-dg-small is-bad" x="30" y="174">not is 15 words back: outside the window</text>
   </g>
 </svg>
 
-Text is the same kind of object: one word after another.
+A fixed window cannot see a *not* further back. And a review can be any length.
 
 <div v-click class="mt-3 dl-callout">
 
@@ -172,18 +169,13 @@ Today's question: keep a **running summary** instead of a window.
 </div>
 
 <!--
-Pick up exactly where Lecture 07 put PixelCNN: a masked convolution writes an
-image one pixel at a time, and each new pixel is predicted from the pixels above
-and to the left of it. The dashed outline is that mask; the accent square is the
-pixel being written. The window has a fixed size — a few pixels each way.
-
-Right: a review is the same kind of object. One word after another, each word
-read in the light of the ones before. A window of three words would predict the
-next word from "movie was not".
+Start with a model that reads text through a fixed window, the way a 1-D
+convolution does. Top row: review B, one word after another, and a window of three
+words. To guess the next word it sees "movie was not" and nothing else.
 
 Click. Two things break the window for text.
-1. Length. An image has a fixed size; a review is 5 words or 500. A window wide
-   enough for every review is mostly padding for most reviews.
+1. Length. A review is 5 words or 500. A window wide enough for every review is
+   mostly padding for most reviews.
 2. Distance. "not" at the start can change a word much later. Here it is 15 words
    back, and the window of three cannot see it. Make the window 16 wide and the
    next review puts "not" 30 words back.
@@ -193,7 +185,8 @@ summary forward — one small vector, updated after every word — instead of a
 window. Section 01 builds that summary; the rest of the deck is about training it.
 
 At the end of the deck we come back here: generating text one word at a time is
-PixelCNN's recipe, with the running summary in place of the window.
+the same idea, predict the next word from the ones before it, with the running
+summary in place of the window.
 -->
 
 ---
@@ -268,7 +261,7 @@ Get the room to say what "not" does before revealing bullet two. It has no
 sentiment of its own; it changes the meaning of what comes after it. That is
 exactly what a model of single words cannot see.
 
-The older pair from the 2025 deck makes the same point and is worth saying aloud:
+An older pair makes the same point and is worth saying aloud:
 "dog bites man" (page 14) and "man bites dog" (front page) — identical words,
 different news.
 -->
@@ -412,7 +405,7 @@ It tells A from B, but learns each word again at every position.
 
 <!--
 Flatten a review into one long vector and feed it to a dense layer — exactly what
-the room did with MNIST in Lecture 03. Give it 200 slots, one word per slot.
+the room did with MNIST. Give it 200 slots, one word per slot.
 
 Do the arithmetic aloud. A one-hot vector is 20 000 numbers, all zero except a
 single 1 at the word's index. 200 slots x 20 000 = 4 000 000 inputs. One dense
@@ -427,9 +420,9 @@ It can tell A from B. The slide shows the worst problem (2); say 1 and 3 aloud.
    review A is 196 slots of padding out of 200.
 2. Position-locked. great sits in slot 4 in A and slot 5 in B, so different
    columns of weights read it. The layer must learn great, and not-before-great,
-   separately at every one of the 200 positions. This is Lecture 04's complaint
-   with "pixel" replaced by "position", and the answer is the same: share the
-   weights.
+   separately at every one of the 200 positions. This is the complaint that led
+   to CNNs, with "pixel" replaced by "position", and the answer is the same:
+   share the weights.
 3. Size. Even with a 64-number embedding instead of one-hot (200 x 64 = 12 800
    inputs), the dense layer is 12 800 x 256 + 256 = 3.28 M weights, plus 1.28 M
    for the embedding. The LSTM classifier we build in section 05 (embedding
@@ -519,7 +512,7 @@ title: Two facts about sequences
 
 # Two facts about sequences
 
-Lecture 04 turned two facts about images into wiring. Sequences have two facts too.
+CNNs turned two facts about images into wiring. Sequences have two facts too.
 
 <svg viewBox="0 0 640 210" class="dl-diagram" role="img" aria-label="The five words of review B, each read by a cell with the same weights W, and a state h passed from each cell to the next">
   <defs>
@@ -551,19 +544,19 @@ Shared weights plus a carried state: that is the whole architecture.
 </div>
 
 <!--
-Lecture 04 did this for images: things are local, and things repeat. Repetition
+CNNs did this for images: things are local, and things repeat. Repetition
 became parameter sharing — one filter slid over every position. Locality does
 not carry over: a sentence is not a neighbourhood, it is an order. Say that in one
-breath; it is the only Lecture 04 recap the section needs.
+breath; it is the only CNN recap the section needs.
 
 Click 1, fact one: "not great" is negative at word 4 and at word 140. So one set
 of weights W should read every position — the same W in every box. This fixes
 the position-locked window from two slides back.
 
 Click 2, fact two: what came earlier changes what a later word means. So
-something has to be carried forward from one position to the next: the state h,
-one small vector passed along the row. It is the running summary from the
-PixelCNN slide.
+something has to be carried from each position to the one after it: the state h,
+one small vector passed along the row. It is the running summary from
+"One step at a time, through a window".
 
 The picture is the recurrent network unrolled over review B, before we have
 named it. Section 01 opens on exactly this drawing, folded into one cell with a
@@ -585,7 +578,7 @@ aside-width: 19rem
 
 ::aside::
 
-Lecture 04's widget, with the axis read as **time**. `Conv1d` shares one filter
+A 1-D convolution, with the axis read as **time**. `Conv1d` shares one filter
 across positions: fact one, already solved.
 
 <v-clicks>
@@ -605,12 +598,12 @@ If someone offers n-grams: yes, a bigram catches "not good", and that is exactly
 what a 1D convolution with a width-2 filter learns. It will not catch "not, by any
 stretch of the imagination, good". Unlimited distance is what recurrence buys.
 
-The filter's reach is the receptive field from Lecture 04: stacking layers widens
-it, but it is always a fixed number of positions.
+The filter's reach is its receptive field: stacking layers widens it, but it is
+always a fixed number of positions.
 
 Plant the flag for the last section: the convolution's advantage here is that it
 is parallel. The recurrent network gives that up, and that cost is the second wall
-at the end of today. Lecture 06 starts from it.
+at the end of today.
 -->
 
 ---
@@ -629,7 +622,7 @@ give an output**.
 
 <div v-click class="mt-3 dl-secondary">
 
-Start on **no recurrence**, every model so far. Which one reads review B and
+Start on **no recurrence**: one input, one output. Which one reads review B and
 gives one label?
 
 </div>
@@ -643,7 +636,7 @@ The shape decides where the loss is computed, and what `forward` returns.
 <!--
 Click through all five and read the examples. Then ask which one the review
 classifier is: many to one — five words in, one label out. Autocomplete is many to
-many, in step, shifted by one: the PixelCNN recipe applied to words.
+many, in step, shifted by one: predict the next word from the ones before it.
 
 The encoder-decoder tab is what the last section of the lecture is about
 (translating review B into Norwegian). Flag it and move on.
@@ -753,7 +746,7 @@ A layer whose **output feeds back in**: a note passed along a row of readers.
 
 <div v-click class="mt-1 dl-callout">
 
-New since Lecture 02: one extra matrix, one step of delay.
+New since the dense layer: one extra matrix, one step of delay.
 
 </div>
 
@@ -869,7 +862,7 @@ $$ \mathbf{h}_t = \tanh\!\left(W_{xh}\,\mathbf{x}_t + W_{hh}\,\mathbf{h}_{t-1} +
 
 <div v-click class="mt-2 dl-callout">
 
-Delete the second term and this is the dense layer from Lecture 02.
+Delete the second term and this is a dense layer.
 
 </div>
 
@@ -887,8 +880,8 @@ Read it aloud in words first: "the new state is a squashed sum of what I am
 looking at and what I already knew". The picture is the same sentence: old note
 in from the left, word in from below, new note out to the right.
 
-Nothing on this slide is new mathematics. W_xh x + b is Lecture 02; the tanh is
-Lecture 02; the only new symbol is W_hh h_{t-1}. Say that explicitly — it lowers
+Nothing on this slide is new mathematics. W_xh x + b is a dense layer; the tanh
+is the familiar activation; the only new symbol is W_hh h_{t-1}. Say that explicitly — it lowers
 the temperature of the slide considerably.
 
 Why tanh rather than ReLU: h is fed back into itself, so an unbounded activation
@@ -896,7 +889,7 @@ can compound to infinity over 200 steps. tanh keeps the state bounded. It is als
 part of why the gradients vanish, which is section 02's problem.
 
 The output o_t: for the review we only use the last one, o_T, and turn it into a
-probability with a sigmoid, as in Lecture 04's binary cross-entropy. The next
+probability with a sigmoid, as in binary cross-entropy. The next
 slide names every symbol.
 -->
 
@@ -1041,8 +1034,8 @@ $$ \mathbf{h}_t = \tanh\!\left( W_h \begin{bmatrix} \mathbf{x}_t \\ \mathbf{h}_{
 Input x_t, previous state h_{t-1} and bias b_h are as before; the only new
 symbol is W_h, the two weight matrices placed side by side.
 
-2025 slide 8 said "another way of writing the same" and left it there. This is
-why it is worth writing: it turns the gate equations on the LSTM slides into one
+It is easy to call this "another way of writing the same" and leave it there.
+This is why it is worth writing: it turns the gate equations on the LSTM slides into one
 matrix multiply, which is also exactly what nn.LSTM does — one weight_ih and one
 weight_hh per layer, not eight.
 
@@ -1208,8 +1201,8 @@ $$ 128 \cdot 64 + 128 \cdot 128 + 128 = 24\,704 $$
 <!--
 The drawing is to scale: one pixel per row and column. W_hh is the big square.
 
-Same argument as Lecture 04, where an image's height and width did not appear in
-a convolution's parameter count. Weight sharing always buys this.
+Same argument as for CNNs, where an image's height and width do not appear in a
+convolution's parameter count. Weight sharing always buys this.
 
 The secondary note saves a lab question every year. nn.RNN keeps bias_ih and
 bias_hh, which only ever appear as a sum — mathematically redundant, kept for
@@ -1266,14 +1259,14 @@ Do the first row together, let them race the rest.
 
 Be precise about "blocks": an LSTM has three gates (input, forget, output) plus a
 candidate, so four blocks of the RNN's size: 4 x 24 832 = 99 328. A GRU has two
-gates (update, reset) plus a candidate: 3 x 24 832 = 74 496. The 2025 deck said
-"four gates", which is a common slip — there are three gates.
+gates (update, reset) plus a candidate: 3 x 24 832 = 74 496. "Four gates" is a
+common slip — there are three gates.
 
 The bar is to scale: 1 280 000 / 1 379 586 = 92.8% embedding, 99 328 / 1 379 586
 = 7.2% LSTM, and Linear(128, 2) = 128 * 2 + 2 = 258 weights, 0.02%.
 
-Lecture 04 ended with the same imbalance the other way round — most of a CNN's
-weights in one dense head. Where a model's parameters live is rarely where its
+A CNN shows the same imbalance the other way round — most of its weights in one
+dense head. Where a model's parameters live is rarely where its
 ideas live. The 93% also explains why pre-trained embeddings mattered so much: it
 is the part of the model with the most to learn and the least supervision.
 -->
@@ -1306,8 +1299,8 @@ Bidirectional needs the whole sequence first — so it cannot predict the next w
 </div>
 
 <!--
-Walk the first three, then the last two. The 2025 deck drew all three arrows at
-once on one figure, which is unreadable, and never said which is used.
+Walk the first three, then the last two. All three arrows drawn at once on one
+figure is unreadable, so take them one at a time and say which one nn.RNN uses.
 
 In the note picture: hidden to hidden passes the whole note; output to hidden
 passes only the reader's one-word verdict. Bidirectional is a second row of
@@ -1402,7 +1395,7 @@ $$ L = \frac{1}{T}\sum_{t=1}^{T} \ell\!\left(\mathbf{o}_t,\; y_t\right) $$
 
 <div v-click>
 
-$T$ terms, averaged. Each is Lecture 04's cross-entropy.
+$T$ terms, averaged. Each is a cross-entropy.
 
 </div>
 
@@ -1416,8 +1409,7 @@ Either way, **one** set of weights receives gradient from **every** term.
 </div>
 
 <!--
-Nothing new about the loss itself — it is Lecture 04's cross-entropy, once or T
-times. What is new is that one weight matrix now receives gradient from T
+Nothing new about the loss itself — it is cross-entropy, once or T times. What is new is that one weight matrix now receives gradient from T
 different places.
 
 Review B: the label is negative and the toy network says P(positive) = 0.22, so
@@ -1487,7 +1479,7 @@ so $L = -\ln 0.78 = 0.25$
 </div>
 
 <!--
-The legend has nothing new in it except the index t. The loss l is Lecture 04's
+The legend has nothing new in it except the index t. The loss l is
 cross-entropy: minus the log of the probability the model gave the right class.
 o_t are the logits at step t; y_t is the right answer at step t.
 
@@ -1801,8 +1793,8 @@ optimistic case.
 </div>
 
 <!--
-Lecture 02's widget, third outing, and it earns it: the vanishing-gradient story
-there was about depth, and this is the same fact about length.
+The vanishing-gradient story is usually told about depth. This widget shows the
+same fact about length.
 
 Tie it to the review: after "not" the flag unit sits at 0.964, where tanh' is
 1 - 0.964^2 = 0.07. A unit that is sure of itself passes almost no gradient back.
@@ -1886,8 +1878,8 @@ memory.
 </div>
 
 <!--
-Being explicit about the ranking matters. The 2025 deck listed these three side
-by side, and a list of three fixes invites a student to pick one.
+Being explicit about the ranking matters. A list of three fixes side by side
+invites a student to pick one.
 
 BPTT is backpropagation through time, from two slides back; truncated BPTT is the
 last slide of this section.
@@ -2179,7 +2171,7 @@ Walk all six, reading each equation as it lights up. Then drive the two extremes
 from the aside. They take ten seconds each and they are what the room remembers.
 
 Say clearly that the sliders set the gate *values*. In a real cell each gate is
-its own sigma(Wx + Wh + b): a small layer with a sigmoid, as in Lecture 02. There
+its own sigma(Wx + Wh + b): a small dense layer with a sigmoid. There
 are three gates (forget, input, output) plus the candidate, which is the same
 kind of layer with tanh. Four weight sets: that is the "4x" in the parameter
 count.
@@ -2554,7 +2546,7 @@ For about twenty years, the LSTM was the standard model for sequences.
 </div>
 
 <!--
-Short and cited, like the Hubel and Wiesel slide in Lecture 04. The history is
+Short and cited. The history is
 worth one minute for one reason: the forget gate was not in the original design,
 which is a useful antidote to reading an architecture as if every part were
 inevitable.
@@ -2788,7 +2780,7 @@ words happen to be numbered 4 216 and 4 218. This is what a student's first
 tokeniser produces, and it is the tensor they then feed straight into a Linear
 layer by mistake.
 
-Click: one-hot it, Lecture 02's answer. A 20 000-long vector, 19 999 zeros and one
+Click: one-hot it, the usual answer. A 20 000-long vector, 19 999 zeros and one
 1. Honest: no false order. But every pair of words is exactly sqrt(2) apart, so
 great and brilliant are as different as great and aardvark. One-hot throws away
 every relationship between words before the model sees anything. It is also what
@@ -2892,7 +2884,7 @@ model.
 
 The useful consequence: a word the model saw twice can inherit from a word it saw
 a thousand times, because they sit near each other. That is what "extraction of
-salient features" meant in the 2025 slide's bullet list.
+salient features" means when textbooks list it as a benefit.
 
 For the running example: in a trained table, "not" would end up somewhere of its
 own, away from the sentiment words, because what it does is flip them, not carry
@@ -3324,7 +3316,7 @@ needs care: dropping a different set of units every step destroys the state.
 nn.LSTM's own `dropout=` argument applies between stacked layers, not across time,
 and it does nothing at all with num_layers=1 (PyTorch warns about this).
 
-No softmax, because CrossEntropyLoss applies it — Lecture 04's trap, unchanged.
+No softmax, because CrossEntropyLoss applies it — the same trap as for CNNs.
 -->
 
 ---
@@ -3373,7 +3365,7 @@ Test first: push one batch of random ids through the model.
 </div>
 
 <!--
-This is Lecture 04's shape ledger, for a sequence model. Same habit, same payoff.
+This is a shape ledger for a sequence model: write every tensor's shape down.
 The strip on top is the same story in three boxes: the T axis of 200 disappears
 at the LSTM.
 
@@ -3435,13 +3427,14 @@ for epoch in range(epochs):
 
 <div v-click class="mt-1 dl-secondary">
 
-Lecture 03's loop, Lecture 04's loop and this one differ by one line and one
-model class.
+The MLP's loop, the CNN's loop and this one differ by one line and one model
+class.
 
 </div>
 
 <!--
-Say the thing the slide is for: the pipeline has not changed since Lecture 03.
+Say the thing the slide is for: the pipeline is the same one used for MLPs and
+CNNs.
 A new architecture is a new nn.Module.
 
 The clip line is the only addition ("Gradient clipping, in one line" in section
@@ -3523,8 +3516,8 @@ index: "06"
 <div style="position: absolute; right: 4.5rem; top: 50%; transform: translateY(-50%);"><RnnGlyph kind="generate" :size="190" /></div>
 
 <!--
-Section 07. The first slide closes the loop with Lecture 07; the rest is the
-encoder–decoder, attention in its 2014 form, and the one problem attention does
+Section 06. The first slide closes the loop with the window slide in section 00;
+the rest is the encoder–decoder, attention in its 2014 form, and the one problem attention does
 not fix. Compressible after the generation slide if time is short: show
 "One sequence in, another out", "The other wall" and the recap.
 
@@ -3538,18 +3531,12 @@ title: Generating one step at a time
 
 # Generating one step at a time
 
-Predict the next word, then read it back in. This is PixelCNN's recipe from
-Lecture 07, with a state instead of a fixed window.
+Predict the next word, then read it back in. A state carries the past, not a fixed window.
 
-<div class="grid grid-cols-[1fr_auto] gap-x-8 gap-y-1 items-center mt-2 mx-auto" style="max-width: 560px;">
-  <div class="dl-secondary">word by word</div>
-  <div class="dl-secondary">pixel by pixel</div>
+<div class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 items-center mt-3 mx-auto w-full" style="max-width: 640px;">
   <template v-for="k in [3, 4, 5]" :key="k">
-    <WordStrip review="B" :upto="k" :highlight="['the', 'movie', 'was', 'not', 'great'][k - 1]" :width="400" />
-    <svg viewBox="0 0 46 46" width="46" height="46" role="img" :aria-label="`A 4 by 4 image with ${k + 3} pixels written`">
-      <rect v-for="p in 16" :key="p" :x="1 + ((p - 1) % 4) * 11" :y="1 + Math.floor((p - 1) / 4) * 11" width="10" height="10" rx="1"
-        :class="p < k + 3 ? 'dl-dg-bar' : (p === k + 3 ? 'dl-dg-bar is-q' : 'dl-dg-box')" />
-    </svg>
+    <span class="dl-secondary">step {{ k }}</span>
+    <WordStrip review="B" :upto="k" :highlight="['the', 'movie', 'was', 'not', 'great'][k - 1]" :width="520" />
   </template>
 </div>
 
@@ -3565,14 +3552,13 @@ Lecture 07, with a state instead of a fixed window.
 </div>
 
 <!--
-This is the hand-back to Lecture 07. PixelCNN wrote an image one pixel at a time,
-each pixel predicted from the ones before it, in raster order. Generating text is
-the same recipe: predict the next word from the earlier ones, write it, and read
-it back in. Each row on the slide is one step; the accent tile and the accent
-pixel are the one just written.
+This closes the loop with the window slide in section 00. Generating text is one
+recipe: predict the next word from the ones before it, write it, and read it back
+in. Each row on the slide is one step of review B; the accent tile is the word
+just written.
 
-The difference is how the past is seen. PixelCNN's masked kernel sees a fixed
-window of earlier pixels. The RNN carries the note: everything it has read is
+The difference from the window is how the past is seen. A window sees a fixed
+number of earlier words. The RNN carries the note: everything it has read is
 folded into the state, however long ago.
 
 Teacher forcing: at training time the true previous word is known, so every
@@ -3768,8 +3754,8 @@ The one thing to point at: everything on this slide is differentiable, so the
 alignment is learned by the same gradient descent as the rest. Nobody supplies
 alignments.
 
-Do not go further than this today. What happens when the recurrence is removed
-is the next lecture's question, and "The other wall" is why it matters.
+Do not go further than this today. "The other wall" names the problem attention
+does not fix.
 -->
 
 ---
@@ -3906,8 +3892,7 @@ step at a time.
 </div>
 
 <!--
-This is the slide that explains the last eight years, and the 2025 deck did not
-have it. Spend two minutes.
+This is the slide that explains the last eight years. Spend two minutes.
 
 The picture: against clock time, the RNN computes one state per tick, because h2
 needs h1. A convolution, or an attention weighted sum on its own, computes every
@@ -3919,8 +3904,8 @@ train, and it is the reason recurrent models were abandoned rather than improved
 Scale needed parallelism, and recurrence cannot provide it.
 
 The 2017 paper that removed the recurrence and kept only the attention is called
-"Attention Is All You Need". This wall is why that paper matters — but that is
-the next lecture; name it and stop.
+"Attention Is All You Need". This wall is why that paper matters. Name the wall
+and stop: every step waits for the one before.
 
 If someone asks what recurrent models are still good for: very long or streaming
 sequences, small on-device models, and the state-space revival — Mamba and
@@ -3969,7 +3954,7 @@ title: Where we got to
 <div v-click class="mt-4 dl-callout">
 
 Two walls. A fixed-size summary: attention fixes it. Time that cannot run in
-parallel: the next lecture, on transformers, answers that one.
+parallel: still open. Each step waits for the last.
 
 </div>
 
@@ -3987,8 +3972,8 @@ Shape: batch_first=True, pack the padded batch, clip the gradient.
 Generate: feed the output back in to write text; let the decoder look back at
 every encoder state with attention.
 
-The last callout is the hand-over. The next lecture opens by taking the attention
-slide, removing the RNN around it, and asking what is left.
+The last callout names both walls. The first is fixed; the second, steps that
+must run one after another, is still open at the end of today.
 -->
 
 ---
@@ -4066,7 +4051,6 @@ Practicalities — dataset, deadline, what to hand in — belong on the course p
 ---
 layout: end
 email: vajira@simula.no
-next: Transformers
 ---
 
 # To be continued…
@@ -4081,5 +4065,6 @@ switching on at "not", the sentiment going negative at "great", and P(positive)
 = 0.22. Two numbers of state carried that across the review.
 
 Leave time for questions. A likely one: "if attention is so good, why keep the
-RNN at all?" — which is exactly where the next lecture starts.
+RNN at all?" — answer it with the second wall: the attention still sits inside
+an RNN, so every step still waits for the one before.
 -->
