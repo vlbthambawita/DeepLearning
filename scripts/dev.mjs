@@ -5,8 +5,9 @@
  *   npm run dev -- lecture-01
  *   npm run dev -- lecture-01 --port 3040
  *
- * Speaker notes stay in the source and are visible at /presenter — they are only
- * stripped from the public build (`--without-notes` in build-site.mjs).
+ * Speaker notes stay in the source and are visible at /presenter — the public
+ * build strips them (`--without-notes` in build-site.mjs) unless the deck sets
+ * `"publicNotes": true` in decks.config.json.
  */
 import { spawnSync } from 'node:child_process'
 import { loadConfig, parseArgs, repoRoot } from './lib/config.mjs'

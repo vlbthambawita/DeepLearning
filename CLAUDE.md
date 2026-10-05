@@ -58,7 +58,8 @@ authoring/review checklist for decks and widgets — load it before building or 
 
 **Build → publish pipeline** (`scripts/`, all invoked through `package.json`):
 - `build-site.mjs` builds each deck with `--base ./` (relative, so assets resolve under the
-  non-root HF Space path) and `--without-notes` (strips speaker notes), then generates the
+  non-root HF Space path) and `--without-notes` (strips speaker notes — skipped for a deck
+  with `"publicNotes": true`, whose notes students read via Presenter Mode), then generates the
   landing page from `site/index.template.html` and the Space's `README.md` (its YAML front
   matter is what makes HF serve it as a static Space). A full build wipes `dist/` first; an
   `--only` build writes into the existing `dist/` without clobbering other decks.

@@ -294,8 +294,11 @@ Mechanics:
 - Slidev reads notes only from the **last `<!-- -->` block at the very end of the
   slide**. A comment anywhere else is an ordinary HTML comment and never reaches
   the presenter view. One block per slide, last thing before the next `---`.
-- Notes are stripped from the public build (`--without-notes`), so write them for
-  the presenter, not the student. Plain prose in short paragraphs. Markdown
+- Notes are stripped from the public build (`--without-notes`) unless the deck
+  sets `"publicNotes": true` in `decks.config.json`. Lecture 05 does: its notes
+  ship with the site, and students read them through the Presenter Mode
+  button. Write every note so a student can read it too: no private remarks
+  about the room, nothing you would not say in front of them. Plain prose in short paragraphs. Markdown
   renders, but keep maths as plain text (`p(x | z)`, `W^T x`) — that is easier to
   read off a laptop mid-lecture than KaTeX.
 

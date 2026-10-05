@@ -36,7 +36,9 @@ npm run preview                # serve dist/ at http://localhost:4173
 ```
 
 Speaker notes live in the source and show up in the presenter view. They are
-stripped from anything public by `--without-notes`.
+stripped from anything public by `--without-notes`, unless the deck sets
+`"publicNotes": true` in `decks.config.json` — then students can read them
+through the Presenter Mode button in the deck's nav bar.
 
 To pull reference material out of a 2025 PDF:
 

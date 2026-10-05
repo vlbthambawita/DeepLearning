@@ -16,6 +16,10 @@
  * deck rendered as a blank page. Relative works at the root and under any
  * prefix, which also makes the GitHub Pages base path a non-issue.
  *
+ * Speaker notes are stripped (`--without-notes`) unless the deck sets
+ * `"publicNotes": true` in decks.config.json. Then they ship with the deck and
+ * students read them through the Presenter Mode button in the nav bar.
+ *
  * The in-deck PDF download button comes from the theme's `download` default
  * ("./slides.pdf"), likewise relative. Run `export-pdf.mjs` after this on
  * anything you actually deploy, or that button 404s.
@@ -50,10 +54,10 @@ for (const deck of decks) {
     'build', deck.entry,
     '--base', './',
     '--out', deckOut,
-    '--without-notes',
+    ...(deck.publicNotes ? [] : ['--without-notes']),
   ]
 
-  console.log(`\n→ ${deck.id}`)
+  console.log(`\n→ ${deck.id}${deck.publicNotes ? '  (with speaker notes)' : ''}`)
   const result = spawnSync('npx', slidevArgs, { cwd: repoRoot, stdio: 'inherit' })
   if (result.status !== 0)
     throw new Error(`slidev build failed for ${deck.id} (exit ${result.status})`)
