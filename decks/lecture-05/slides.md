@@ -279,6 +279,92 @@ An older pair makes the same point and is worth saying aloud: "dog bites man"
 
 ---
 layout: default
+title: "A bag of words: keep the words, drop the order"
+---
+
+# A bag of words: keep the words, drop the order
+
+<svg viewBox="0 0 640 196" class="dl-diagram" role="img" aria-label="Review B as five word tiles is poured into a bag. The same five words in a shuffled order give the same bag. The bag becomes one vector, the average of the five word vectors, 0.2 and 0.2">
+  <defs>
+    <marker id="l5a-bag-head" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+      <path class="dl-dg-head" d="M0 0 L7 3.5 L0 7 z" />
+    </marker>
+  </defs>
+  <text class="dl-dg-small" x="20" y="12">review B</text>
+  <rect v-for="k in 5" :key="`b${k}`" :class="k === 4 ? 'dl-dg-box is-accent' : 'dl-dg-box'" :x="20 + (k - 1) * 80" y="20" width="72" height="30" rx="4" />
+  <text v-for="(w, k) in ['the', 'movie', 'was', 'not', 'great']" :key="`bw${k}`" class="dl-dg-lab is-sm" :x="56 + k * 80" y="40" text-anchor="middle" v-text="w" />
+  <path class="dl-dg-arrow" marker-end="url(#l5a-bag-head)" d="M424 35 H468" />
+  <path class="dl-dg-box" d="M492 22 Q540 8 588 22 L612 104 Q540 126 468 104 Z" />
+  <path class="dl-dg-line" d="M506 22 Q540 32 574 22" />
+  <text class="dl-dg-small" x="540" y="50" text-anchor="middle">great</text>
+  <text class="dl-dg-small" x="506" y="68" text-anchor="middle">the</text>
+  <text class="dl-dg-small is-bad" x="570" y="72" text-anchor="middle">not</text>
+  <text class="dl-dg-small" x="532" y="90" text-anchor="middle">movie</text>
+  <text class="dl-dg-small" x="580" y="98" text-anchor="middle">was</text>
+  <g v-click="1">
+    <text class="dl-dg-small" x="20" y="74">shuffled</text>
+    <rect v-for="k in 5" :key="`s${k}`" :class="k === 2 ? 'dl-dg-box is-accent' : 'dl-dg-box'" :x="20 + (k - 1) * 80" y="82" width="72" height="30" rx="4" />
+    <text v-for="(w, k) in ['great', 'not', 'was', 'movie', 'the']" :key="`sw${k}`" class="dl-dg-lab is-sm" :x="56 + k * 80" y="102" text-anchor="middle" v-text="w" />
+    <path class="dl-dg-arrow" marker-end="url(#l5a-bag-head)" d="M424 97 H468" />
+    <text class="dl-dg-small is-bad" x="446" y="124" text-anchor="middle">same bag</text>
+  </g>
+  <g v-click="2">
+    <path class="dl-dg-arrow" marker-end="url(#l5a-bag-head)" d="M540 120 V146" />
+    <rect class="dl-dg-box is-accent" x="490" y="150" width="100" height="30" rx="4" />
+    <text class="dl-dg-lab is-sm" x="540" y="170" text-anchor="middle">[0.2, 0.2]</text>
+    <text class="dl-dg-small" x="20" y="152">average of the five word vectors:</text>
+    <text class="dl-dg-small" x="20" y="172">([0, 0] + [0, 0] + [0, 0] + [0, 1] + [1, 0]) / 5 = [0.2, 0.2]</text>
+  </g>
+</svg>
+
+<div class="dl-tight">
+
+<v-clicks>
+
+- In a bag, only **which words appear** survives, not their order.
+- The bag becomes **one vector**: the average of its word vectors, for any review length.
+
+</v-clicks>
+
+</div>
+
+<div v-click="3" class="mt-2 dl-callout">
+
+A **bag of words**: the simplest text model. Does it keep what *not* does?
+
+</div>
+
+<!--
+The point: before testing it, name the simplest way to read text with the
+networks the room already has. A bag of words throws away the order of the
+words and keeps only which words appear. The next slide tests whether that is
+enough for our two reviews.
+
+On screen: the top row is review B, word by word. The arrow pours the five words
+into a bag; inside the bag they have no order any more. "not" is drawn in red in
+the bag because it is the word whose position matters.
+
+Click: the second row is the same five words shuffled — "great not was movie
+the". It goes into exactly the same bag. That is the definition: two reviews with
+the same words, in any order, are the same bag.
+
+Click 2: the bag becomes one vector. With the toy embedding, the, movie and was
+are [0, 0], not is [0, 1] and great is [1, 0]. Add the five vectors and divide by
+five: ([0, 0] + [0, 0] + [0, 0] + [0, 1] + [1, 0]) / 5 = [1, 1] / 5 = [0.2, 0.2].
+That one vector is what a classifier sees. A 4-word review and a 400-word review
+both become two numbers, so a plain dense layer can read either.
+
+Click 3: the callout. A bag of words is the simplest text model, and it is a
+strong baseline in practice. The question for the next slide: it keeps the
+word "not", but does it keep what "not" does to the word after it?
+
+Variants worth naming if asked: instead of averaging embeddings, the classic
+version counts each word of the vocabulary (a vector of 20 000 counts). The
+order is lost either way.
+-->
+
+---
+layout: default
 title: Averaging loses the order
 ---
 
@@ -620,17 +706,29 @@ aside-width: 19rem
 
 ::aside::
 
-A 1-D convolution, with the axis read as **time**. `Conv1d` shares one filter
-across positions: fact one, already solved.
-
 <v-clicks>
 
-- **Parallel**: every output at once
-- Context **limited** by the filter's reach
-- Nothing about 60 words ago
-- Recurrence gives up that parallelism for **unlimited** context
+- **Parallel**: each output needs only nearby words, so all are computed at once
+- **Limited** reach: nothing from 60 words ago
+- A recurrent layer: step 5 waits for step 4, so steps run **one after another**. But the state reaches any distance.
 
 </v-clicks>
+
+<svg v-click="3" viewBox="0 0 260 84" class="dl-diagram mt-1" role="img" aria-label="Order of computation. Convolution: five outputs, all computed in round 1. Recurrent layer: five steps in a chain, computed in rounds 1 to 5">
+  <defs>
+    <marker id="l5a-par-head" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+      <path class="dl-dg-head" d="M0 0 L7 3.5 L0 7 z" />
+    </marker>
+  </defs>
+  <text class="dl-dg-small" x="0" y="24">conv</text>
+  <rect v-for="k in 5" :key="`c${k}`" class="dl-dg-box is-accent" :x="64 + (k - 1) * 40" y="8" width="28" height="24" rx="3" />
+  <text v-for="k in 5" :key="`ct${k}`" class="dl-dg-lab is-sm" :x="78 + (k - 1) * 40" y="25" text-anchor="middle">1</text>
+  <text class="dl-dg-small" x="0" y="66">recurrent</text>
+  <rect v-for="k in 5" :key="`r${k}`" class="dl-dg-box" :x="64 + (k - 1) * 40" y="50" width="28" height="24" rx="3" />
+  <text v-for="k in 5" :key="`rt${k}`" class="dl-dg-lab is-sm" :x="78 + (k - 1) * 40" y="67" text-anchor="middle" v-text="k" />
+  <path v-for="k in 4" :key="`ra${k}`" class="dl-dg-arrow" marker-end="url(#l5a-par-head)" :d="`M${93 + (k - 1) * 40} 62 H${103 + (k - 1) * 40}`" />
+  <text class="dl-dg-small" x="260" y="44" text-anchor="end">number = round it is computed in</text>
+</svg>
 
 <!--
 The point: this slide exists so nobody leaves believing recurrence is the only
@@ -643,18 +741,22 @@ across positions, which already fixes the position-locking problem from the
 dense-layer slide. Try the padding and stride controls: padding keeps the
 output as long as the input, stride 2 halves it.
 
-Click: "Parallel" — every output can be computed at once; no output waits for
-another.
+Click: "Parallel". Each output of the convolution depends only on the few input
+words under the filter, and the input is all known in advance. No output needs
+another output, so a GPU computes all of them at the same time.
 
-Click 2: context is limited by the filter's reach. The filter's reach is its
-receptive field: stacking layers widens it, but it is always a fixed number of
-positions.
+Click 2: the reach is limited. The filter's reach is its receptive field:
+stacking layers widens it, but it is always a fixed number of positions. If the
+"not" is 60 words back, outside the reach, the output never sees it.
 
-Click 3: nothing about 60 words ago. If the "not" is outside the reach, the
-output never sees it.
-
-Click 4: recurrence gives up the parallelism for unlimited context. Plant the
-flag for the last section: this cost is the second wall at the end of today.
+Click 3: a recurrent layer makes the opposite trade, and the small picture shows it. The
+number in each box is the round in which that output can be computed. The
+convolution's five outputs are all computed in round 1. The recurrent layer's step 5 needs
+the state from step 4, which needs step 3, and so on, so the five steps take five
+rounds, one after another. A 500-word review takes 500 rounds, however big the
+GPU is. What the RNN gets in return: the state is passed along the whole chain,
+so a word from any distance back can still affect the output. Plant the flag for
+the last section: this waiting is the second wall at the end of today.
 
 If someone offers n-grams: yes, a bigram catches "not good", and that is
 exactly what a 1-D convolution with a width-2 filter learns. It will not catch
@@ -692,6 +794,14 @@ The shape decides where the loss is computed, and what `forward` returns.
 </div>
 
 <!--
+Start on the first tab, "no recurrence". Its caption uses the word IID:
+independent and identically distributed. Independent means one example tells you
+nothing about the next one; identically distributed means they all come from the
+same data. Five Iris flowers are IID, so their order does not matter and
+shuffling them changes nothing. The five words of a review are not: shuffle them
+and the meaning changes. Everything else in this lecture is about data that is
+not IID along the time axis.
+
 Click through all five and read the examples. Then ask which one the review
 classifier is: many to one — five words in, one label out. Autocomplete is many to
 many, in step, shifted by one: predict the next word from the ones before it.
@@ -860,7 +970,7 @@ aside-width: 18rem
 
 <div v-click class="mt-2 dl-callout">
 
-At *great*, A and B give the same input. Only the note differs.
+Review A (*…was great*) and B (*…not great*) both end on *great*. Only the note differs.
 
 </div>
 
@@ -889,8 +999,12 @@ Now press "Next step" and walk through review B. "the", "movie", "was" embed as
 [0.45, -0.42]. In review A the same "great" arrives with a blank note and gives
 [0, 0.76].
 
-Click 4: the callout. At great, A and B give the same input; only the note
-differs. Same word, same weights, different note, opposite answer.
+Click 4: the callout. A and B are the two running reviews: A is "the movie was
+great" (positive), B is "the movie was not great" (negative). Both end on the
+word great, so at that last step they give the same input x = [1, 0] to the same
+weights. The only difference is the note that arrives with it: blank [0, 0] in
+A, the not-flag [0.96, 0] in B. Same word, same weights, different note,
+opposite answer.
 -->
 
 ---
@@ -1040,20 +1154,15 @@ title: "Reading the equation: one recurrent step"
 
 <div class="mt-1 dl-math-xs">
 
-$W_{xh} = \begin{bmatrix} 0 & 2 \\ 1 & 0 \end{bmatrix}$, $W_{hh} = \begin{bmatrix} 0.5 & 0 \\ -1.5 & 0.8 \end{bmatrix}$
+$W_{xh} = \begin{bmatrix} 0 & 2 \\ 1 & 0 \end{bmatrix}$, $W_{hh} = \begin{bmatrix} 0.5 & 0 \\ -1.5 & 0.8 \end{bmatrix}$, $\mathbf{b}_h = \mathbf{0}$
 
 </div>
 
-<div v-click class="mt-1 dl-callout">
+<div v-click class="mt-2 dl-callout">
 
-At *great*, reading the note left by *not*:
-
-$\mathbf{h}_5 = \tanh([0, 1] + [0.482, -1.446])$
-
-$\phantom{\mathbf{h}_5} = [0.448, -0.419]$
+Result: $\mathbf{h}_5 = [0.448, -0.419]$. The next slide works it out, one step per click.
 
 </div>
-
 </div>
 </div>
 
@@ -1065,19 +1174,124 @@ tanh. That gives the new note h_t. The output o_t is a plain dense layer on top.
 Say which symbols are learned: W_xh, W_hh, W_ho and the two biases. x_t is data.
 h_t is neither — it is computed, fresh, for every review.
 
-The two steps worth doing on the board, both checked in Python:
-  "not" (t = 4): x = [0, 1]. W_xh x = [0*0 + 2*1, 1*0 + 0*1] = [2, 0].
-  h_3 = [0, 0], so W_hh h_3 = [0, 0]. h_4 = tanh[2, 0] = [0.964, 0].
-  "great" (t = 5): x = [1, 0]. W_xh x = [0, 1].
-  W_hh h_4 = [0.5*0.964, -1.5*0.964 + 0.8*0] = [0.482, -1.446].
-  Sum [0.482, -0.446]. tanh gives [0.448, -0.419].
-  o_5 = W_ho h_5 = 3 * (-0.419) = -1.257, and sigmoid(-1.257) = 0.22: negative.
+Where h_4 comes from (one step earlier, at "not", t = 4): x_4 = [0, 1].
+W_xh x_4 = [0*0 + 2*1, 1*0 + 0*1] = [2, 0]. h_3 = [0, 0], so W_hh h_3 = [0, 0].
+h_4 = tanh([2, 0]) = [0.964, 0]. That is the value in the legend's h_{t-1} row.
 
-The -1.446 is the slide: it is the not-flag, travelling through the -1.5 wire,
-and it beats the +1 that "great" brought on its own.
+Click 9: the callout gives the result of step 5, h_5 = [0.448, -0.419]. Do not
+compute it here; the next slide does it one step per click.
+
+The -1.446 is the heart of it: it is the not-flag, travelling through the -1.5
+wire, and it beats the +1 that "great" brought on its own.
 
 Shapes to say out loud: in the code slides n_x = 64 and n_h = 128, so W_xh is
 128 x 64 and W_hh is 128 x 128. Here n_x = 2 and n_h = 2 so it fits on paper.
+-->
+
+---
+layout: default
+title: "Working it out: review B at great"
+---
+
+# Working it out: review B at *great*
+
+<svg viewBox="0 0 640 124" class="dl-diagram" style="max-height: 7.2rem" role="img" aria-label="Step 5 of review B. The old state h4 = 0.964, 0 times W_hh gives 0.482, minus 1.446. The word great = 1, 0 times W_xh gives 0, 1. The two are added, squashed by tanh into h5 = 0.448, minus 0.419, and read out as P(positive) = 0.22">
+  <defs>
+    <marker id="l5b-work-head" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+      <path d="M0 0 L7 3.5 L0 7 z" class="dl-dg-head" />
+    </marker>
+  </defs>
+  <rect x="4" y="10" width="112" height="30" rx="5" class="dl-dg-box" />
+  <text x="60" y="30" text-anchor="middle" class="dl-dg-lab is-sm">h₄ = [0.964, 0]</text>
+  <path d="M118 25 H234" class="dl-dg-arrow" marker-end="url(#l5b-work-head)" />
+  <text x="176" y="17" text-anchor="middle" class="dl-dg-small">2 · × W_hh</text>
+  <text x="176" y="40" text-anchor="middle" class="dl-dg-small is-bad">[0.482, −1.446]</text>
+  <circle cx="254" cy="25" r="15" class="dl-dg-box" />
+  <text x="254" y="30" text-anchor="middle" class="dl-dg-lab is-sm">+</text>
+  <rect x="190" y="90" width="128" height="30" rx="5" class="dl-dg-box" />
+  <text x="254" y="110" text-anchor="middle" class="dl-dg-lab is-sm">x₅ = great [1, 0]</text>
+  <path d="M254 88 V44" class="dl-dg-arrow" marker-end="url(#l5b-work-head)" />
+  <text x="262" y="62" class="dl-dg-small">1 · × W_xh</text>
+  <text x="262" y="78" class="dl-dg-small is-good">[0, 1]</text>
+  <path d="M270 25 H318" class="dl-dg-arrow" marker-end="url(#l5b-work-head)" />
+  <rect x="320" y="10" width="64" height="30" rx="5" class="dl-dg-box" />
+  <text x="352" y="30" text-anchor="middle" class="dl-dg-lab is-sm">3 · tanh</text>
+  <path d="M386 25 H426" class="dl-dg-arrow" marker-end="url(#l5b-work-head)" />
+  <rect x="428" y="10" width="150" height="30" rx="5" class="dl-dg-box is-accent" />
+  <text x="503" y="30" text-anchor="middle" class="dl-dg-lab is-sm">h₅ = [0.448, −0.419]</text>
+  <path d="M503 42 V86" class="dl-dg-arrow" marker-end="url(#l5b-work-head)" />
+  <text x="511" y="68" class="dl-dg-small">4 · × W_ho, then σ</text>
+  <rect x="428" y="90" width="150" height="30" rx="5" class="dl-dg-box" />
+  <text x="503" y="110" text-anchor="middle" class="dl-dg-lab is-sm">P(positive) = 0.22</text>
+</svg>
+
+<div class="grid grid-cols-2 gap-x-6 gap-y-2 mt-2 dl-math-sm">
+<div v-click class="dl-card">
+
+<div class="dl-secondary">1 · What the word brings</div>
+
+$W_{xh}\mathbf{x}_5 = \begin{bmatrix} 0 & 2 \\ 1 & 0 \end{bmatrix} \begin{bmatrix} 1 \\ 0 \end{bmatrix} = \begin{bmatrix} 0 \\ 1 \end{bmatrix}$
+
+</div>
+<div v-click class="dl-card">
+
+<div class="dl-secondary">2 · What the note brings</div>
+
+$W_{hh}\mathbf{h}_4 = \begin{bmatrix} 0.5 & 0 \\ -1.5 & 0.8 \end{bmatrix} \begin{bmatrix} 0.964 \\ 0 \end{bmatrix} = \begin{bmatrix} 0.482 \\ -1.446 \end{bmatrix}$
+
+</div>
+<div v-click class="dl-card">
+
+<div class="dl-secondary">3 · Add them (bias 0), then tanh</div>
+
+$\mathbf{h}_5 = \tanh \begin{bmatrix} 0 + 0.482 \\ 1 - 1.446 \end{bmatrix} = \begin{bmatrix} 0.448 \\ -0.419 \end{bmatrix}$
+
+</div>
+<div v-click class="dl-card">
+
+<div class="dl-secondary">4 · Read out with W<sub>ho</sub> = [0, 3], then sigmoid σ</div>
+
+$o_5 = 3 \times (-0.419) = -1.26$
+
+$\sigma(-1.26) = 0.22$: negative
+
+</div>
+</div>
+
+<!--
+The point: the arithmetic of one recurrent step, at the moment that matters —
+review B reaching "great" with the note left by "not". Four small steps, one per
+click, each a matrix times a vector the room can check by hand. All numbers are
+checked in Python.
+
+On screen: the picture is the recipe, numbered in the same order as the cards.
+The old note h_4 comes in from the left, the word "great" from below. Each is
+multiplied by its own weight matrix (steps 1 and 2), the two results are added
+and squashed by tanh (step 3), and the new note h_5 is read out as a
+probability (step 4).
+
+Click: step 1, what the word brings. x_5 = [1, 0]. Multiply each row of W_xh by
+x_5: row 1 is 0*1 + 2*0 = 0, row 2 is 1*1 + 0*0 = 1. So the word brings [0, 1]:
+on its own, "great" pushes the sentiment unit up by 1.
+
+Click 2: step 2, what the note brings. h_4 = [0.964, 0] (computed at "not", on
+the previous slide). Row 1 of W_hh: 0.5*0.964 + 0*0 = 0.482. Row 2: -1.5*0.964 +
+0.8*0 = -1.446. So the note brings [0.482, -1.446]. The -1.446 is the not-flag
+travelling through the -1.5 wire.
+
+Click 3: step 3, add and squash. Add the two vectors and the bias (zero here):
+[0 + 0.482, 1 - 1.446] = [0.482, -0.446]. Apply tanh to each number:
+tanh(0.482) = 0.448 and tanh(-0.446) = -0.419. So h_5 = [0.448, -0.419]. The
+sentiment unit is negative: the note's -1.446 beat the word's +1.
+
+Click 4: step 4, read out. W_ho = [0, 3] reads only the sentiment unit:
+0*0.448 + 3*(-0.419) = -1.256, about -1.26. The sigmoid turns this logit into a
+probability: sigmoid(-1.26) = 1 / (1 + e^1.26) = 0.22. P(positive) = 0.22, so
+review B is read as negative.
+
+For contrast, say review A aloud: it reaches "great" with a blank note [0, 0],
+so step 2 brings [0, 0], h_5 = tanh([0, 1]) = [0, 0.762], and
+sigmoid(3 * 0.762) = 0.91: positive. Same word, same weights, different note.
 -->
 
 ---
@@ -3593,25 +3807,29 @@ output, _ = pad_packed_sequence(packed_out, batch_first=True)
 </div>
 <div>
 
-<svg class="dl-diagram" viewBox="0 0 230 168" role="img" aria-label="The four reviews sorted by length 8, 5, 3, 2. Real tokens are solid, padding dashed. The last real token of each row is highlighted. Under each time step, the count of real tokens: 4, 4, 3, 2, 2, 1, 1, 1.">
-  <text class="dl-dg-small" x="30" y="10">sorted by length</text>
+<svg class="dl-diagram" viewBox="0 0 262 172" role="img" aria-label="The four reviews sorted by length 8, 5, 3, 2 words, one column per time step 1 to 8. Real tokens are solid, padding red. The last real token of each row is highlighted. Under each step, how many reviews still have a real word: 4, 4, 3, 2, 2, 1, 1, 1.">
+  <text class="dl-dg-small" x="58" y="12" text-anchor="end">step</text>
+  <text v-for="t in 8" :key="`s${t}`" class="dl-dg-small" :x="74 + (t - 1) * 24" y="12" text-anchor="middle" v-text="t" />
   <g v-for="(len, r) in [8, 5, 3, 2]" :key="r">
-    <text class="dl-dg-small" x="22" :y="33 + r * 24" text-anchor="end">{{len}}</text>
+    <text class="dl-dg-small" x="58" :y="35 + r * 24" text-anchor="end">{{len}} words</text>
     <rect v-for="t in 8" :key="t"
       :class="['dl-dg-box', ['', 'is-accent', 'is-bad'][Math.sign(t - len) + 1]]"
-      :x="30 + (t - 1) * 24" :y="18 + r * 24" width="20" height="20" rx="2" />
+      :x="64 + (t - 1) * 24" :y="20 + r * 24" width="20" height="20" rx="2" />
   </g>
+  <path class="dl-dg-line" d="M62 120 H256" />
+  <text class="dl-dg-small" x="58" y="140" text-anchor="end">still going</text>
   <g v-for="(n, t) in [4, 4, 3, 2, 2, 1, 1, 1]" :key="`n${t}`">
-    <text class="dl-dg-lab is-sm" :x="40 + t * 24" y="130" text-anchor="middle">{{n}}</text>
+    <text class="dl-dg-lab is-sm" :x="74 + t * 24" y="140" text-anchor="middle">{{n}}</text>
   </g>
-  <text class="dl-dg-small" x="30" y="150">batch_sizes: real tokens per step</text>
+  <text class="dl-dg-small" x="62" y="164">stored as batch_sizes</text>
 </svg>
 
 </div>
 </div>
 
-Packing keeps only the real tokens, plus a count for each time step. The layer
-then stops each row at its own length.
+Packing keeps only the real tokens. The bottom row counts **how many reviews
+still have a real word** at each step. Step 3 has 3: the 2-word review has ended.
+So each row stops at its own length.
 
 <div v-click class="mt-2 dl-callout">
 
@@ -3626,11 +3844,22 @@ each row at its own length. Without it, h_n is the wrong vector for every padded
 row.
 
 On screen: the code on the left. On the right, the same four reviews sorted by
-length, 8, 5, 3, 2. The accent cell in each row is the last real token — where
-h_n is now read; the cells after it are padding. The numbers underneath are what
-a PackedSequence actually stores as batch_sizes: 4, 4, 3, 2, 2, 1, 1, 1 — how
-many reviews are still going at each step. They add up to the 18 real tokens. At
-step 6 only one review is still going.
+length, 8, 5, 3, 2 words, with one column per time step (numbered along the
+top). The accent cell in each row is the last real token — where h_n is now
+read; the red cells after it are padding.
+
+The bottom row is the part people ask about. Read it column by column: under
+each step, count the rows that still have a real (not red) token in that
+column.
+  Steps 1 and 2: all four reviews have a word, so 4 and 4.
+  Step 3: the 2-word review ("utterly awful") has ended, so 3.
+  Steps 4 and 5: the 3-word review has ended too, so 2 and 2.
+  Steps 6, 7 and 8: only the 8-word review is left, so 1, 1, 1.
+That row, 4, 4, 3, 2, 2, 1, 1, 1, is exactly what a PackedSequence stores in
+its batch_sizes field. At each step the LSTM processes only that many rows, so
+it never reads a pad token. The numbers add up to 18, the real tokens in the
+batch. Sorting by length is what makes the rows still going always the top
+ones.
 
 Click: lines 1–4. Import the two helpers and pack the embedded batch with its
 lengths. enforce_sorted=False is the modern convenience; older code sorts the
@@ -3995,45 +4224,95 @@ title: Generating one step at a time
 
 # Generating one step at a time
 
-Predict the next word, then read it back in. A state carries the past, not a fixed window.
+One next-word model, fed in two different ways.
 
-<div class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 items-center mt-3 mx-auto w-full" style="max-width: 640px;">
-  <template v-for="k in [3, 4, 5]" :key="k">
-    <span class="dl-secondary">step {{ k }}</span>
-    <WordStrip review="B" :upto="k" :highlight="['the', 'movie', 'was', 'not', 'great'][k - 1]" :width="520" />
-  </template>
-</div>
+<svg viewBox="0 0 660 214" class="dl-diagram" role="img" aria-label="Left, training: the true words the, movie, was, not go in at four steps, and at each step the prediction is compared with the true next word movie, was, not, great, giving four losses. Right, generating: only the goes in; each predicted word is fed back in as the next input, one step at a time">
+  <defs>
+    <marker id="l5f-gen-head" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+      <path class="dl-dg-head" d="M0 0 L7 3.5 L0 7 z" />
+    </marker>
+  </defs>
+  <text class="dl-dg-lab is-sm" x="10" y="14">Training: the true review is known</text>
+  <g v-for="(w, k) in ['the', 'movie', 'was', 'not']" :key="`t${k}`">
+    <text class="dl-dg-small is-good" :x="40 + k * 74" y="38" text-anchor="middle">loss</text>
+    <rect class="dl-dg-box" :x="12 + k * 74" y="46" width="56" height="24" rx="3" />
+    <text class="dl-dg-lab is-sm" :x="40 + k * 74" y="63" text-anchor="middle" v-text="['movie', 'was', 'not', 'great'][k]" />
+    <path class="dl-dg-arrow" marker-end="url(#l5f-gen-head)" :d="`M${40 + k * 74} 98 V74`" />
+    <rect class="dl-dg-net" :x="16 + k * 74" y="100" width="48" height="30" rx="5" />
+    <text class="dl-dg-in" :x="40 + k * 74" y="120" text-anchor="middle">RNN</text>
+    <path class="dl-dg-arrow" marker-end="url(#l5f-gen-head)" :d="`M${40 + k * 74} 160 V134`" />
+    <rect class="dl-dg-box is-accent" :x="12 + k * 74" y="162" width="56" height="24" rx="3" />
+    <text class="dl-dg-lab is-sm" :x="40 + k * 74" y="179" text-anchor="middle" v-text="w" />
+  </g>
+  <path v-for="k in 3" :key="`th${k}`" class="dl-dg-line" marker-end="url(#l5f-gen-head)" :d="`M${64 + (k - 1) * 74} 115 H${86 + (k - 1) * 74}`" />
+  <text class="dl-dg-small" x="10" y="206">target: the true next word · input: the true word</text>
+  <path class="dl-dg-split" d="M322 6 V206" />
+  <g v-click="1">
+    <text class="dl-dg-lab is-sm" x="336" y="14">Generating: no true review exists</text>
+    <g v-for="k in 4" :key="`g${k}`">
+      <rect class="dl-dg-box" :x="334 + (k - 1) * 82" y="46" width="60" height="24" rx="3" />
+      <text class="dl-dg-lab is-sm" :x="364 + (k - 1) * 82" y="63" text-anchor="middle" v-text="['movie', 'was', 'not', 'great'][k - 1]" />
+      <path class="dl-dg-arrow" marker-end="url(#l5f-gen-head)" :d="`M${364 + (k - 1) * 82} 98 V74`" />
+      <rect class="dl-dg-net" :x="340 + (k - 1) * 82" y="100" width="48" height="30" rx="5" />
+      <text class="dl-dg-in" :x="364 + (k - 1) * 82" y="120" text-anchor="middle">RNN</text>
+      <path class="dl-dg-arrow" marker-end="url(#l5f-gen-head)" :d="`M${364 + (k - 1) * 82} 160 V134`" />
+      <rect :class="k === 1 ? 'dl-dg-box is-accent' : 'dl-dg-box'" :x="334 + (k - 1) * 82" y="162" width="60" height="24" rx="3" />
+      <text class="dl-dg-lab is-sm" :x="364 + (k - 1) * 82" y="179" text-anchor="middle" v-text="['the', 'movie', 'was', 'not'][k - 1]" />
+    </g>
+    <path v-for="k in 3" :key="`gh${k}`" class="dl-dg-line" marker-end="url(#l5f-gen-head)" :d="`M${388 + (k - 1) * 82} 115 H${419 + (k - 1) * 82}`" />
+    <path v-for="k in 3" :key="`gb${k}`" class="dl-dg-grad is-good" marker-end="url(#l5f-gen-head)" :d="`M${396 + (k - 1) * 82} 58 Q${412 + (k - 1) * 82} 58 ${412 + (k - 1) * 82} 120 Q${412 + (k - 1) * 82} 174 ${420 + (k - 1) * 82} 174`" />
+    <text class="dl-dg-small" x="336" y="206">input: the model's own last guess</text>
+  </g>
+</svg>
 
-<div class="dl-tight mt-2">
+<div class="dl-tight">
 
 <v-clicks>
 
-- **Training**: feed the *true* previous word (**teacher forcing**), all in one pass
-- **Generating**: feed its *own* last word, so one mistake carries forward (**exposure bias**)
+- **Training** feeds the *true* previous word (**teacher forcing**). All inputs are known, so one forward call covers the review.
+- **Generating** feeds its *own* last guess. One wrong word changes every later input (**exposure bias**).
 
 </v-clicks>
 
 </div>
 
 <!--
-This closes the loop with the window slide in section 00. Generating text is one
-recipe: predict the next word from the ones before it, write it, and read it back
-in. Each row on the slide is one step of review B; the accent tile is the word
-just written.
+The point: an RNN that predicts the next word is used in two different ways.
+At training time it is fed the true review; at generation time it is fed its
+own guesses. This closes the loop with the window slide in section 00: predict
+the next word from the ones before it, with the state in place of the window.
 
-The difference from the window is how the past is seen. A window sees a fixed
-number of earlier words. The RNN carries the note: everything it has read is
-folded into the state, however long ago.
+On screen, left panel (training). Read it bottom to top. The bottom row is the
+input at each step: the true words of review B, "the movie was not". The middle
+row is the same RNN cell at four steps, with the state passed along to the
+right. The top row is the target: the true next word at each step, "movie was
+not great". The model's prediction at each step is compared with that target,
+which gives one cross-entropy loss per step (the "loss" labels). The four
+losses are averaged into the loss for the review.
 
-Teacher forcing: at training time the true previous word is known, so every
-step's input is known in advance and the loss for the whole review comes from one
-forward pass. At generation time there is no true previous word; the model reads
-its own output, which it never saw during training. That mismatch is exposure
-bias, and it is why generated text drifts. Scheduled sampling — mixing in the
-model's own predictions with rising probability — is the classic fix.
+Click: the right panel (generating). Now there is no true review; we want the
+model to write one. We give it only the first word, "the" (the accent tile). It
+predicts a next word, here "movie". The dashed curve shows that guess fed back
+in as the input of the next step. Then it predicts "was", feeds it back, and so
+on. Each step must wait for the guess of the step before, so generation runs
+one word at a time.
 
-If the room is interested: always taking the most likely word (argmax) is
-repetitive; sampling from softmax(logits / temperature) is the knob.
+Click 2: training uses the true previous word as input. This has a name,
+teacher forcing: like a teacher who corrects you after every word, so a mistake
+at step 2 does not affect the input of step 3. Because every input is known
+before we start, nn.LSTM processes the whole review in one forward call and
+computes the loss for every step at once.
+
+Click 3: generating uses the model's own last guess. The model never saw its
+own mistakes during training, so one wrong word puts it in a situation it was
+not trained on, and the error carries into every later step. That mismatch
+between training and generating is called exposure bias, and it is why long
+generated text drifts. Scheduled sampling, which mixes in the model's own
+predictions during training with rising probability, is the classic fix.
+
+How the next word is chosen, if the room asks: the output at each step is a
+softmax over the vocabulary. Always taking the most likely word (argmax) is
+repetitive; sampling from softmax(logits / temperature) is the usual knob.
 -->
 
 ---

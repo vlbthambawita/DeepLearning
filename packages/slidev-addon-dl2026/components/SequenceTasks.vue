@@ -40,7 +40,7 @@ const TASKS: Task[] = [
     recurrent: false,
     example: 'Ex: five Iris flowers → five class labels. Everything the course has done so far.',
     shape: 'five independent examples',
-    loss: 'Shuffle the five columns and nothing changes. That is what IID means.',
+    loss: 'The examples are IID (independent and identically distributed): each one is drawn on its own, from the same data. So shuffling the five columns changes nothing.',
   },
   {
     key: 'many-to-one',
