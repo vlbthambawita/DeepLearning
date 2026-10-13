@@ -4,12 +4,14 @@
  *
  *   npm run dev -- lecture-01
  *   npm run dev -- lecture-01 --port 3040
+ *   npm run dev -- lecture-01 --class      # the class cut: only `core: true` slides
  *
  * Speaker notes stay in the source and are visible at /presenter — the public
  * build strips them (`--without-notes` in build-site.mjs) unless the deck sets
  * `"publicNotes": true` in decks.config.json.
  */
 import { spawnSync } from 'node:child_process'
+import { writeClassDeck } from './lib/class-cut.mjs'
 import { loadConfig, parseArgs, repoRoot } from './lib/config.mjs'
 
 const args = parseArgs()
@@ -22,10 +24,22 @@ if (!deck) {
   process.exit(1)
 }
 
-const extra = args.port ? ['--port', String(args.port)] : []
-console.log(`Opening ${deck.id} — presenter view at /presenter`)
+let entry = deck.entry
+if (args.class) {
+  // Regenerated on every start; edit slides.md (the `core: true` flags), not class.md.
+  const cut = writeClassDeck(deck)
+  if (!cut) {
+    console.error(`${deck.id} flags no slides \`core: true\` — it has no class cut yet.`)
+    process.exit(1)
+  }
+  entry = cut.path
+  console.log(`Class cut: ${cut.slides} of ${cut.of} slides`)
+}
 
-const result = spawnSync('npx', ['slidev', deck.entry, '--open', ...extra], {
+const extra = args.port ? ['--port', String(args.port)] : []
+console.log(`Opening ${deck.id}${args.class ? ' (class)' : ''} — presenter view at /presenter`)
+
+const result = spawnSync('npx', ['slidev', entry, '--open', ...extra], {
   cwd: repoRoot,
   stdio: 'inherit',
 })

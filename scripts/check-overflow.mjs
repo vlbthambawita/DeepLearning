@@ -24,6 +24,7 @@
  *   node scripts/check-overflow.mjs                       # every deck
  *   node scripts/check-overflow.mjs lecture-04            # one deck
  *   node scripts/check-overflow.mjs lecture-04 --dark
+ *   node scripts/check-overflow.mjs lecture-04 --class    # the class cut
  *   node scripts/check-overflow.mjs --shots out/          # save a PNG per slide
  *
  * Exits non-zero if anything is clipped, so it can gate a release.
@@ -37,6 +38,8 @@ import { installErrorHandler } from './lib/fail.mjs'
 installErrorHandler()
 
 const args = process.argv.slice(2)
+// --class checks the class cut (<id>/class/), built when a deck flags `core: true` slides.
+const classCut = args.includes('--class')
 const dark = args.includes('--dark')
 const shotIndex = args.indexOf('--shots')
 const shotDir = shotIndex === -1 ? null : args[shotIndex + 1]
@@ -118,7 +121,7 @@ page.on('pageerror', err => {
 })
 
 for (const deck of decks) {
-  const url = `${base}/${deck.id}/index.html`
+  const url = `${base}/${deck.id}${classCut ? '/class' : ''}/index.html`
   const slideNo = () => page.evaluate(() => Number((location.hash.match(/^#\/(\d+)/) ?? [])[1]))
   let checked = 0
 

@@ -20,6 +20,10 @@
  * `"publicNotes": true` in decks.config.json. Then they ship with the deck and
  * students read them through the Presenter Mode button in the nav bar.
  *
+ * A deck that flags slides `core: true` also gets its class cut — the short
+ * deck taught in the 2-hour session — generated as decks/<id>/class.md and
+ * built to <id>/class/ (see lib/class-cut.mjs). The landing page links both.
+ *
  * The in-deck PDF download button comes from the theme's `download` default
  * ("./slides.pdf"), likewise relative. Run `export-pdf.mjs` after this on
  * anything you actually deploy, or that button 404s.
@@ -27,6 +31,7 @@
 import { spawnSync } from 'node:child_process'
 import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
+import { coreCount, writeClassDeck } from './lib/class-cut.mjs'
 import { loadConfig, parseArgs, repoRoot, selectDecks } from './lib/config.mjs'
 import { installErrorHandler } from './lib/fail.mjs'
 
@@ -49,18 +54,15 @@ console.log(`Building ${decks.length} deck(s) into ${outDir}`)
 for (const deck of decks) {
   const deckOut = join(outDir, deck.id)
 
-  const slidevArgs = [
-    'slidev',
-    'build', deck.entry,
-    '--base', './',
-    '--out', deckOut,
-    ...(deck.publicNotes ? [] : ['--without-notes']),
-  ]
-
   console.log(`\n→ ${deck.id}${deck.publicNotes ? '  (with speaker notes)' : ''}`)
-  const result = spawnSync('npx', slidevArgs, { cwd: repoRoot, stdio: 'inherit' })
-  if (result.status !== 0)
-    throw new Error(`slidev build failed for ${deck.id} (exit ${result.status})`)
+  slidevBuild(deck, deck.entry, deckOut)
+
+  // After the full deck: its build empties deckOut, which would delete class/.
+  const cut = writeClassDeck(deck)
+  if (cut) {
+    console.log(`\n→ ${deck.id}/class  (${cut.slides} of ${cut.of} slides)`)
+    slidevBuild(deck, cut.path, join(deckOut, 'class'))
+  }
 }
 
 writeLanding()
@@ -69,6 +71,19 @@ writeSpaceReadme()
 console.log(`\nDone. Preview with:  npx vite preview --outDir ${args.out ?? 'dist'}`)
 
 // ---------------------------------------------------------------------------
+
+function slidevBuild(deck, entry, out) {
+  const slidevArgs = [
+    'slidev',
+    'build', entry,
+    '--base', './',
+    '--out', out,
+    ...(deck.publicNotes ? [] : ['--without-notes']),
+  ]
+  const result = spawnSync('npx', slidevArgs, { cwd: repoRoot, stdio: 'inherit' })
+  if (result.status !== 0)
+    throw new Error(`slidev build failed for ${entry} (exit ${result.status})`)
+}
 
 function escapeHtml(value) {
   return String(value).replace(/[&<>"']/g, c => (
@@ -88,13 +103,22 @@ function writeLanding() {
   // Link the file, not the directory. GitHub Pages resolves "lecture-01/" to
   // its index.html; the Hugging Face static Space serves exact paths only and
   // answers a directory request with its own 404 page.
+  // A deck with a class cut gets a div card with two real links (anchors cannot
+  // nest); a deck without one stays a single clickable card.
   const cards = listed.length
-    ? listed.map(deck => `    <a class="deck" href="${deck.id}/index.html">
+    ? listed.map((deck) => {
+        const head = `
       <div class="deck__week">Week ${escapeHtml(deck.week)}</div>
       <div class="deck__title">${escapeHtml(deck.title)}</div>
-      ${deck.subtitle ? `<div class="deck__sub">${escapeHtml(deck.subtitle)}</div>` : ''}
+      ${deck.subtitle ? `<div class="deck__sub">${escapeHtml(deck.subtitle)}</div>` : ''}`
+        return coreCount(deck)
+          ? `    <div class="deck">${head}
+      <div class="deck__links"><a href="${deck.id}/class/index.html">Class slides →</a><a href="${deck.id}/index.html">Full slides, for self-study →</a></div>
+    </div>`
+          : `    <a class="deck" href="${deck.id}/index.html">${head}
       <div class="deck__links"><span>Open slides →</span></div>
-    </a>`).join('\n')
+    </a>`
+      }).join('\n')
     : '    <div class="empty">No lectures published yet.</div>'
 
   const html = template

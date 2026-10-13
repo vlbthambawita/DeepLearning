@@ -9,7 +9,9 @@ skill's rule is a visual on every slide, and a table or an equation does not
 count as one. It also lists slides whose speaker notes are missing or too thin
 to explain the slide (see the skill's "Speaker notes: explain the slide"),
 and every picture slide not followed by its "In words: …" description slide
-(see "A description slide after every picture slide").
+(see "A description slide after every picture slide"). Last, it sizes the
+class cut — the slides flagged `core: true` that `npm run build` turns into the
+2-hour class deck (see "The class cut") — and estimates its teaching time.
 
     python3 .claude/skills/lecture-deck/slide-stats.py               # every deck
     python3 .claude/skills/lecture-deck/slide-stats.py lecture-07    # one deck
@@ -53,6 +55,12 @@ def is_frontmatter(block):
 
 def slides(path):
     """Yield (layout, label, body) per slide. Slides may omit front matter."""
+    for layout, label, body, _fm in slides_fm(path):
+        yield layout, label, body
+
+
+def slides_fm(path):
+    """As `slides`, plus each slide's raw front matter."""
     blocks = re.split(r"(?m)^---$", path.read_text(encoding="utf-8"))
     if blocks and not blocks[0].strip():
         blocks = blocks[1:]
@@ -68,7 +76,43 @@ def slides(path):
         named = re.search(r"(?m)^(?:heading|title):\s*(.+)$", fm)
         head = re.search(r"(?m)^#{1,2}\s+(.+)$", body)
         label = (named.group(1) if named else head.group(1) if head else "").strip()[:46]
-        yield layout, label, body
+        yield layout, label, body, fm
+
+
+# --- the class cut -----------------------------------------------------------
+# Same selection rule as scripts/lib/class-cut.mjs: the title slide, every slide
+# flagged `core: true`, every `end` slide, and a `section` divider when at least
+# one core slide follows it before the next divider.
+CORE = re.compile(r"(?m)^core:\s*true\s*$")
+CLASS_MINUTES = 100          # 2 h session minus a 15 min break and 5 min slack
+# Rough minutes per slide when taught, by kind — tune if the room runs slower.
+MINUTES = {"title": 1, "section": 0.5, "end": 1, "default": 2, "figure": 2,
+           "interactive": 4, "poll": 4, "code": 3}
+
+
+def class_cut(parsed_fm):
+    """Indices (0-based) of the slides that go into the class deck."""
+    core = [bool(CORE.search(fm)) for _l, _lb, _b, fm in parsed_fm]
+    keep = []
+    for i, (layout, _label, _body, _fm) in enumerate(parsed_fm):
+        if i == 0 or core[i] or layout == "end":
+            keep.append(i)
+        elif layout == "section":
+            j = i + 1
+            while j < len(parsed_fm) and parsed_fm[j][0] != "section":
+                if core[j]:
+                    keep.append(i)
+                    break
+                j += 1
+    return keep
+
+
+def teach_minutes(layout, body):
+    if "<PollSlide" in body:
+        return MINUTES["poll"]
+    if layout in ("default", "figure") and "```" in re.sub(r"<!--.*?-->", "", body, flags=re.S):
+        return MINUTES["code"]
+    return MINUTES.get(layout, 2)
 
 
 def prose_words(body):
@@ -213,6 +257,26 @@ def report(deck, show_all):
             mark = "!!" if words > HARD.get(layout, 110) else " ·"
             print(f"   {mark} {n:3d} {layout:12s} {words:4d}w  {label}"
                   f"{'' if visual else '   <- words only'}")
+    parsed_fm = list(slides_fm(path))
+    keep = class_cut(parsed_fm)
+    flagged_core = [i for i, s in enumerate(parsed_fm) if CORE.search(s[3])]
+    if not flagged_core:
+        print("  class cut: none flagged (add `core: true` to the main-flow slides)")
+    else:
+        mins = sum(teach_minutes(parsed_fm[i][0], parsed_fm[i][2]) for i in keep)
+        mark = "" if mins <= CLASS_MINUTES else f"   <- over {CLASS_MINUTES} min: cut more"
+        print(f"  class cut: {len(keep)} of {len(parsed_fm)} slides, ~{mins:.0f} min{mark}")
+        bad = [i for i in flagged_core if is_description(parsed_fm[i][1])]
+        for i in bad:
+            print(f"      {i + 1:3d} core description slide — 'In words' slides are for self-study")
+        unpictured = [i for i in flagged_core if not has_picture(parsed_fm[i][2])]
+        for i in unpictured:
+            print(f"      {i + 1:3d} core slide with no picture — the class cut is diagram-led")
+        if show_all:
+            for i in keep:
+                layout, label, body, _fm = parsed_fm[i]
+                print(f"      {i + 1:3d} {layout:12s} {teach_minutes(layout, body):4.1f}m  {label}")
+
     if show_all:
         print("  all slides:")
         for n, layout, label, words, parts, visual in rows:

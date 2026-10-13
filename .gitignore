@@ -227,6 +227,8 @@ __marimo__/
 node_modules/
 dist/
 .slidev/
+# The class cut, generated from slides.md by scripts/lib/class-cut.mjs
+decks/*/class.md
 *.tsbuildinfo
 
 # Extracted reference material from the 2025 PDFs (regenerate with scripts/extract_figures.py)

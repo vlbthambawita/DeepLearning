@@ -58,6 +58,7 @@ is next week.
 
 ---
 layout: interactive
+core: true
 heading: Where we are
 title: Where we are
 aside-width: 15rem
@@ -85,6 +86,8 @@ week 8 is next.
 
 About one minute. Do not open the other blocks; the only thing to land is where
 today sits between last week and next week.
+
+Class cut: about 4 minutes.
 -->
 
 ---
@@ -138,6 +141,7 @@ that removed the recurrence, and the one-sentence description of a transformer
 
 ---
 layout: default
+core: true
 title: Where last week stopped
 ---
 
@@ -233,6 +237,8 @@ lecture is about.
 If anyone is missing week 6: the one sentence they need is that attention means
 "score every position, softmax the scores, take a weighted sum of the values".
 That is all of it, and this lecture re-derives it from scratch anyway.
+
+Class cut: about 2 minutes.
 -->
 
 ---
@@ -268,6 +274,7 @@ still standing, and why did attention not touch it?
 
 ---
 layout: default
+core: true
 title: The move
 ---
 
@@ -357,6 +364,8 @@ Click 3: the callout — the title is not a slogan, it is the result.
 
 Twelve hours on eight P100s for the base model. The reason that number mattered
 is that it is what made everything after it affordable.
+
+Class cut: about 2 minutes.
 -->
 
 ---
@@ -389,6 +398,7 @@ on a graphics card.
 
 ---
 layout: default
+core: true
 title: What a transformer is
 ---
 
@@ -473,6 +483,8 @@ Click 4: the callout. The "two thirds of the parameters" line always gets a
 reaction, and it should — students arrive believing a transformer is attention
 with some plumbing. It is closer to the reverse. The "What a block costs" slide
 does the arithmetic.
+
+Class cut: about 2 minutes.
 -->
 
 ---
@@ -507,6 +519,8 @@ last line; everything in sections 01 and 02 fills in one of the two steps.
 
 ---
 layout: default
+core: true
+title: "Poll: which wall attention solves"
 ---
 
 <div class="grid grid-cols-[1.7fr_1fr] gap-6 items-start">
@@ -580,6 +594,8 @@ Option 3 is the popular wrong answer and it is worth naming why: attention and
 parallelism get taught together so often that students fuse them. They are two
 separate moves, made three years apart. Option 4 is wrong because this lecture
 shows attention working with no recurrence at all.
+
+Class cut: about 4 minutes.
 -->
 
 ---
@@ -632,6 +648,7 @@ computed at the same time.
 
 ---
 layout: default
+core: true
 title: Start from a lookup
 ---
 
@@ -740,6 +757,8 @@ from them:
 
 Both changes exist for the same reason: a hard lookup is not differentiable, and
 you cannot backpropagate through a KeyError.
+
+Class cut: about 3 minutes.
 -->
 
 ---
@@ -773,6 +792,7 @@ reading afterwards.
 
 ---
 layout: default
+core: true
 title: Three roles, one vector
 ---
 
@@ -838,6 +858,8 @@ of people assume a token is excluded from its own row.
 
 W_Q, W_K and W_V are the only new parameters in the layer, and they learn the
 usual way, by gradient descent.
+
+Class cut: about 2 minutes.
 -->
 
 ---
@@ -870,6 +892,7 @@ time; skip in the lecture if short on time — this slide is for revision.
 
 ---
 layout: default
+core: true
 title: The sentence we will use all lecture
 ---
 
@@ -966,6 +989,8 @@ Click 4: so the information has to come from a neighbour.
 Click 5: the honesty caveat at the bottom is not optional. Say it out loud —
 dimension 2 is not "water" in any real model, and a student who leaves believing
 otherwise will misread every attention visualisation they ever see.
+
+Class cut: about 2 minutes.
 -->
 
 ---
@@ -997,6 +1022,7 @@ seconds; skip in the lecture if short on time — this slide is for revision.
 
 ---
 layout: interactive
+core: true
 heading: Three lenses on one word
 title: Three lenses on one word
 aside-width: 17rem
@@ -1038,6 +1064,8 @@ a job.
 If asked whether W_Q, W_K, W_V are shared across positions: yes, one set per
 head for the whole sequence. Exactly the weight-sharing argument from weeks 4
 and 5, a third time.
+
+Class cut: about 4 minutes. In the full slides, for self-study, it is followed by "Why a key and a value are different things".
 -->
 
 ---
@@ -1177,6 +1205,7 @@ the lecture if short on time — this slide is for revision.
 
 ---
 layout: default
+core: true
 title: Four steps, and that is the whole mechanism
 ---
 
@@ -1241,7 +1270,7 @@ four.
 
 The picture: four boxes, one per step, and under each the bank row of "the
 river bank" after that step. The mix box deliberately has no number yet — the
-next slide derives it, and the room should produce it.
+"One output vector, five lines" derives it (in class, ask the room for it here).
 
 Click: score. Bank's query dotted with every key gives 0, 2, 0. A big dot
 product means the two vectors point the same way; only river advertised
@@ -1260,6 +1289,8 @@ weighted sum, and a student who noticed that should be told they were right —
 the only genuinely new thing in this lecture is *where the scores come from*,
 which is now a dot product between two learned projections instead of a small
 MLP (multilayer perceptron).
+
+Class cut: about 2 minutes. In the full slides, for self-study, it is followed by "One output vector, five lines".
 -->
 
 ---
@@ -1369,6 +1400,7 @@ for revision.
 
 ---
 layout: interactive
+core: true
 heading: Same word, same weights, different neighbour
 title: Same word, same weights, different neighbour
 aside-width: 18rem
@@ -1409,6 +1441,8 @@ slide, and it is the difference between 2013 NLP and 2018 NLP.
 If someone asks whether the input embedding is now useless: no — it is what the
 query and key are computed *from*. Context does not replace the word, it resolves
 it.
+
+Class cut: about 4 minutes. In the full slides, for self-study, it is followed by "Why divide by the square root" and "Reading the equation: scaled scores".
 -->
 
 ---
@@ -1652,6 +1686,7 @@ seconds; skip in the lecture if short on time — this slide is for revision.
 
 ---
 layout: interactive
+core: true
 heading: Every query at once
 title: Every query at once
 aside-width: 18rem
@@ -1692,6 +1727,8 @@ in one shot whether the sentence is three words or three thousand.
 Hovering a row puts that row's numbers in the readout. The flat row for "the" is
 worth pausing on: a token with a zero query gets a uniform average of the whole
 sentence, which is a perfectly sensible thing for a stopword to do.
+
+Class cut: about 4 minutes.
 -->
 
 ---
@@ -1723,6 +1760,7 @@ seconds; skip in the lecture if short on time — this slide is for revision.
 
 ---
 layout: default
+core: true
 title: The whole layer, in one line
 ---
 
@@ -1806,6 +1844,8 @@ Click 4: the callout — two matrix multiplies and a softmax.
 
 Have the room confirm the T x T — it is the shape that comes back to bite in
 section 02.
+
+Class cut: about 2 minutes. In the full slides, for self-study, it is followed by "Poll: where self-attention's keys come from".
 -->
 
 ---
@@ -1838,6 +1878,7 @@ in the lecture if short on time — this slide is for revision.
 
 ---
 layout: default
+title: "Poll: where self-attention's keys come from"
 ---
 
 <div class="grid grid-cols-[1.7fr_1fr] gap-6 items-start">
@@ -1969,6 +2010,7 @@ at the end to their callouts.
 
 ---
 layout: default
+core: true
 title: One softmax can only point at one thing
 ---
 
@@ -2033,6 +2075,8 @@ blurs all four answers.
 
 Click 3: the fix. The word "head" has no deeper meaning. It is one independent
 copy of the mechanism with its own three matrices.
+
+Class cut: about 2 minutes.
 -->
 
 ---
@@ -2062,6 +2106,7 @@ seconds to read it, or skip it in the lecture if short on time.
 
 ---
 layout: interactive
+core: true
 heading: Four heads, one question each
 title: Four heads, one question each
 aside-width: 17rem
@@ -2110,6 +2155,8 @@ the first token — are a robust finding, and they matter practically: they are
 why you cannot simply evict the first tokens from a KV cache.
 
 Press Next query word a couple of times so they see the rows change together.
+
+Class cut: about 4 minutes. In the full slides, for self-study, it is followed by "Heads are free".
 -->
 
 ---
@@ -2268,6 +2315,7 @@ lecture if short on time.
 
 ---
 layout: interactive
+core: true
 heading: Attention does not know what order the words came in
 title: Attention does not know what order the words came in
 aside-width: 18rem
@@ -2314,6 +2362,8 @@ The technical name is permutation equivariance: permute the input and the output
 permute with it, otherwise unchanged. For a set of points that is a feature —
 it is why the same machinery works on graphs and point clouds. For a sentence it
 is a bug.
+
+Class cut: about 4 minutes.
 -->
 
 ---
@@ -2347,6 +2397,7 @@ lecture if short on time.
 
 ---
 layout: interactive
+core: true
 heading: So put the position into the vector
 title: So put the position into the vector
 aside-width: 18rem
@@ -2397,6 +2448,8 @@ Why not just learn a position embedding? You can, and BERT and GPT-2 both do.
 Learned embeddings cannot extrapolate past the longest training sequence, which
 is exactly the problem RoPE later solves properly — see "Position, done
 properly".
+
+Class cut: about 4 minutes.
 -->
 
 ---
@@ -2429,6 +2482,7 @@ lecture if short on time.
 
 ---
 layout: default
+core: true
 title: The other half of the block
 ---
 
@@ -2514,7 +2568,9 @@ Click 4: the weight count, 2 x 512 x 2048 = 2 097 152, twice the attention
 sub-layer.
 
 Click 5: the callout. Attention gathers; the FFN processes what was gathered.
-The next slide reads the equation symbol by symbol.
+"Reading the equation: the feed-forward network" reads it symbol by symbol.
+
+Class cut: about 2 minutes. In the full slides, for self-study, it is followed by "Reading the equation: the feed-forward network".
 -->
 
 ---
@@ -2622,6 +2678,7 @@ Give the room 30 seconds; skip in the lecture if short on time.
 
 ---
 layout: default
+core: true
 title: Two wrappers that make it stackable
 ---
 
@@ -2712,6 +2769,8 @@ statistics depend on the other examples in the batch, which is untenable when
 sequences have different lengths and at inference with batch 1.
 
 Click 5: the callout — same shape in, same shape out.
+
+Class cut: about 2 minutes.
 -->
 
 ---
@@ -2745,6 +2804,7 @@ seconds; skip in the lecture if short on time.
 
 ---
 layout: interactive
+core: true
 heading: The block, assembled
 title: The block, assembled
 aside-width: 17rem
@@ -2781,7 +2841,7 @@ Click: attention. The thing to point at repeatedly: only this box moves
 information sideways. Everything else in the block — and, in fact, everything
 else in the entire architecture — operates on one position at a time.
 
-Click 2: add, the residual from the previous slide.
+Click 2: add, the residual from "Two wrappers that make it stackable".
 
 Click 3: norm, the LayerNorm.
 
@@ -2794,6 +2854,8 @@ Click 6: the callout — the shape at the top equals the shape at the bottom.
 This is the 2017 wiring, with the norms after the adds. Do not mention pre-LN
 yet; section 04 flips the toggle and the contrast is much sharper if they have
 not seen it coming.
+
+Class cut: about 4 minutes. In the full slides, for self-study, it is followed by "What a block costs".
 -->
 
 ---
@@ -2928,6 +2990,7 @@ lecture if short on time.
 
 ---
 layout: default
+core: true
 title: The bill for looking everywhere
 ---
 
@@ -2999,6 +3062,8 @@ the central engineering fight of 2020-2024.
 Memory is worse than compute here: the T x T matrix has to exist per head per
 layer. That is what FlashAttention attacks — not by changing the mathematics but
 by never materialising the matrix. See "What else changed inside the block".
+
+Class cut: about 2 minutes.
 -->
 
 ---
@@ -3054,6 +3119,7 @@ the parameter table in one sentence.
 
 ---
 layout: default
+core: true
 title: Two stacks
 ---
 
@@ -3135,6 +3201,8 @@ because the decoder could only be handed one thing. Here the decoder can attend,
 so the encoder simply hands over everything.
 
 About three minutes.
+
+Class cut: about 2 minutes.
 -->
 
 ---
@@ -3169,6 +3237,7 @@ skip it in the lecture if short on time.
 
 ---
 layout: interactive
+core: true
 heading: The architecture, step by step
 title: The architecture, step by step
 aside-width: 17rem
@@ -3219,6 +3288,8 @@ Click 4: the callout. That asymmetry between training and generation is the whol
 reason the KV cache exists: see "What generation actually costs" in section 04.
 
 About four minutes.
+
+Class cut: about 4 minutes.
 -->
 
 ---
@@ -3251,6 +3322,7 @@ on time.
 
 ---
 layout: interactive
+core: true
 heading: The mask, and why the loss collapses without it
 title: The mask, and why the loss collapses without it
 aside-width: 18rem
@@ -3305,6 +3377,8 @@ signals.
 The detail students get wrong: masking does not skip the computation. Every
 score is computed, then the forbidden ones are set to -inf before the softmax.
 It saves no work; it only removes the answer.
+
+Class cut: about 4 minutes. In the full slides, for self-study, it is followed by "Cross-attention is last week's slide", "The model they actually trained" and "Poll: how many decoder passes teacher forcing needs".
 -->
 
 ---
@@ -3546,6 +3620,7 @@ on time.
 
 ---
 layout: default
+title: "Poll: how many decoder passes teacher forcing needs"
 ---
 
 <div class="grid grid-cols-[1.7fr_1fr] gap-6 items-start">
@@ -3664,6 +3739,7 @@ not change", and leave the rest for reading.
 
 ---
 layout: interactive
+core: true
 heading: The architecture forked three ways
 title: The architecture forked three ways
 aside-width: 17rem
@@ -3711,6 +3787,8 @@ vector for it — is exactly the mask.
 
 Whisper being encoder-decoder is a nice detail: audio in, text out, two genuinely
 different modalities, so having two separate stacks is worth it.
+
+Class cut: about 4 minutes.
 -->
 
 ---
@@ -3739,6 +3817,7 @@ alone.
 
 ---
 layout: default
+core: true
 title: Why decoder-only took over
 ---
 
@@ -3815,6 +3894,8 @@ Click 5: the callout. Then say that how it is trained, and at what scale, is nex
 If someone asks whether encoder-only models are obsolete: no. Retrieval and
 reranking in production are still full of them, and ModernBERT in 2024 exists
 precisely because that niche did not go away.
+
+Class cut: about 2 minutes.
 -->
 
 ---
@@ -3842,6 +3923,7 @@ short on time.
 
 ---
 layout: interactive
+core: true
 heading: One wire moved, and deep stacks started training
 title: One wire moved, and deep stacks started training
 aside-width: 19rem
@@ -3890,6 +3972,8 @@ moving the norm is the fix.
 
 Anyone who has tried to train a deep transformer from scratch and watched it
 diverge in the first hundred steps has met this.
+
+Class cut: about 4 minutes. In the full slides, for self-study, it is followed by "What else changed inside the block", "Position, done properly" and "What generation actually costs".
 -->
 
 ---
@@ -4256,6 +4340,7 @@ Revision slide. Give the room 30 seconds to read it, or skip it in the lecture.
 
 ---
 layout: default
+core: true
 title: The same block, more of it
 ---
 
@@ -4331,6 +4416,8 @@ Click 2: context went from 512 to 128 k tokens, about 250-fold, so the T^2 cost
 from "The bill for looking everywhere" grew too. Engineering kept it affordable:
 faster kernels, cached keys, cheaper positions. Attention itself was not
 replaced.
+
+Class cut: about 2 minutes. In the full slides, for self-study, it is followed by "What did not change".
 -->
 
 ---
@@ -4493,6 +4580,7 @@ leave the rest for the lab.
 
 ---
 layout: default
+core: true
 title: The mechanism is one function call
 ---
 
@@ -4580,6 +4668,8 @@ and time so the whole thing is one batched matrix multiply.
 Depth: pass an explicit attn_mask instead of is_causal when you have padding as
 well as causality. You have to combine the two masks yourself, which is the most
 common source of silent errors in hand-written transformer code.
+
+Class cut: about 3 minutes. In the full slides, for self-study, it is followed by "Self-attention, written out", "A block, and a stack" and "Or use the one in the box".
 -->
 
 ---
@@ -4965,6 +5055,7 @@ the lecture if short on time — this slide is for revision.
 
 ---
 layout: default
+core: true
 title: Shapes, end to end
 ---
 
@@ -5034,6 +5125,8 @@ The check to run before writing any training loop:
 Depth: the last row is a logit per position, not per sequence. A decoder-only
 model predicts a next token at every position at once, which is what makes
 training parallel.
+
+Class cut: about 2 minutes. In the full slides, for self-study, it is followed by "Four bugs, and what each one looks like".
 -->
 
 ---
@@ -5210,6 +5303,7 @@ running late, show the recap, name the lab task, and stop.
 
 ---
 layout: default
+core: true
 title: Where we got to
 ---
 
@@ -5287,6 +5381,8 @@ Click 8: the callout, the sentence to leave with.
 Then hand over: next week takes this block, stacks a hundred of them, trains it
 on next-token prediction over a substantial fraction of the written internet, and
 asks what happens. None of the architecture changes. Everything else does.
+
+Class cut: about 2 minutes.
 -->
 
 ---
@@ -5318,6 +5414,7 @@ short on time.
 
 ---
 layout: default
+core: true
 title: Reading, and the lab
 ---
 
@@ -5396,6 +5493,8 @@ recent characters — which is itself the lesson, and the reason to make them
 predict first.
 
 Practicalities — dataset, deadline, what to hand in — belong on the course page.
+
+Class cut: about 2 minutes.
 -->
 
 ---

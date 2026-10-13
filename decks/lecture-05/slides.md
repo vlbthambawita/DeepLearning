@@ -52,6 +52,7 @@ runs late — the lab covers them. Today ends on two walls a recurrent network h
 
 ---
 layout: default
+core: true
 title: Today, in seven parts
 ---
 
@@ -103,6 +104,8 @@ the one new wire), the fading arrows (section 02, why it is hard to train), and 
 valve (section 03, the fix). Those three sections are the lecture — the click
 says so. Sections 04 and 05 can shrink to one slide each if time is short — the
 lab carries them.
+
+Class cut: about 2 minutes.
 -->
 
 ---
@@ -156,6 +159,7 @@ facts about sequences that become the recurrent layer.
 
 ---
 layout: default
+core: true
 title: One step at a time, through a window
 ---
 
@@ -216,6 +220,8 @@ window. Section 01 builds that summary; the rest of the deck is about training i
 At the end of the deck we come back here: generating text one word at a time is
 the same idea, predict the next word from the ones before it, with the running
 summary in place of the window.
+
+Class cut: about 2 minutes.
 -->
 
 ---
@@ -249,6 +255,7 @@ running summary can. Twenty seconds to read; this slide is for revision.
 
 ---
 layout: default
+core: true
 title: Two reviews, one word apart
 ---
 
@@ -333,6 +340,8 @@ section comes back to them, with the same picture.
 
 An older pair makes the same point and is worth saying aloud: "dog bites man"
 (page 14) and "man bites dog" (front page) — identical words, different news.
+
+Class cut: about 2 minutes. In the full slides, for self-study, it is followed by "A bag of words: keep the words, drop the order".
 -->
 
 ---
@@ -480,6 +489,7 @@ Twenty seconds to read; this slide is for revision.
 
 ---
 layout: default
+core: true
 title: Averaging loses the order
 ---
 
@@ -566,6 +576,8 @@ not contributes 1/500 of the average, so the signal shrinks with length.
 
 What survives: averaging keeps which words occur. It loses the order, and so it
 loses which word modifies which.
+
+Class cut: about 2 minutes. In the full slides, for self-study, it is followed by "Try it with the network we already have" and "Sequence, or time series?".
 -->
 
 ---
@@ -833,6 +845,7 @@ only. Twenty seconds to read; this slide is for revision.
 
 ---
 layout: default
+core: true
 title: Two facts about sequences
 ---
 
@@ -891,6 +904,8 @@ people. Each person reads one word, updates the note, and passes it on.
 
 Write the two facts on the board; the rest of the lecture refers back to them by
 number.
+
+Class cut: about 2 minutes. In the full slides, for self-study, it is followed by "An aside — a convolution can read a sequence too".
 -->
 
 ---
@@ -1022,6 +1037,7 @@ with unlimited reach. Twenty seconds to read; this slide is for revision.
 
 ---
 layout: interactive
+core: true
 heading: Which shapes does a sequence problem come in?
 title: Which shapes does a sequence problem come in?
 aside-width: 16rem
@@ -1062,6 +1078,8 @@ many, in step, shifted by one: predict the next word from the ones before it.
 
 The encoder-decoder tab is what the last section of the lecture is about
 (translating review B into Norwegian). Flag it and move on.
+
+Class cut: about 4 minutes. In the full slides, for self-study, it is followed by "Poll: which model just broke?".
 -->
 
 ---
@@ -1205,6 +1223,7 @@ reads the note and says positive or negative. The note is the hidden state.
 
 ---
 layout: interactive
+core: true
 heading: One new wire
 title: One new wire
 aside-width: 17rem
@@ -1257,6 +1276,8 @@ Click 3: W_ho turns the note into an answer — the output layer.
 Click 4: the callout. Compared with the dense layer, the only thing new is one
 extra matrix (W_hh) and one step of delay. "One step of delay" is worth
 repeating: without the delay the definition would be circular.
+
+Class cut: about 4 minutes.
 -->
 
 ---
@@ -1292,6 +1313,7 @@ seconds to read; this slide is for revision.
 
 ---
 layout: interactive
+core: true
 heading: The same layer, once per step
 title: The same layer, once per step
 aside-width: 18rem
@@ -1348,6 +1370,8 @@ word great, so at that last step they give the same input x = [1, 0] to the same
 weights. The only difference is the note that arrives with it: blank [0, 0] in
 A, the not-flag [0.96, 0] in B. Same word, same weights, different note,
 opposite answer.
+
+Class cut: about 4 minutes.
 -->
 
 ---
@@ -1382,6 +1406,7 @@ from B. Twenty seconds to read; this slide is for revision.
 
 ---
 layout: default
+core: true
 title: The forward pass, written down
 ---
 
@@ -1477,7 +1502,9 @@ layer.
 
 Click 5: o_t is logits, with no activation. For the review we only use the last
 one, o_T, and turn it into a probability with a sigmoid, as in binary
-cross-entropy. The next slide names every symbol and puts numbers in.
+cross-entropy. "Reading the equation: one recurrent step" names every symbol and puts numbers in.
+
+Class cut: about 2 minutes. In the full slides, for self-study, it is followed by "Reading the equation: one recurrent step", "Working it out: review B at great" and "The same equation, one matrix".
 -->
 
 ---
@@ -1812,6 +1839,7 @@ layer on [word; note]. Twenty seconds; skip in the lecture if short on time.
 
 ---
 layout: interactive
+core: true
 heading: One step, by hand
 title: One step, by hand
 aside-width: 17rem
@@ -1851,6 +1879,8 @@ and the sentiment ends at -0.42. The readout gives P(positive) = 0.22.
 
 Do not skip this widget because the numbers look small. Nobody who cannot do this
 can debug an RNN.
+
+Class cut: about 4 minutes. In the full slides, for self-study, it is followed by "What the state actually is", "Counting the parameters", "Your turn — count them" and "Five ways to wire it".
 -->
 
 ---
@@ -2276,6 +2306,7 @@ it with 0.82.
 
 ---
 layout: default
+core: true
 title: The loss for a whole sequence
 ---
 
@@ -2368,7 +2399,9 @@ effective learning rate. PyTorch's default is mean, and with padded batches
 section.
 
 Click 3: the callout. Either way, one set of weights receives gradient from
-every term. The next slide names every symbol in these two equations.
+every term. "Reading the equation: the sequence loss" names every symbol in these two equations.
+
+Class cut: about 2 minutes. In the full slides, for self-study, it is followed by "Reading the equation: the sequence loss".
 -->
 
 ---
@@ -2471,6 +2504,7 @@ lecture if short on time.
 
 ---
 layout: default
+core: true
 title: Backpropagation through time
 ---
 
@@ -2553,6 +2587,8 @@ Write that on the board. It is a product of (t - k) copies of the same matrix,
 each pre-multiplied by a diagonal of tanh derivatives, every one of which is at
 most 1. The legend slide works it for one unit; "What vanishing feels like" puts
 it on a long review.
+
+Class cut: about 2 minutes. In the full slides, for self-study, it is followed by "Reading the equation: backpropagation through time".
 -->
 
 ---
@@ -2673,6 +2709,7 @@ Forty seconds; skip in the lecture if short on time.
 
 ---
 layout: default
+core: true
 title: What vanishing feels like
 ---
 
@@ -2747,6 +2784,8 @@ The classic version of this (Olah's): "I grew up in France ... [forty words] ...
 so I speak fluent French." The word that decides the answer is forty steps back.
 A plain RNN is big enough to represent it; it never receives the signal to learn
 it. Fix the backward path and the forward one takes care of itself.
+
+Class cut: about 2 minutes.
 -->
 
 ---
@@ -2775,6 +2814,7 @@ The point: vanishing gradients on the running example — the signal to remember
 
 ---
 layout: interactive
+core: true
 heading: One number, raised to a power
 title: One number, raised to a power
 aside-width: 19rem
@@ -2831,6 +2871,8 @@ the weight, and vanishing is the common case by a wide margin.
 
 Tick gradient clipping with W above 1 and point out that the vanishing end of the
 chart does not move at all: clipping fixes exploding, never vanishing.
+
+Class cut: about 4 minutes. In the full slides, for self-study, it is followed by "And tanh is not helping".
 -->
 
 ---
@@ -2946,6 +2988,7 @@ Twenty seconds; skip in the lecture if short on time.
 
 ---
 layout: default
+core: true
 title: Three ways out, honestly ranked
 ---
 
@@ -3041,6 +3084,8 @@ the three that touches the 0.012: section 03 turns it into 0.82.
 
 Click 4: the callout gives the practical rule. Use clipping and a gated cell
 together; truncate only when a sequence is too long for memory.
+
+Class cut: about 2 minutes. In the full slides, for self-study, it is followed by "Gradient clipping, in one line" and "Truncated backpropagation through time".
 -->
 
 ---
@@ -3334,6 +3379,7 @@ important part of the note in a sealed envelope that only the gates open.
 
 ---
 layout: default
+core: true
 title: Stop multiplying, start adding
 ---
 
@@ -3403,6 +3449,8 @@ a valve, learned, on each path: that is the next slide.
 
 If the room has met a residual (skip) connection, it is the same additive trick.
 Say so in one sentence; do not lean on it.
+
+Class cut: about 2 minutes.
 -->
 
 ---
@@ -3431,6 +3479,7 @@ purpose. Twenty seconds to read; this slide is for revision.
 
 ---
 layout: interactive
+core: true
 heading: The LSTM memory block
 title: The LSTM memory block
 aside-width: 21rem
@@ -3476,6 +3525,8 @@ Running example, in words only: on the unit that holds the not-flag, a trained
 cell can keep the forget gate near 1 from "not" until "great". The flag then
 arrives intact. We have not set LSTM weights for the review, so give no numbers
 for it.
+
+Class cut: about 4 minutes. In the full slides, for self-study, it is followed by "The six equations", "Reading the equation: the LSTM cell" and "One LSTM step, by hand".
 -->
 
 ---
@@ -3840,6 +3891,7 @@ showing. Twenty seconds; this slide is for revision.
 
 ---
 layout: interactive
+core: true
 heading: The highway, against the chain
 title: The highway, against the chain
 aside-width: 20rem
@@ -3899,6 +3951,8 @@ else.
 This is also why forget-gate biases are often initialised to 1 or 2: it starts
 the gate open, so the highway is clear before training has learned anything.
 Worth saying for anyone who reads implementations.
+
+Class cut: about 4 minutes. In the full slides, for self-study, it is followed by "Where the LSTM came from".
 -->
 
 ---
@@ -4009,6 +4063,7 @@ architecture is inevitable. Twenty seconds; this slide is for revision.
 
 ---
 layout: interactive
+core: true
 heading: The GRU — same idea, fewer parts
 title: The GRU — same idea, fewer parts
 aside-width: 20rem
@@ -4054,7 +4109,9 @@ In practice this costs almost nothing, and the GRU has a quarter fewer weights
 (three weight sets instead of four).
 
 Cho et al., 2014. The way the blend is written here (z = how much to update)
-follows Chung et al., 2014; the next slide shows why that matters.
+follows Chung et al., 2014; "Which one, and the sign that will catch you" shows why that matters.
+
+Class cut: about 4 minutes. In the full slides, for self-study, it is followed by "Which one, and the sign that will catch you".
 -->
 
 ---
@@ -4162,6 +4219,7 @@ Twenty seconds; this slide is for revision.
 
 ---
 layout: default
+core: true
 title: "Poll: what is left after fifty steps?"
 ---
 
@@ -4218,6 +4276,8 @@ being added. With input = 0 nothing is added, so nothing fills up.
 
 This is the sealed envelope with both gates shut: nothing gets in, nothing leaks
 out. That is the whole reason the architecture exists.
+
+Class cut: about 4 minutes.
 -->
 
 ---
@@ -4268,6 +4328,7 @@ back on the overview and the recap.
 
 ---
 layout: default
+core: true
 title: A word is not a number
 ---
 
@@ -4323,6 +4384,8 @@ already have" in section 00.
 
 The callout sets up the next slide: our toy review already used two hand-set
 numbers per word. The question is where real ones come from.
+
+Class cut: about 2 minutes.
 -->
 
 ---
@@ -4350,6 +4413,7 @@ seconds; this slide is for revision.
 
 ---
 layout: interactive
+core: true
 heading: An embedding is a lookup table
 title: An embedding is a lookup table
 aside-width: 19rem
@@ -4402,6 +4466,8 @@ vocabulary size), d columns (the embedding width), with d much smaller than V.
 Which also answers "how does it learn?": the same way every other weight matrix
 does. The gradient reaching E is non-zero only in the rows for words that were in
 the batch, which is why embedding gradients are sparse.
+
+Class cut: about 4 minutes.
 -->
 
 ---
@@ -4430,6 +4496,7 @@ learned. Twenty seconds; this slide is for revision.
 
 ---
 layout: interactive
+core: true
 heading: What it learns is a geometry
 title: What it learns is a geometry
 aside-width: 21rem
@@ -4486,6 +4553,8 @@ salient features" means when textbooks list it as a benefit.
 For the running example: in a trained table, "not" would end up somewhere of its
 own, away from the sentiment words, because what it does is flip them, not carry
 a sentiment of its own. Say that as an expectation, not a measured fact.
+
+Class cut: about 4 minutes. In the full slides, for self-study, it is followed by "Embeddings in code, and where they come from".
 -->
 
 ---
@@ -4659,6 +4728,7 @@ batch of reviews. It is the picture behind every slide in this section.
 
 ---
 layout: default
+core: true
 title: The shape that causes the most bugs
 ---
 
@@ -4719,6 +4789,8 @@ library that runs the LSTM loop. Batch-first matches every other PyTorch layer,
 and nn.Embedding's output.
 
 The h_n exception catches people who then try to be consistent about it.
+
+Class cut: about 2 minutes. In the full slides, for self-study, it is followed by "nn.LSTM returns two things, and you want one of them".
 -->
 
 ---
@@ -4890,6 +4962,7 @@ decides which one to use. Thirty seconds to read; this slide is for revision.
 
 ---
 layout: default
+core: true
 title: Sequences in a batch are not the same length
 ---
 
@@ -4944,6 +5017,8 @@ bag-of-words baseline.
 
 If asked how to waste less: sorting a batch by length reduces the padding a lot.
 Bucketing by length reduces it further.
+
+Class cut: about 2 minutes.
 -->
 
 ---
@@ -4976,6 +5051,7 @@ reads the padding as words. Thirty seconds to read; this slide is for revision.
 
 ---
 layout: default
+core: true
 title: Packing — tell the layer where to stop
 ---
 
@@ -5073,6 +5149,8 @@ Click 5: the callout. This is not an optimisation; it is a correctness fix.
 For a many-to-many model you could skip packing and mask the loss instead, and
 that is a legitimate choice. For many-to-one you cannot: there is nothing to
 mask, the damage is already inside h_n.
+
+Class cut: about 3 minutes. In the full slides, for self-study, it is followed by "The model".
 -->
 
 ---
@@ -5225,6 +5303,7 @@ seconds to read; this slide is for revision.
 
 ---
 layout: default
+core: true
 title: Shapes, end to end
 ---
 
@@ -5289,6 +5368,8 @@ Four lines, and they catch every shape mistake on this slide.
 
 Note which dimension is 200 and which is 32 at every row, and that 200 disappears
 after h_n — that is where the sequence becomes a vector.
+
+Class cut: about 2 minutes. In the full slides, for self-study, it is followed by "The training loop, with one line added" and "Four bugs, and what each one looks like".
 -->
 
 ---
@@ -5675,6 +5756,7 @@ guesses. Thirty seconds to read; this slide is for revision.
 
 ---
 layout: interactive
+core: true
 heading: One sequence in, another out
 title: One sequence in, another out
 aside-width: 21rem
@@ -5708,7 +5790,7 @@ that is the bottleneck.
 
 On screen: the widget. Bottom row: the encoder, an RNN that reads the German
 source sentence. Top row: the decoder, a second RNN that writes the English
-target one word at a time, exactly as on the previous slide — but starting from
+target one word at a time, exactly as in "Generating one step at a time" — but starting from
 the encoder's final state instead of from zero. In the middle, the context box:
 256 numbers. The slider sets how many words are in the source, from 2 to 8.
 
@@ -5732,6 +5814,8 @@ from section 03 again.
 
 Cho et al. measured it in 2014 — translation quality (BLEU score) falls off
 sharply past about 20 source words. The fix was published the same year.
+
+Class cut: about 4 minutes.
 -->
 
 ---
@@ -5763,6 +5847,7 @@ the bottleneck. Thirty seconds to read; this slide is for revision.
 
 ---
 layout: interactive
+core: true
 heading: Attention — stop choosing in advance
 title: Attention — stop choosing in advance
 aside-width: 20rem
@@ -5822,7 +5907,9 @@ This is Bahdanau, Cho & Bengio, 2014 — attention added to a recurrent
 encoder–decoder. The recurrence is still there: the encoder is an RNN and the
 decoder is an RNN. Attention only changes what the decoder reads at each step.
 
-Do not spend the mathematics here — the next slide is three lines.
+Do not spend the mathematics here — "Attention, in three lines" has it.
+
+Class cut: about 4 minutes. In the full slides, for self-study, it is followed by "Attention, in three lines" and "Reading the equation: attention".
 -->
 
 ---
@@ -6082,6 +6169,7 @@ seconds to read; this slide is for revision.
 
 ---
 layout: default
+core: true
 title: The other wall — and this one attention does not fix
 ---
 
@@ -6165,6 +6253,8 @@ If someone asks what recurrent models are still good for: very long or streaming
 sequences, small on-device models, and the state-space revival — Mamba and
 similar models are recurrent networks with a computation that can run in
 parallel during training.
+
+Class cut: about 2 minutes.
 -->
 
 ---
@@ -6198,6 +6288,7 @@ change that. Thirty seconds to read; this slide is for revision.
 
 ---
 layout: default
+core: true
 title: Where we got to
 ---
 
@@ -6257,6 +6348,8 @@ every encoder state with attention.
 
 The last callout names both walls. The first is fixed; the second, steps that
 must run one after another, is still open at the end of today.
+
+Class cut: about 2 minutes.
 -->
 
 ---
@@ -6291,6 +6384,7 @@ this slide is for revision.
 
 ---
 layout: default
+core: true
 title: Reading, and the lab
 ---
 
@@ -6378,6 +6472,8 @@ one looks like": two silent ones, and clipping, the loud one. Each run changes
 exactly one thing against a working baseline.
 
 Practicalities — dataset, deadline, what to hand in — belong on the course page.
+
+Class cut: about 2 minutes.
 -->
 
 ---

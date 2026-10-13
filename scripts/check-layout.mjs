@@ -39,6 +39,8 @@ import { installErrorHandler } from './lib/fail.mjs'
 installErrorHandler()
 
 const args = process.argv.slice(2)
+// --class checks the class cut (<id>/class/), built when a deck flags `core: true` slides.
+const classCut = args.includes('--class')
 const flag = name => args.includes(name)
 const opt = (name, fallback) => {
   const i = args.indexOf(name)
@@ -200,7 +202,7 @@ const problems = []
 const hashSlide = async () => createHash('sha1').update(await page.screenshot({ clip: { x: 0, y: 0, width: 1176, height: 662 } })).digest('hex')
 
 for (const deck of decks) {
-  const url = `${base}/${deck.id}/index.html`
+  const url = `${base}/${deck.id}${classCut ? '/class' : ''}/index.html`
   const slideNo = () => page.evaluate(() => Number((location.hash.match(/^#\/(\d+)/) ?? [])[1]))
   let total = 0
   for (const probe of [2, 3, 1, 4, 5]) {

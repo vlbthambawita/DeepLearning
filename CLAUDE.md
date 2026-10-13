@@ -17,12 +17,13 @@ conversion strategy slide by slide; `TODO/` holds per-lecture working notes.
 npm install
 npm run dev -- lecture-01              # dev server; presenter view (speaker notes) at /presenter
 npm run dev -- lecture-01 --port 3040
+npm run dev -- lecture-01 --class      # the 2-hour class cut: only `core: true` slides
 npm run build                          # published decks + landing page → dist/
 npm run build:all                      # include decks with "published": false (this is what CI runs)
 npm run export -- --only lecture-01    # printable PDF (needs Chromium: npx playwright install chromium)
 npm run preview                        # serve dist/ at http://localhost:4173
 npm run check -- lecture-01            # overflow/clipping check against a running preview (see below)
-npm run check                          # every deck; --dark and --shots <dir> also available
+npm run check                          # every deck; --dark, --shots <dir> and --class also available
 npm run check:layout -- lecture-07 --from 30 --to 40   # overlapping text + dead clicks (--no-clicks = faster)
 python3 .claude/skills/lecture-deck/slide-lint.py lecture-07 [--only read,dup,click,eq]  # source-level lint
 python3 .claude/skills/lecture-deck/slide-stats.py lecture-07   # per-slide stats, lists "no picture" slides
@@ -63,6 +64,10 @@ authoring/review checklist for decks and widgets — load it before building or 
   landing page from `site/index.template.html` and the Space's `README.md` (its YAML front
   matter is what makes HF serve it as a static Space). A full build wipes `dist/` first; an
   `--only` build writes into the existing `dist/` without clobbering other decks.
+- A deck that flags slides `core: true` also gets a **class cut**: `lib/class-cut.mjs` writes
+  `decks/<id>/class.md` (gitignored) with the title slide, the core slides, their section
+  dividers and the end slide, and `build-site.mjs` builds it to `<id>/class/`. The full deck
+  is for self-study; the class cut is what is taught in the 2-hour session.
 - `export-pdf.mjs` renders each deck to `<id>/slides.pdf` (one page per click step).
 - `publish-hf.mjs` uploads `dist/` via the `hf` CLI. `--mode full` passes `--delete "*"`
   (replace whole Space); `--mode deck --only <id>` uploads one deck without deleting others.

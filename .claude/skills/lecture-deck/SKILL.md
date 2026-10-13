@@ -1,6 +1,6 @@
 ---
 name: lecture-deck
-description: Author or review a PGR207 lecture deck — use whenever the task is building slides for a new lecture, chapter or week, converting a 2025 PDF deck into Slidev, adding or reworking slides in decks/lecture-XX/slides.md, reviewing or correcting an existing deck, or writing a new teaching widget for the dl2026 addon.
+description: Author or review a PGR207 lecture deck — use whenever the task is building slides for a new lecture, chapter or week, converting a 2025 PDF deck into Slidev, adding or reworking slides in decks/lecture-XX/slides.md, choosing the 2-hour class cut (`core: true` slides), reviewing or correcting an existing deck, or writing a new teaching widget for the dl2026 addon.
 ---
 
 # Building a lecture deck
@@ -8,6 +8,16 @@ description: Author or review a PGR207 lecture deck — use whenever the task is
 These decks are lectures, not documents. The test for every slide is whether it
 does something a handout could not: reveal in an order, respond to a control, or
 carry a number the room can check by hand.
+
+Every deck serves **two audiences from one source**:
+
+- **The full deck** (`slides.md`, published at `<id>/`) is for self-study. It has
+  every picture, every equation legend and every "In words" slide. A student
+  who missed the lecture learns the topic from it alone.
+- **The class cut** (published at `<id>/class/`) is what is taught in the
+  2-hour session. It is the main flow only, told through diagrams. It is
+  generated from the full deck: the slides flagged `core: true`. See "The class
+  cut: a 2-hour teaching deck" below.
 
 ## Read before writing anything
 
@@ -50,6 +60,9 @@ Do not open `slides.md` until this exists and the user has seen it:
 - **Sections with a slide budget**, and which one is the lecture (the rest are
   compressible if the session runs late — say so in the speaker notes).
 - **The payoff slide**: the one moment the whole deck is built to deliver.
+- **The class cut**: the main flow as a list of slides, with minutes per
+  section, adding up to at most 100 minutes. Write this list *before* the
+  depth slides: it is the spine the rest of the deck hangs off.
 
 ## 2. Scaffold
 
@@ -224,6 +237,78 @@ How to write it:
 Plan the slide budget with this in mind: a section of 8 picture slides is about
 16 slides with its descriptions. `slide-stats.py` lists every picture slide
 with **no description** after it; the goal is zero.
+
+### The class cut: a 2-hour teaching deck
+
+The full deck is too long to teach in one session, and it should be: it is
+written for a student working alone. The session teaches the **main flow**:
+why the problem matters, the core idea, how it works on the running example,
+the payoff, and where it stops. It teaches it with diagram-led slides. The
+detail stays in the full deck for self-study.
+
+**Mechanics.**
+
+- Flag each main-flow slide with `core: true` in its front matter. Do not use
+  `class:` for this: Slidev already uses `class:` to put a CSS class on the slide.
+- The title slide, every `end` slide, and every `section` divider with a core
+  slide after it are included automatically. Every other slide needs the flag.
+- `npm run build` writes `decks/<id>/class.md` (generated and gitignored, so
+  never edit it) and builds it to `<id>/class/`. The landing page then links
+  both versions: "Class slides" and "Full slides, for self-study". The class
+  deck's PDF button downloads the full deck's PDF.
+- `npm run dev -- lecture-07 --class` opens the class cut in the dev server.
+  `npm run check -- lecture-07 --class` and `check:layout -- lecture-07 --class`
+  check its build.
+- `slide-stats.py` prints `class cut: N of M slides, ~X min`. It also flags
+  any core slide that is an "In words" slide or has no picture.
+
+**The time budget.** At most **100 minutes** of slides: a 2-hour session, less
+a 15-minute break and some slack for questions. `slide-stats.py` estimates
+2 minutes for a `default` or `figure` slide, 3 for a code slide, 4 for a widget
+or a poll, half a minute for a divider and 1 for the title and end slides. A
+good split is about 15 minutes for the hook and the problem, 45–50 for the core
+mechanism, 20 for the payoff and one practical slide, and 10 for the recap and
+the lab. In practice that is about 35–45 slides.
+
+**Which slides are core.**
+
+- **Diagram-led.** Every core slide has a picture that carries the argument.
+  When two slides make the same point, flag the one where the picture is the
+  explanation, not the one that restates it in words or symbols.
+- **The main flow, in order.** The hook and the problem, the core idea, how it
+  works on the running example, the payoff slide, the main limitation, and the
+  recap. If removing a slide does not break the story, it is not core.
+- **At most one poll per main section**, and only for the misconception that
+  matters most.
+- **Not core:**
+  - "In words" slides. They are for revision at the student's own pace.
+  - "Reading the equation" slides, as a rule. In class the equation is said in
+    words on its picture slide, and the legend is for revision. The exception
+    is the one equation the lecture is about; then flag its reading slide too.
+  - Derivations, history, variants, edge cases and asides.
+  - More than one code slide per topic. The shapes slide usually earns its
+    place; the line-by-line walkthrough is for self-study.
+
+**Main flow first.** Inside each section of the full deck, put the core slides
+first and the depth slides after them. A student reading alone then meets the
+same story as the room, and the details after it. A depth slide can be headed
+as such, e.g. "Going deeper: …".
+
+**The cut must read as one story.** Open it with `dev --class` and click
+through from start to finish. Each core slide must make sense straight after
+the previous *core* slide:
+
+- No "as we just saw" pointing at a skipped slide.
+- No symbol, number or term that is defined only on a skipped slide.
+
+If a bridge is missing, flag one more slide or add a sentence to the speaker
+notes. Do not write class-only slides: the class cut is always a subset of the
+full deck. A core slide may point students to a skipped slide by its name, for
+self-study ("worked through in 'Reading the equation: …' in the full slides").
+
+**Speaker notes on a core slide** give the time for the class cut in their
+timing paragraph. They also say which depth slides come after it in the full
+deck, so the presenter can answer a question from them.
 
 ### Reach for a picture before more sentences
 
@@ -439,6 +524,9 @@ npm run check -- lecture-07 --dark
 npm run check -- lecture-07 --shots /tmp/deck    # a PNG per slide
 npm run check:layout -- lecture-07               # overlapping text/figures, dead clicks
 python3 .claude/skills/lecture-deck/slide-lint.py lecture-07   # readability, duplicates, clicks
+python3 .claude/skills/lecture-deck/slide-stats.py lecture-07 --all   # class cut, slide by slide
+npm run check -- lecture-07 --class                # the class cut's own build
+npm run check:layout -- lecture-07 --class
 ```
 
 `check` only catches **vertical** clipping. A widget with a fixed rem grid slides
@@ -535,7 +623,10 @@ once**. The build and `check` passing says nothing about whether the slides are
    slides `slide-stats.py` lists under *no description*. For each existing one,
    check it still matches the slide before it — a slide that was reworked
    usually leaves its description stale.
-13. **Verify, then look.** `build:all`, `check` light and dark, `--shots`, and
+13. **The class cut.** If `slide-stats.py` says *none flagged*, choose the core
+    slides. Otherwise check that the cut is at most 100 minutes, and that it
+    still reads as one story after slides were added, moved or reworked.
+14. **Verify, then look.** `build:all`, `check` light and dark, `--shots`, and
     eyeball every slide you changed.
 
 Record what was wrong and what changed in `TODO/summary_slideset_XX.md` under a
@@ -642,6 +733,9 @@ never push a tag unless asked.
   has a notes block, as its last element, that explains what is on screen.
 - `slide-lint.py` is clean, and `check:layout` reports no overlaps and no dead
   clicks.
+- `slide-stats.py` reports a **class cut of at most 100 minutes**, with no core
+  description slides and no core slide without a picture. You clicked through
+  it with `npm run dev -- <id> --class`, and it reads as one story.
 - No slide leans on a concept from the plan's *does not have yet* list; grep
   for those words before calling the deck done.
 - Every display equation is said in words, has a symbol legend (name, meaning,

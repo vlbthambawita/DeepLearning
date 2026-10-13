@@ -27,9 +27,20 @@ flag flips.
 
 ```bash
 npm run dev -- lecture-03      # dev server, presenter view at /presenter
+npm run dev -- lecture-03 --class   # only the class cut (the `core: true` slides)
 npm run build:all              # build everything, published or not
 npm run preview                # serve dist/ at http://localhost:4173
 ```
+
+### The class cut
+
+Each deck is the full self-study version. The slides taught in the 2-hour
+session are flagged `core: true` in their front matter. The build turns them,
+plus the title slide, the `end` slide and their section dividers, into a
+second deck at `<id>/class/`, and the landing page links both versions.
+The generated `decks/<id>/class.md` is gitignored, so edit `slides.md` only.
+`slide-stats.py` estimates the cut's length. The
+`lecture-deck` skill says which slides belong in it.
 
 ## Converting an old deck
 
