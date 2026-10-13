@@ -106,6 +106,35 @@ lab carries them.
 -->
 
 ---
+layout: default
+title: "In words: Today, in seven parts"
+---
+
+# In words: Today, in seven parts
+
+<div class="dl-describe">
+
+The slide is the map of the lecture. Each small glyph stands for one section, and
+the same glyph returns on that section's divider and on the recap.
+
+- **00**, a row of tiles: in a sequence, order matters.
+- **01**, a cell with a loop: one layer whose output feeds back in.
+- **02**, fading arrows: why that loop is hard to train.
+- **03**, a valve: gates that keep the past.
+- **04**, **05** and **06**: words as vectors, the network in PyTorch, and
+  generating text.
+
+The ideas live in sections 01 to 03. Sections 04 and 05 turn them into the
+code you will need in the lab.
+
+</div>
+
+<!--
+The point: the seven glyphs as a map to come back to. Fifteen seconds; skip in
+the lecture if short on time — this slide is for revision.
+-->
+
+---
 layout: section
 index: "00"
 ---
@@ -187,6 +216,35 @@ window. Section 01 builds that summary; the rest of the deck is about training i
 At the end of the deck we come back here: generating text one word at a time is
 the same idea, predict the next word from the ones before it, with the running
 summary in place of the window.
+-->
+
+---
+layout: default
+title: "In words: One step at a time, through a window"
+---
+
+# In words: One step at a time, through a window
+
+<div class="dl-describe">
+
+The top row reads review B one word at a time. A fixed **window** sees only
+the last three words, *movie was not*, and guesses the next word from them.
+
+The bottom row shows why that fails for text:
+
+1. **Length.** A review can be 5 words or 500. One fixed window does not fit all
+   of them.
+2. **Distance.** Here *not* sits 15 words before *great*. It is outside the
+   window of three, so the model never sees it.
+
+The lecture's answer: keep a **running summary**, one small vector updated
+after every word, instead of a window.
+
+</div>
+
+<!--
+The point: a fixed window cannot handle any length or a far-back "not"; a
+running summary can. Twenty seconds to read; this slide is for revision.
 -->
 
 ---
@@ -279,6 +337,36 @@ An older pair makes the same point and is worth saying aloud: "dog bites man"
 
 ---
 layout: default
+title: "In words: Two reviews, one word apart"
+---
+
+# In words: Two reviews, one word apart
+
+<div class="dl-describe">
+
+These two reviews are the running example for the whole lecture.
+
+- **Review A**, *the movie was great*, is positive.
+- **Review B**, *the movie was not great*, is negative.
+
+They differ only in the highlighted *not*. On its own, *not* has no sentiment.
+It flips the meaning of the word **after** it.
+
+The chart shows a toy **embedding**: two numbers per word. Dimension 1 means
+"positive", and dimension 2 means "negation". The words *the*, *movie* and *was*
+sit at [0, 0]. *great* sits at [1, 0], and *not* at [0, 1].
+
+The model therefore has to keep some memory of earlier words as it reads.
+
+</div>
+
+<!--
+The point: the two running reviews and the toy embedding, to keep on the board.
+Twenty seconds to read; this slide is for revision.
+-->
+
+---
+layout: default
 title: "A bag of words: keep the words, drop the order"
 ---
 
@@ -361,6 +449,33 @@ word "not", but does it keep what "not" does to the word after it?
 Variants worth naming if asked: instead of averaging embeddings, the classic
 version counts each word of the vocabulary (a vector of 20 000 counts). The
 order is lost either way.
+-->
+
+---
+layout: default
+title: "In words: A bag of words: keep the words, drop the order"
+---
+
+# In words: A bag of words: keep the words, drop the order
+
+<div class="dl-describe">
+
+A **bag of words** is the simplest text model.
+
+1. Pour review B into a bag. Inside, the words have no order.
+2. Shuffle the words, *great not was movie the*, and you get exactly the same
+   bag. Only **which words appear** survives.
+3. Turn the bag into one vector: the average of its word vectors. For the toy
+   embedding, the sum is [1, 1]. Divided by 5 words, that gives [0.2, 0.2].
+
+Any review length gives two numbers, so a dense layer can read it. The bag
+keeps *not*, but does it keep what *not* does?
+
+</div>
+
+<!--
+The point: what a bag of words keeps (which words) and loses (their order).
+Twenty seconds to read; this slide is for revision.
 -->
 
 ---
@@ -455,6 +570,34 @@ loses which word modifies which.
 
 ---
 layout: default
+title: "In words: Averaging loses the order"
+---
+
+# In words: Averaging loses the order
+
+<div class="dl-describe">
+
+The chart places each review at its **average word vector**.
+
+1. Review A lands at [0.25, 0] and review B at [0.2, 0.2]. A line at 0.1 splits
+   them, so averaging seems to work.
+2. But that line has only learned "any *not* means negative". It is a rule about
+   which words occur, not about order.
+3. Add *bad* = [−1, 0]. Review C, *not bad, the movie was great*, is positive.
+   Review D, *not great, the movie was bad*, is negative.
+4. Same six words, so both average to [0, 0.17]: one point, two labels.
+
+No rule on the average can separate them.
+
+</div>
+
+<!--
+The point: the C/D pair shows that an average cannot recover order. Thirty
+seconds to read; this slide is for revision.
+-->
+
+---
+layout: default
 title: Try it with the network we already have
 ---
 
@@ -537,6 +680,34 @@ The slide shows the worst problem (position-locking); say the other two aloud.
    (embedding 20 000 x 64, LSTM 64 to 128, a linear head to 2 classes) has
    1 379 586 ≈ 1.38 M parameters in total — and that number does not change
    when the review gets longer.
+-->
+
+---
+layout: default
+title: "In words: Try it with the network we already have"
+---
+
+# In words: Try it with the network we already have
+
+<div class="dl-describe">
+
+A plain dense layer reads a fixed window of 200 **slots**, one word per slot.
+Dashed boxes are padding.
+
+- Each slot holds a **one-hot** vector: 20 000 numbers, all 0 except a single 1
+  at the word's index.
+- 200 × 20 000 = 4 000 000 inputs; 256 units need 1 024 000 256 weights.
+- The highlighted word *great* sits in slot 4 in review A and slot 5 in review
+  B. So different weights read it. This is called being **position-locked**.
+
+It keeps order, so it tells A from B. But it is huge, and learns every word
+again at every position.
+
+</div>
+
+<!--
+The point: the flattened dense layer works on A and B, but is huge and
+position-locked. Twenty seconds to read; this slide is for revision.
 -->
 
 ---
@@ -635,6 +806,33 @@ Short slide: a minute or two.
 
 ---
 layout: default
+title: "In words: Sequence, or time series?"
+---
+
+# In words: Sequence, or time series?
+
+<div class="dl-describe">
+
+- **Sequence** (left): a row of DNA letters. Each item has a position and
+  nothing else. Order matters, but there is no clock. The words of a sentence
+  are a sequence too.
+- **Time series** (right): samples placed on a time axis. The red mark shows an
+  uneven gap between two samples. In a time series, those gaps are data too.
+  Examples are stock prices each minute, speech at 16 000 samples a second, and
+  an ECG (electrocardiogram) trace.
+
+So a time series is a special case of a sequence. Today's models see only positions: one step is
+one row, whatever the real gap.
+
+</div>
+
+<!--
+The point: sequence versus time series, and that today's models see positions
+only. Twenty seconds to read; this slide is for revision.
+-->
+
+---
+layout: default
 title: Two facts about sequences
 ---
 
@@ -693,6 +891,34 @@ people. Each person reads one word, updates the note, and passes it on.
 
 Write the two facts on the board; the rest of the lecture refers back to them by
 number.
+-->
+
+---
+layout: default
+title: "In words: Two facts about sequences"
+---
+
+# In words: Two facts about sequences
+
+<div class="dl-describe">
+
+Review B, one word per box, with a cell under each word. Each fact becomes
+wiring.
+
+1. **The same pattern means the same thing anywhere.** *not great* is negative
+   at word 4 or at word 140. So every cell uses the **same weights** $W$. This
+   fixes the position-locked window.
+2. **Earlier words change later ones.** So each cell passes a **state** $h$ to
+   the next cell along the row. The state is the running summary of the words
+   so far.
+
+Shared weights plus a carried state: that is the whole recurrent network.
+
+</div>
+
+<!--
+The point: the two facts, and the two pieces of wiring they lead to. Twenty
+seconds to read; this slide is for revision.
 -->
 
 ---
@@ -767,6 +993,34 @@ WaveNet and ByteNet are convolutional; so is most on-device audio.
 -->
 
 ---
+layout: default
+title: "In words: An aside — a convolution can read a sequence too"
+---
+
+# In words: An aside — a convolution can read a sequence too
+
+<div class="dl-describe">
+
+A **1-D convolution** reads a sequence too: one filter slides along the words,
+with the same weights everywhere. Padding keeps the output length; stride 2
+halves it.
+
+In the small picture, each box shows the **round** its output is computed in.
+
+- **Convolution**: each output needs only the nearby words. All five outputs are
+  computed in round 1, in parallel. But its reach is limited: a *not* 60 words
+  back is never seen.
+- **Recurrent layer**: step 5 waits for step 4, so five steps take five rounds.
+  In return, the state carries a word from any distance back.
+
+</div>
+
+<!--
+The point: convolution is parallel with limited reach; recurrence is sequential
+with unlimited reach. Twenty seconds to read; this slide is for revision.
+-->
+
+---
 layout: interactive
 heading: Which shapes does a sequence problem come in?
 title: Which shapes does a sequence problem come in?
@@ -808,6 +1062,35 @@ many, in step, shifted by one: predict the next word from the ones before it.
 
 The encoder-decoder tab is what the last section of the lecture is about
 (translating review B into Norwegian). Flag it and move on.
+-->
+
+---
+layout: default
+title: "In words: Which shapes does a sequence problem come in?"
+---
+
+# In words: Which shapes does a sequence problem come in?
+
+<div class="dl-describe">
+
+The widget draws one cell five times along a timeline. Each tab changes only
+**which steps take an input, and which give an output**.
+
+- **No recurrence**: no state between columns. The examples are IID
+  (independent and identically distributed), so order does not matter.
+- **Many → one**: a review in, one label out. Our classifier.
+- **One → many**: one image in, a caption out.
+- **Many → many, in step**: a tag for every word.
+- **Many → many, delayed**: read the whole input first, then write, as in
+  translation.
+
+Pick the shape first: it fixes which steps feed the loss and what `forward` hands back.
+
+</div>
+
+<!--
+The point: the five wirings, and that review classification is many to one.
+Thirty seconds to read; this slide is for revision.
 -->
 
 ---
@@ -866,6 +1149,35 @@ cells — which is exactly what the next section shows. The unrolled picture on
 Option 2 is the one to discuss: the 1D CNN's filters do not break, but if its last
 layer flattens the feature map into a dense head, that head breaks for the same
 reason as the MLP. Global pooling over time is the usual fix.
+-->
+
+---
+layout: default
+title: "In words: Poll: which model just broke?"
+---
+
+# In words: Poll: which model just broke?
+
+<div class="dl-describe">
+
+Training reviews end at the dashed line, 200 words. The test review runs on to
+340.
+
+The answer is **the flattened MLP** (multi-layer perceptron). Its input layer has
+one weight per input number, so its width is built into its weights. A
+340-word review does not fit.
+
+- **The 1-D CNN** does not break: a filter slides, so it takes any length.
+- **The RNN** does not break either. It is one cell, and its loop runs as many
+  times as there are words.
+- So **all three** is wrong too.
+
+
+</div>
+
+<!--
+The point: only the flattened dense layer has its input length built in.
+Twenty seconds to read; this slide is for revision.
 -->
 
 ---
@@ -948,6 +1260,37 @@ repeating: without the delay the definition would be circular.
 -->
 
 ---
+layout: default
+title: "In words: One new wire"
+---
+
+# In words: One new wire
+
+<div class="dl-describe">
+
+The widget shows one hidden layer. The word comes in from below. The layer's
+output curls back into its own input: the **one new wire**.
+
+Think of a note passed along a row of readers. Each reads one word, updates the
+note, and passes it on.
+
+Three weight matrices do the work:
+
+- $W_{xh}$ reads this word.
+- $W_{hh}$ reads the note, which is the layer's own last output.
+- $W_{ho}$ reads the note and produces the output.
+
+The loop is not a second layer. It is the same units, reading what they held one
+step ago.
+
+</div>
+
+<!--
+The point: a recurrent layer is a dense layer plus one feedback wire. Twenty
+seconds to read; this slide is for revision.
+-->
+
+---
 layout: interactive
 heading: The same layer, once per step
 title: The same layer, once per step
@@ -1005,6 +1348,36 @@ word great, so at that last step they give the same input x = [1, 0] to the same
 weights. The only difference is the note that arrives with it: blank [0, 0] in
 A, the not-flag [0.96, 0] in B. Same word, same weights, different note,
 opposite answer.
+-->
+
+---
+layout: default
+title: "In words: The same layer, once per step"
+---
+
+# In words: The same layer, once per step
+
+<div class="dl-describe">
+
+**Unrolling** draws one copy of the layer for each word. The folded picture is
+the network; the unrolled picture is the computation.
+
+- Every $W$ in the unrolled row is the **same matrix**. A longer review makes a
+  longer chain, not a bigger model.
+- The note starts blank: $\mathbf{h}_0 = \mathbf{0}$.
+
+Stepping through review B: *the*, *movie* and *was* are [0, 0], so the note
+stays [0, 0]. Then *not* marks the first unit: $\mathbf{h}$ = [0.96, 0]. Then
+*great* gives [0.45, −0.42].
+
+In review A, the same *great* arrives with a blank note and gives [0, 0.76].
+Same word, same weights, different note, opposite answer.
+
+</div>
+
+<!--
+The point: one shared layer used once per step, and the note is what tells A
+from B. Twenty seconds to read; this slide is for revision.
 -->
 
 ---
@@ -1190,6 +1563,30 @@ Shapes to say out loud: in the code slides n_x = 64 and n_h = 128, so W_xh is
 
 ---
 layout: default
+title: "In words: The forward pass, written down"
+---
+
+# In words: The forward pass, written down
+
+<div class="dl-describe">
+
+Each step mixes the current word with the old note, then squashes the result.
+
+- **The picture.** The tanh box is the layer. The old note $\mathbf{h}_{t-1}$ enters from the left through $W_{hh}$, the word $\mathbf{x}_t$ from below through $W_{xh}$. The new note $\mathbf{h}_t$ leaves right; the output $\mathbf{o}_t$ goes up through $W_{ho}$.
+- **The steps.** Multiply each input by its matrix, add the bias $\mathbf{b}_h$, then apply tanh, which keeps numbers between −1 and 1.
+- **The numbers.** Review B at *great*: $\mathbf{h}_4 = [0.964, 0]$ and $\mathbf{x}_5 = [1, 0]$ give $\mathbf{h}_5 = [0.448, -0.419]$ and $o_5 = -1.26$.
+- **Remember:** delete the $W_{hh}\,\mathbf{h}_{t-1}$ term and this is a dense layer.
+
+</div>
+
+<!--
+The point: the recurrent step as one sentence, with the review B numbers, for
+revision. It covers this slide and the "Reading the equation" slide before it.
+Thirty seconds to read; skip in the lecture if short on time.
+-->
+
+---
+layout: default
 title: "Working it out: review B at great"
 ---
 
@@ -1296,6 +1693,32 @@ sigmoid(3 * 0.762) = 0.91: positive. Same word, same weights, different note.
 
 ---
 layout: default
+title: "In words: Working it out: review B at great"
+---
+
+# In words: Working it out: review B at *great*
+
+<div class="dl-describe">
+
+This is one recurrent step done by hand, at the word that decides review B. The diagram is the recipe; its numbers 1 to 4 match the four cards.
+
+1. **What the word brings.** $W_{xh}\mathbf{x}_5 = [0, 1]$. On its own, *great* pushes the sentiment unit up by 1.
+2. **What the note brings.** $W_{hh}\mathbf{h}_4 = [0.482, -1.446]$. The −1.446 is the flag left by *not*, carried by the −1.5 weight.
+3. **Add, then squash.** The bias is 0, so the sum is $[0.482, -0.446]$.
+   Tanh of each entry gives the new note, $\mathbf{h}_5 = [0.448, -0.419]$.
+4. **Read out.** $W_{ho} = [0, 3]$ gives $o_5 = -1.26$. The sigmoid σ turns it into P(positive) = 0.22: negative.
+
+The note beat the word.
+
+</div>
+
+<!--
+The point: the four arithmetic steps at "great", in order, to check by hand when
+revising. Thirty seconds; skip in the lecture if short on time.
+-->
+
+---
+layout: default
 title: The same equation, one matrix
 ---
 
@@ -1364,6 +1787,30 @@ The drawing is to scale. Have them check it.
 -->
 
 ---
+layout: default
+title: "In words: The same equation, one matrix"
+---
+
+# In words: The same equation, one matrix
+
+<div class="dl-describe">
+
+The two weight matrices can be written as one. Nothing new is computed.
+
+- **The trick.** Stack the word $\mathbf{x}_t$ on top of the note $\mathbf{h}_{t-1}$ into one long vector. Place $W_{xh}$ and $W_{hh}$ side by side as $W_h$. Add the bias $\mathbf{b}_h$ and apply tanh, as before.
+- **The picture** is to scale: $W_{xh}$ is 64 columns wide, the shaded $W_{hh}$ 128. Both have 128 rows, one per hidden unit.
+- **The numbers.** The toy at *great* gives $[0.482, -0.446]$, the same sum as before tanh. A real layer is $128 \times 192$, because $64 + 128 = 192$.
+
+So a recurrent layer is one dense layer reading word and note, joined.
+
+</div>
+
+<!--
+The point: W_xh and W_hh side by side are one matrix, so the layer is one dense
+layer on [word; note]. Twenty seconds; skip in the lecture if short on time.
+-->
+
+---
 layout: interactive
 heading: One step, by hand
 title: One step, by hand
@@ -1404,6 +1851,33 @@ and the sentiment ends at -0.42. The readout gives P(positive) = 0.22.
 
 Do not skip this widget because the numbers look small. Nobody who cannot do this
 can debug an RNN.
+-->
+
+---
+layout: default
+title: "In words: One step, by hand"
+---
+
+# In words: One step, by hand
+
+<div class="dl-describe">
+
+The widget runs review B, one word per step, in four lines:
+
+1. The rule, with $t$ fixed.
+2. The numbers, with the same two matrices every step.
+3. What this word brought, beside what the note brought.
+4. Add, then squash: the new note.
+
+*The*, *movie* and *was* give zeros: no sentiment in the toy. At *not*, the word brings $[2, 0]$ and the note $[0, 0]$, so the new note is $[0.96, 0]$: a flag. At *great*, the word brings $[0, 1]$ and the note $[0.48, -1.45]$. The note wins: the sentiment ends at −0.42, and P(positive) = 0.22.
+
+Line 3 at *great* is the one to produce unaided.
+
+</div>
+
+<!--
+The point: the step-by-step trace of review B, word by word, for revision.
+Thirty seconds to read; skip in the lecture if short on time.
 -->
 
 ---
@@ -1455,6 +1929,30 @@ The callout is the most important idea in the section. Recurrence does not give 
 network unlimited memory; it gives it a fixed budget and makes it learn what to
 keep. Gates (section 03) are a better way of choosing. The attention slide in the
 last section is refusing to throw anything away.
+-->
+
+---
+layout: default
+title: "In words: What the state actually is"
+---
+
+# In words: What the state actually is
+
+<div class="dl-describe">
+
+The strip reads review B word by word. Two bars show the two numbers in the state $\mathbf{h}_t$; the verdict shows P(positive).
+
+- **Unit 1 is the not-flag.** It stays at 0 until *not*, then jumps to 0.964.
+- **Unit 2 is the sentiment.** At *great* it goes down, to −0.419, and P(positive) = 0.22.
+- **Why down?** The weight −1.5 in $W_{hh}$ carries the flag into the sentiment unit.
+
+The lesson: $\mathbf{h}_t$ is a fixed-size summary. It is 2 numbers here and 128 in a real layer, after 3 words or 300. So it must throw information away.
+
+</div>
+
+<!--
+The point: the state is a fixed-size summary with a job per unit, and it has to
+forget. Thirty seconds; skip in the lecture if short on time.
 -->
 
 ---
@@ -1541,6 +2039,31 @@ assumes they are wrong. They are not: 24 704 + 128 = 24 832.
 
 ---
 layout: default
+title: "In words: Counting the parameters"
+---
+
+# In words: Counting the parameters
+
+<div class="dl-describe">
+
+A recurrent layer has three sets of weights. $W_{xh}$ is $n_h \times n_x$ and $W_{hh}$ is $n_h \times n_h$. The bias $\mathbf{b}_h$ has $n_h$ numbers.
+
+- **The picture** is drawn to scale. With $n_x = 64$ inputs and $n_h = 128$ hidden units, $W_{xh}$ holds 8 192 weights. The big square $W_{hh}$ holds 16 384. The thin strip is the bias, 128.
+- **The total** is $8\,192 + 16\,384 + 128 = 24\,704$.
+- **The length $T$ does not appear.** A 10-word and a 1000-word review share the same weights.
+- **$W_{hh}$ grows with $n_h^2$.** Double the units and it has four times the weights.
+
+`nn.RNN` prints 24 832, because PyTorch keeps two bias vectors: $24\,704 + 128$. A hand count of 24 704 is right.
+
+</div>
+
+<!--
+The point: how to count a recurrent layer's weights, and why the sequence length
+never enters. Thirty seconds; skip in the lecture if short on time.
+-->
+
+---
+layout: default
 title: Your turn — count them
 ---
 
@@ -1614,6 +2137,33 @@ of the model with the most to learn and the least supervision.
 -->
 
 ---
+layout: default
+title: "In words: Your turn — count them"
+---
+
+# In words: Your turn — count them
+
+<div class="dl-describe">
+
+The answers to the exercise, all with 64 inputs and 128 hidden units:
+
+- `nn.RNN(64, 128)`: 24 832, with PyTorch's two bias vectors.
+- `nn.LSTM(64, 128)`: four blocks of that size, so 99 328.
+- `nn.GRU(64, 128)`: three blocks, so 74 496.
+- `nn.Embedding(20000, 64)`: one row of 64 numbers for each of 20 000 words, so 1 280 000.
+
+The bar is the whole classifier to scale, 1 379 586 weights in all. The embedding is 93% of the bar, the LSTM 7%, and the output layer (the head) a sliver.
+
+The recurrent part this lecture is about holds only 7% of the weights.
+
+</div>
+
+<!--
+The point: the answers, and the surprise that the embedding holds most of the
+weights. Thirty seconds; skip in the lecture if short on time.
+-->
+
+---
 layout: interactive
 heading: Five ways to wire it
 title: Five ways to wire it
@@ -1673,6 +2223,32 @@ review is there before we classify it — and wrong for generating text.
 The bidirectional caveat catches people out in their own projects: they add
 bidirectional=True to a language model, the loss collapses to nothing, and it
 takes an afternoon to realise the model can see the answer.
+-->
+
+---
+layout: default
+title: "In words: Five ways to wire it"
+---
+
+# In words: Five ways to wire it
+
+<div class="dl-describe">
+
+The widget shows one wiring per tab: where does the recurrent arrow come from?
+
+- **Hidden → hidden.** The whole note $h$ passes to the next step. This is what `nn.RNN` uses.
+- **Output → hidden.** Only the output $o$, usually far smaller than $h$, passes on.
+- **Output → output.** Only the previous output feeds the next; $h$ carries nothing forward.
+- **Stacked.** One layer's states are the next layer's inputs (`num_layers`).
+- **Bidirectional.** A second row reads right to left, and the two notes are joined at each word (`bidirectional=True`).
+
+Bidirectional needs the whole sequence first. It suits classifying review B, but it cannot predict the next word.
+
+</div>
+
+<!--
+The point: the five wirings in one list, and when bidirectional is wrong.
+Thirty seconds; skip in the lecture if short on time.
 -->
 
 ---
@@ -1871,6 +2447,30 @@ PyTorch section.
 
 ---
 layout: default
+title: "In words: The loss for a whole sequence"
+---
+
+# In words: The loss for a whole sequence
+
+<div class="dl-describe">
+
+The loss is the cross-entropy, $\ell = -\ln p$, where $p$ is the chance the model gave the right answer. Used once, or $T$ times.
+
+- **One label per review (left).** Only the last cell feeds the loss: $L = \ell(\mathbf{o}_T, y)$. Review B is negative and the model gives that 0.78, so $L = -\ln 0.78 = 0.25$.
+- **One label per word (right).** Every cell feeds a loss; the $T$ losses are averaged. For the next character with $T = 3$ and $p$ = 0.8, 0.5, 0.25, the step losses are 0.22, 0.69 and 1.39. Their mean is $L = 0.77$.
+
+Either way, the same weights act at every step, so every loss term sends them gradient.
+
+</div>
+
+<!--
+The point: the two kinds of sequence loss and their worked numbers. Covers this
+slide and the "Reading the equation" slide before it. Thirty seconds; skip in the
+lecture if short on time.
+-->
+
+---
+layout: default
 title: Backpropagation through time
 ---
 
@@ -2047,6 +2647,32 @@ W_hh is a matrix, so the factor is a matrix product. Do not go further than that
 
 ---
 layout: default
+title: "In words: Backpropagation through time"
+---
+
+# In words: Backpropagation through time
+
+<div class="dl-describe">
+
+Unrolled, an RNN is a deep feed-forward network, so backpropagation trains it. The twist: $W_{hh}$ is used at every step. The gradient runs back from $L$ through every copy.
+
+- **The outer sum** collects a share of the gradient from every step $t$.
+- **Inside**, for each earlier step $k$, the factor $\partial \mathbf{h}_t / \partial \mathbf{h}_k$ carries it back $t - k$ steps. It is a product of $t - k$ terms.
+
+**Worked example:** one unit, no tanh, $W_{hh} = 0.5$, inputs 1, 0, 0. Then $h$ = 1, 0.5, 0.25 and $L = h_3$. The three terms are $0.25 \cdot 0 + 0.5 \cdot 1 + 1 \cdot 0.5 = 1.0$, matching the slope of $W_{hh}^2$.
+
+The factors 1, 0.5, 0.25 are powers of $W_{hh}$. That product is the trouble.
+
+</div>
+
+<!--
+The point: BPTT is ordinary backprop on a shared weight, and the backward factor
+is a product. Covers this slide and the "Reading the equation" slide before it.
+Forty seconds; skip in the lecture if short on time.
+-->
+
+---
+layout: default
 title: What vanishing feels like
 ---
 
@@ -2124,6 +2750,30 @@ it. Fix the backward path and the forward one takes care of itself.
 -->
 
 ---
+layout: default
+title: "In words: What vanishing feels like"
+---
+
+# In words: What vanishing feels like
+
+<div class="dl-describe">
+
+The strip is a 21-word review. The word that decides it, *not*, comes first; *great* comes last, 20 steps later. The loss sits after *great*.
+
+- **The bars** show how much gradient reaches each word, drawn to scale.
+- **Each step back** multiplies it by 0.8, the sentiment unit's weight on itself.
+- So *great* gets 1, five words back gets 0.33, ten back 0.11, and *not* only $0.8^{20} = 0.012$.
+
+Forward, the layer could carry the flag to the end. Backward, the signal that says "keep the flag" arrives at about 1% strength, so it is never learned.
+
+</div>
+
+<!--
+The point: vanishing gradients on the running example — the signal to remember
+"not" arrives at 1%. Thirty seconds; skip in the lecture if short on time.
+-->
+
+---
 layout: interactive
 heading: One number, raised to a power
 title: One number, raised to a power
@@ -2184,6 +2834,32 @@ chart does not move at all: clipping fixes exploding, never vanishing.
 -->
 
 ---
+layout: default
+title: "In words: One number, raised to a power"
+---
+
+# In words: One number, raised to a power
+
+<div class="dl-describe">
+
+With one hidden unit, $W_{hh}$ is a single weight $W$. Going $k$ steps back multiplies the gradient by $W^k$.
+
+- **The chart** plots the gradient's size against steps back, on a log axis. The result is a straight line, so the damage grows exponentially with distance.
+- **It opens on the review:** $W = 0.8$ and 20 steps give 0.012.
+- **$W < 1$: vanishing.** At 0.9 the gradient reaches about 43 steps back at 1% strength; at 0.6, only nine.
+- **$W > 1$: exploding.** The line climbs; training shows NaN.
+- **$W = 1$: stable**, but nothing in training keeps the weight there.
+
+There is no safe band, only a single point.
+
+</div>
+
+<!--
+The point: the backward factor is W to the power of the distance, and only W = 1
+is safe. Thirty seconds; skip in the lecture if short on time.
+-->
+
+---
 layout: interactive
 heading: And tanh is not helping
 title: And tanh is not helping
@@ -2240,6 +2916,32 @@ The obvious question — why not ReLU, whose derivative is exactly 1 — has a g
 answer: people do, and it works with careful initialisation (IRNN), but an
 unbounded activation fed back into itself for 200 steps also explodes forwards, not
 just backwards. tanh is the safe default and gating is the real fix.
+-->
+
+---
+layout: default
+title: "In words: And tanh is not helping"
+---
+
+# In words: And tanh is not helping
+
+<div class="dl-describe">
+
+In the widget, the solid curve is tanh and the dashed curve is its slope, $\tanh'$.
+
+- **The slope peaks at 1**, at input 0, and falls towards zero on both sides.
+- **A saturated unit**, sitting near +1 or −1, has a slope near zero. It passes almost no gradient back.
+- **Every backward step** multiplies by one of these slopes.
+
+So the real factor per step is $W \cdot \tanh'$, and it is smaller than $W$. On the review, the flag unit sits at 0.964 after *not*. There $\tanh' = 1 - 0.964^2 = 0.07$.
+
+The 0.012 was optimistic: what keeps the state bounded also shrinks the gradient.
+
+</div>
+
+<!--
+The point: tanh' is at most 1, so the activation makes vanishing worse.
+Twenty seconds; skip in the lecture if short on time.
 -->
 
 ---
@@ -2343,6 +3045,30 @@ together; truncate only when a sequence is too long for memory.
 
 ---
 layout: default
+title: "In words: Three ways out, honestly ranked"
+---
+
+# In words: Three ways out, honestly ranked
+
+<div class="dl-describe">
+
+Three standard answers to the gradient problem, not equals.
+
+1. **Gradient clipping.** The tall arrow is cut off at a dashed ceiling: cap the gradient's length. This fixes exploding only; a tiny gradient is never above the cap.
+2. **Truncated BPTT** (backpropagation through time). The chain is cut after two cells: go back $k$ steps, then stop. Nothing further than $k$ steps back is learned.
+3. **Gated cells**, shown by the gate glyph. They make the gradient's path add instead of multiply. This is the real fix, and the next section.
+
+In practice, use clipping and a gated cell together. Truncate only when a sequence is too long for memory.
+
+</div>
+
+<!--
+The point: the three fixes, ranked, and the practical rule. Twenty seconds; skip
+in the lecture if short on time.
+-->
+
+---
+layout: default
 title: Gradient clipping, in one line
 ---
 
@@ -2435,6 +3161,30 @@ wants that.
 max_norm between 0.25 and 5 is the usual range, and 1.0 is a fine default. If
 clipping fires on every batch, the learning rate is too high — clipping is a
 safety device for rare spikes, not a way to train.
+-->
+
+---
+layout: default
+title: "In words: Gradient clipping, in one line"
+---
+
+# In words: Gradient clipping, in one line
+
+<div class="dl-describe">
+
+Clipping stops one huge gradient from wrecking the weights in a single step.
+
+- **The code** is an ordinary training step. The new line is `clip_grad_norm_`, with `max_norm=1.0`.
+- **The order matters.** `backward()` creates the gradients, clipping shrinks them, then `step()` uses them. Clip before `backward()` and there is nothing to clip. Clip after `step()` and the damage is done.
+- **The picture.** The red arrow is a gradient of length 900. The dashed circle holds every vector of length $c = 1$. Clipping keeps the arrow's **direction** and cuts its **length** to 1.
+- **The rule.** If $\|\mathbf{g}\| > c$, replace $\mathbf{g}$ by $c \cdot \mathbf{g} / \|\mathbf{g}\|$.
+
+</div>
+
+<!--
+The point: one line, placed between backward() and step(); same direction,
+capped length. Twenty seconds to read; skip in the lecture if short on time —
+this slide is for revision.
 -->
 
 ---
@@ -2536,6 +3286,32 @@ k = 128 or 256 is typical for character models. It is a memory decision.
 -->
 
 ---
+layout: default
+title: "In words: Truncated backpropagation through time"
+---
+
+# In words: Truncated backpropagation through time
+
+<div class="dl-describe">
+
+A 100 000-character book cannot be backpropagated in one go: its activations do not fit in memory.
+
+So we cut it into chunks of 128 steps and train on one chunk at a time.
+
+- **The accent line** in the picture is the state. It flows forward through every chunk, so the model keeps its context.
+- **The red arrows** are the gradient. Each one flows back only inside its own chunk.
+- **The dashed cuts** are the `detach()` calls. `detach()` keeps the state's values but cuts the graph behind them.
+
+Forget the `detach()` and the graph keeps growing, chunk after chunk, until memory runs out.
+
+</div>
+
+<!--
+The point: truncation cuts learning, not memory — the state crosses every
+boundary, only the gradient stops. Twenty seconds; this slide is for revision.
+-->
+
+---
 layout: section
 index: "03"
 ---
@@ -2630,6 +3406,30 @@ Say so in one sentence; do not lean on it.
 -->
 
 ---
+layout: default
+title: "In words: Stop multiplying, start adding"
+---
+
+# In words: Stop multiplying, start adding
+
+<div class="dl-describe">
+
+A plain RNN rebuilds its state at every word. That is why an old signal fades.
+
+- **Top row.** The *not*-flag passes through a chain of states. Each word multiplies it by 0.8, so the boxes fade.
+- **Bottom row.** The flag instead rides a straight line, the **cell state**. Along that line there are only additions, drawn as **+** circles. The envelope is the same at every step.
+- **Why it helps.** Adding keeps the factor per word at 1, so the flag and its gradient arrive unchanged.
+
+The problem: a state that only adds never forgets, and fills up. The fix is a learned valve on each path, called a **gate**.
+
+</div>
+
+<!--
+The point: an additive path keeps the factor at 1; gates make it forget on
+purpose. Twenty seconds to read; this slide is for revision.
+-->
+
+---
 layout: interactive
 heading: The LSTM memory block
 title: The LSTM memory block
@@ -2676,6 +3476,31 @@ Running example, in words only: on the unit that holds the not-flag, a trained
 cell can keep the forget gate near 1 from "not" until "great". The flag then
 arrives intact. We have not set LSTM weights for the review, so give no numbers
 for it.
+-->
+
+---
+layout: default
+title: "In words: The LSTM memory block"
+---
+
+# In words: The LSTM memory block
+
+<div class="dl-describe">
+
+The LSTM (long short-term memory) cell carries **two states**. The **cell state** $c$ is its long-term memory. The **hidden state** $h$ is what it shows to the next layer.
+
+- **The forget gate** $f$ sets the fraction of the old memory that is kept.
+- **The input gate** $i$ sets how much of the new candidate is written.
+- **The output gate** $o$ sets how much of the memory is shown as $h$.
+
+With forget = 1 and input = 0, $c_t = c_{t-1}$ at every step: the envelope stays sealed. With forget = 0, the old memory is erased in a single step.
+
+</div>
+
+<!--
+The point: two states, three gates, and the sealed-envelope setting. Thirty
+seconds to read; skip in the lecture if short on time — this slide is for
+revision.
 -->
 
 ---
@@ -2883,6 +3708,32 @@ layer. The literature uses the same letters for both; say it once.
 
 ---
 layout: default
+title: "In words: The six equations"
+---
+
+# In words: The six equations
+
+<div class="dl-describe">
+
+The LSTM looks like six equations, but four of them are the same layer.
+
+1. **Three gates:** forget $\mathbf{f}_t$, input $\mathbf{i}_t$, output $\mathbf{o}_t$. Each is $\sigma(W_x\mathbf{x}_t + W_h\mathbf{h}_{t-1} + \mathbf{b})$ with its own weights. The sigmoid $\sigma$ gives a fraction between 0 and 1.
+2. **The candidate** $\tilde{\mathbf{c}}_t$: the same layer with $\tanh$, so the new content can be negative.
+3. **Cell update:** $\mathbf{c}_t = \mathbf{f}_t \odot \mathbf{c}_{t-1} + \mathbf{i}_t \odot \tilde{\mathbf{c}}_t$. Keep part of the old memory, add part of the new. $\odot$ multiplies unit by unit.
+4. **Output:** $\mathbf{h}_t = \mathbf{o}_t \odot \tanh(\mathbf{c}_t)$.
+
+Worked forget gate: $\sigma(1.5 \cdot 1 + 0.8 \cdot 0.5 + 0.3) = \sigma(2.2) = 0.90$.
+
+</div>
+
+<!--
+The point: four copies of one layer, plus two new update lines; covers "The six
+equations" and its "Reading the equation" slide. Thirty seconds; this slide is
+for revision.
+-->
+
+---
+layout: default
 title: One LSTM step, by hand
 ---
 
@@ -2963,6 +3814,31 @@ on that: we have not set LSTM weights for the review.
 -->
 
 ---
+layout: default
+title: "In words: One LSTM step, by hand"
+---
+
+# In words: One LSTM step, by hand
+
+<div class="dl-describe">
+
+One full LSTM step, with numbers. The line across the top is the cell state, read left to right.
+
+1. **Keep.** The old memory $c_{t-1} = 0.6$ is multiplied by the forget gate $f = 0.9$. That keeps 0.54.
+2. **Write.** The input gate times the candidate gives $0.4 \times 0.8 = 0.32$.
+3. **Add.** The new memory is $c_t = 0.54 + 0.32 = 0.86$.
+4. **Show.** Squash it with $\tanh$, then scale by the output gate: $0.7 \times \tanh(0.86) = 0.49$.
+
+The cell **holds** 0.86 but **shows** 0.49. The output gate decides how much of the memory to reveal.
+
+</div>
+
+<!--
+The point: the four numbers of one step, and the difference between holding and
+showing. Twenty seconds; this slide is for revision.
+-->
+
+---
 layout: interactive
 heading: The highway, against the chain
 title: The highway, against the chain
@@ -3015,7 +3891,7 @@ The chart: red is the plain recurrence, multiplied by W = 0.8 per word back; tea
 is the cell state, multiplied by f = 0.99. Then push f to 1.000 on the slider:
 the factor is exactly 1 at any distance.
 
-The secondary line is the honest version and it matters: LSTMs do not abolish
+Add the honest caveat out loud, because it is not on the slide: LSTMs do not abolish
 vanishing gradients. They make the decay rate a learned, per-unit, per-step
 quantity. An LSTM whose forget gates all learn 0.5 vanishes as fast as anything
 else.
@@ -3023,6 +3899,30 @@ else.
 This is also why forget-gate biases are often initialised to 1 or 2: it starts
 the gate open, so the highway is clear before training has learned anything.
 Worth saying for anyone who reads implementations.
+-->
+
+---
+layout: default
+title: "In words: The highway, against the chain"
+---
+
+# In words: The highway, against the chain
+
+<div class="dl-describe">
+
+In the long review, *not* sits 20 words before *great*. What fraction of the gradient reaches it?
+
+- **The red curve** is the plain RNN. Each word back multiplies the gradient by the weight 0.8.
+- **The teal curve** is the LSTM cell state. Each word back multiplies it by the forget gate, here 0.99.
+- **The two bars** use the same scale from 0 to 1. The plain RNN keeps $0.8^{20} = 0.012$, a sliver. The cell state keeps $0.99^{20} = 0.82$.
+
+It is not magic: a learned forget gate held near 1 replaces the fixed 0.8.
+
+</div>
+
+<!--
+The point: 0.012 against 0.82, and why. Thirty seconds to read; this slide is
+for revision.
 -->
 
 ---
@@ -3081,6 +3981,33 @@ What came after the LSTM starts at the end of this lecture (attention, in its
 -->
 
 ---
+layout: default
+title: "In words: Where the LSTM came from"
+---
+
+# In words: Where the LSTM came from
+
+<div class="dl-describe">
+
+The timeline reads left to right, one dot per milestone.
+
+- **1991:** the vanishing gradient is described.
+- **1997:** the LSTM is built to fix it. Its key part is the additive cell state.
+- **2000:** the forget gate is added. This dot is highlighted, because the gate was not in the first design.
+- **2014:** the GRU arrives, with fewer parts.
+
+Why the forget gate mattered: the 1997 cell could write and read, but never clear. So on a long input the memory kept growing until it saturated and stopped responding.
+
+After that fix, the LSTM was the standard model for sequences for about twenty years.
+
+</div>
+
+<!--
+The point: the forget gate came three years after the LSTM, so no part of an
+architecture is inevitable. Twenty seconds; this slide is for revision.
+-->
+
+---
 layout: interactive
 heading: The GRU — same idea, fewer parts
 title: The GRU — same idea, fewer parts
@@ -3128,6 +4055,30 @@ In practice this costs almost nothing, and the GRU has a quarter fewer weights
 
 Cho et al., 2014. The way the blend is written here (z = how much to update)
 follows Chung et al., 2014; the next slide shows why that matters.
+-->
+
+---
+layout: default
+title: "In words: The GRU — same idea, fewer parts"
+---
+
+# In words: The GRU — same idea, fewer parts
+
+<div class="dl-describe">
+
+The GRU (gated recurrent unit) uses the same gating idea as the LSTM, with **one state and two gates**.
+
+- **The update gate** $z$ does two jobs at once. It decides how much of the old state to keep and how much new content to write.
+- **The reset gate** $r$ decides how much of the past the candidate may read. At $r = 0$ it reads none.
+- **The blend:** $h_t = (1-z)\,h_{t-1} + z\,\tilde{h}_t$. The two shares always add up to 1.
+
+In the widget's bars, the kept and written parts add up to the new state. At $z = 0$ the state is frozen. At $z = 1$ it is fully overwritten.
+
+</div>
+
+<!--
+The point: one state, two gates, one blend whose shares sum to 1. Twenty
+seconds; this slide is for revision.
 -->
 
 ---
@@ -3185,6 +4136,33 @@ convention. Fixed in the 2026-10-04 rework.)
 
 ---
 layout: default
+title: "In words: Which one, and the sign that will catch you"
+---
+
+# In words: Which one, and the sign that will catch you
+
+<div class="dl-describe">
+
+The bars count the weights of one layer with 64 inputs and 128 hidden units, drawn to scale.
+
+- **Plain RNN:** 24 832 weights, one set.
+- **GRU:** 74 496, three sets.
+- **LSTM:** 99 328, four sets.
+
+Which to use? On long sequences either gated cell does better than the plain RNN. Between the two, accuracy is usually within a point, so pick one and move on.
+
+**The sign trap.** Here $z$ means how much to **update**. Cho's paper and PyTorch's `nn.GRU` write $h_t = z\,h_{t-1} + (1-z)\,\tilde{h}_t$, so there $z$ means how much to **keep**. It is the same model, with the gate's meaning flipped.
+
+</div>
+
+<!--
+The point: the costs side by side, and the flipped meaning of z in nn.GRU.
+Twenty seconds; this slide is for revision.
+-->
+
+---
+layout: default
+title: "Poll: what is left after fifty steps?"
 ---
 
 <div class="grid grid-cols-[1.6fr_1fr] gap-6 items-start">
@@ -3240,6 +4218,32 @@ being added. With input = 0 nothing is added, so nothing fills up.
 
 This is the sealed envelope with both gates shut: nothing gets in, nothing leaks
 out. That is the whole reason the architecture exists.
+-->
+
+---
+layout: default
+title: "In words: Poll: what is left after fifty steps?"
+---
+
+# In words: Poll: what is left after fifty steps?
+
+<div class="dl-describe">
+
+The question: an LSTM unit runs 50 steps with forget = 1 and input = 0. What is $c_{50}$?
+
+**The answer is $c_0$, unchanged.** The picture shows why: each step multiplies by 1 and adds 0. So $c_t = 1 \cdot c_{t-1} + 0 \cdot \tilde{c}_t = c_{t-1}$, fifty times over. The gradient travels back the same way, multiplied by exactly 1 at each step.
+
+Why the other answers are wrong:
+
+- **Zero:** nothing shrinks it, because the factor is 1, not less than 1.
+- **Saturates:** a state fills up only when input keeps being added. Here input is 0.
+- **$\tanh(c_0)$:** $\tanh$ is applied on the way out to $h$, never to $c$ itself.
+
+</div>
+
+<!--
+The point: both gates shut means the memory is sealed, and so is the gradient
+path. Twenty seconds; this slide is for revision.
 -->
 
 ---
@@ -3322,6 +4326,29 @@ numbers per word. The question is where real ones come from.
 -->
 
 ---
+layout: default
+title: "In words: A word is not a number"
+---
+
+# In words: A word is not a number
+
+<div class="dl-describe">
+
+The layer computes $W_{xh}\mathbf{x}_t$, so every word must become a vector. Here are two simple ways to do it for a 20 000-word vocabulary:
+
+- **Left, an index.** Each word gets one number: *aardvark* 96, *brilliant* 2 103, *great* 4 217. This invents an order.
+- **Right, one-hot.** Each word gets 20 000 numbers: all zeros except a single 1. There is no false order. But the three corners of the triangle show the cost: every pair of words is equally far apart.
+
+Neither scheme captures that *great* and *brilliant* are near-synonyms. The goal is a few numbers per word, placed so that similar words land near each other.
+
+</div>
+
+<!--
+The point: an index invents an order, one-hot erases every similarity. Twenty
+seconds; this slide is for revision.
+-->
+
+---
 layout: interactive
 heading: An embedding is a lookup table
 title: An embedding is a lookup table
@@ -3378,6 +4405,30 @@ the batch, which is why embedding gradients are sparse.
 -->
 
 ---
+layout: default
+title: "In words: An embedding is a lookup table"
+---
+
+# In words: An embedding is a lookup table
+
+<div class="dl-describe">
+
+An **embedding** is a table with one row of numbers per word. A word's vector is its row.
+
+- **The small table** is our review's, set by hand. It has two numbers per word. *the*, *movie* and *was* are 0, 0. *not* is 0, 1. *great* is 1, 0.
+- **The widget** is a different, bigger table: 9 words with 4 numbers each.
+- **A real table** has 20 000 rows of 64 numbers, and the numbers are learned.
+
+The key fact: a one-hot vector times the table picks out exactly one row. So the lookup is an ordinary layer, and it trains like any other weight matrix.
+
+</div>
+
+<!--
+The point: lookup and one-hot-times-matrix are the same thing, so the table is
+learned. Twenty seconds; this slide is for revision.
+-->
+
+---
 layout: interactive
 heading: What it learns is a geometry
 title: What it learns is a geometry
@@ -3421,9 +4472,10 @@ Click 2: awful and terrible too, at the far end of the same axis.
 Click 3: the and a sit near zero on both axes — they carry neither sentiment nor
 meaning about films.
 
-Click 4: the honest caveat in the secondary line, and it matters. The widget's
-axes, "sentiment" and "is a film noun", are hand-written to look like a trained
-table; they are not the toy review's axes ("positive word", "negation word"), and
+Click 4: the honest caveat in the secondary line, and it matters. The widget
+labels its axes only "learned dimension 1" and "2", but the values are
+hand-written so they read as "sentiment" and "is a film noun", like a trained
+table might. They are not the toy review's axes ("positive word", "negation word"), and
 this is not the same table. A real table has 64 unnamed axes. Do not let anyone
 leave thinking dimension 1 is "sentiment" in a real model.
 
@@ -3434,6 +4486,32 @@ salient features" means when textbooks list it as a benefit.
 For the running example: in a trained table, "not" would end up somewhere of its
 own, away from the sentiment words, because what it does is flip them, not carry
 a sentiment of its own. Say that as an expectation, not a measured fact.
+-->
+
+---
+layout: default
+title: "In words: What it learns is a geometry"
+---
+
+# In words: What it learns is a geometry
+
+<div class="dl-describe">
+
+In a trained model the embedding numbers are weights, moved by gradient descent. What they learn is a **geometry**: words used alike end up close together.
+
+The widget plots each word as a dot in two dimensions.
+
+- *great* and *brilliant* sit together.
+- *awful* and *terrible* sit together too, at the far end.
+- *the* and *a* stay near the origin.
+
+One caution. The two axes in the widget are hand-written for display, and they are not our toy review's. A real table has 64 axes, and none has a name you could read off. So a word's neighbours carry meaning, but a single axis does not.
+
+</div>
+
+<!--
+The point: similar words end up near each other; single axes mean nothing.
+Twenty seconds; this slide is for revision.
 -->
 
 ---
@@ -3532,6 +4610,34 @@ reading them did not.
 -->
 
 ---
+layout: default
+title: "In words: Embeddings in code, and where they come from"
+---
+
+# In words: Embeddings in code, and where they come from
+
+<div class="dl-describe">
+
+The strip across the top is the whole layer: ids go in, vectors come out.
+
+- **The input** is integer ids, shape (2, 5): two reviews, five slots each.
+  Review A is padded with id 0.
+- **The table** has one row per word: 20 000 rows of 64 numbers.
+  Looking up each id gives back its row.
+- **The output** has shape (2, 5, 64): one 64-number vector per token.
+- `padding_idx=0` pins row 0 at zero, so padding adds nothing.
+- The table holds 20 000 × 64 = 1.28 M learned numbers, starting random.
+  Or start from a pre-trained table: word2vec, GloVe or fastText.
+
+</div>
+
+<!--
+The point: an embedding is a lookup table from ids to learned vectors, (B, T) in
+and (B, T, d) out. Thirty seconds to read; skip in the lecture if short on time —
+this slide is for revision.
+-->
+
+---
 layout: section
 index: "05"
 ---
@@ -3613,6 +4719,34 @@ library that runs the LSTM loop. Batch-first matches every other PyTorch layer,
 and nn.Embedding's output.
 
 The h_n exception catches people who then try to be consistent about it.
+-->
+
+---
+layout: default
+title: "In words: The shape that causes the most bugs"
+---
+
+# In words: The shape that causes the most bugs
+
+<div class="dl-describe">
+
+A batch has three sizes: B = 32 reviews, T = 200 words, F = 64 numbers per word.
+Each row of boxes is one axis order.
+
+- **Top row, the default:** time comes first, (T, B, F).
+- **Middle row, `batch_first=True`:** the batch comes first, (B, T, F).
+  This matches the embedding layer's output.
+- **Red row, the trap:** a batch-first tensor fed to a default layer.
+  It reads 32 reviews as 32 time steps.
+
+Nothing crashes, but the model learns nonsense. Always pass `batch_first=True`.
+The one exception is `h_n`, which is always (layers × directions, B, hidden).
+
+</div>
+
+<!--
+The point: always pass batch_first=True, because the wrong axis order trains
+without an error. Thirty seconds to read; this slide is for revision.
 -->
 
 ---
@@ -3727,6 +4861,35 @@ hands back two states, because only the LSTM has two.
 
 ---
 layout: default
+title: "In words: nn.LSTM returns two things, and you want one of them"
+---
+
+# In words: `nn.LSTM` returns two things, and you want one of them
+
+<div class="dl-describe">
+
+The picture shows five LSTM steps over review B, each sending one vector up.
+
+- **`output`** is all of those vectors: the state at every step.
+  Its shape is (32, 200, 128).
+- **`h_n`** is only the last one, drawn in the accent colour.
+  Its shape is (1, 32, 128); the leading 1 counts the layers.
+
+Choose by the task shape.
+To classify a whole review, take `h_n[-1]`, shape (32, 128).
+To give every word a label, take `output`.
+With no padding, `output[:, -1]` equals `h_n[-1]`.
+Pick wrong, and the shapes can still line up: nothing warns you.
+
+</div>
+
+<!--
+The point: output is one vector per step, h_n is the last step, and the task
+decides which one to use. Thirty seconds to read; this slide is for revision.
+-->
+
+---
+layout: default
 title: Sequences in a batch are not the same length
 ---
 
@@ -3781,6 +4944,34 @@ bag-of-words baseline.
 
 If asked how to waste less: sorting a batch by length reduces the padding a lot.
 Bucketing by length reduces it further.
+-->
+
+---
+layout: default
+title: "In words: Sequences in a batch are not the same length"
+---
+
+# In words: Sequences in a batch are not the same length
+
+<div class="dl-describe">
+
+A batch is one rectangle, but reviews differ in length.
+The picture shows four reviews padded out to 8 slots.
+The faint tiles are the **pad** token, id 0: "no word here".
+
+- The real lengths are 5, 3, 8 and 2 words.
+- That is 18 real tokens and 14 pads, so nearly half the batch is nothing.
+- On *utterly awful*, the LSTM runs all 8 steps.
+  Six of those steps read padding.
+
+So its `h_n` is the state after six steps of nothing. No error appears.
+This is why every batch must carry its real **lengths**.
+
+</div>
+
+<!--
+The point: padding makes a batch rectangular, and without the lengths the LSTM
+reads the padding as words. Thirty seconds to read; this slide is for revision.
 -->
 
 ---
@@ -3886,6 +5077,33 @@ mask, the damage is already inside h_n.
 
 ---
 layout: default
+title: "In words: Packing — tell the layer where to stop"
+---
+
+# In words: Packing — tell the layer where to stop
+
+<div class="dl-describe">
+
+The grid shows the four reviews sorted by length, one column per time step.
+The accent cell is each row's last real word; red cells are padding.
+
+The bottom row counts the reviews that still have a real word at each step. It reads 4, 4, 3, 2, 2, 1, 1, 1.
+At step 3 the 2-word review has ended.
+Packing stores this row as `batch_sizes`, and the LSTM runs only that many rows per step.
+
+`pack_padded_sequence` takes the embedded batch and its lengths.
+Then `h_n[-1]` is the state after each row's last real word.
+It is a correctness fix.
+
+</div>
+
+<!--
+The point: packing stops each row at its own length, so h_n is read after the
+last real word. Forty seconds to read; this slide is for revision.
+-->
+
+---
+layout: default
 title: The model
 ---
 
@@ -3980,6 +5198,33 @@ No softmax, because CrossEntropyLoss applies it — the same trap as for CNNs.
 
 ---
 layout: default
+title: "In words: The model"
+---
+
+# In words: The model
+
+<div class="dl-describe">
+
+The classifier is three layers. Read the shape strip top to bottom.
+
+1. **Embedding.** The ids, shape (32, 200), become vectors, shape (32, 200, 64).
+2. **LSTM, packed.** It reads 64 numbers per word and keeps 128 numbers of state.
+   We keep only `h_n[-1]`, shape (32, 128).
+   The 200 time steps disappear here.
+3. **Dropout and Linear.** Dropout of 0.3, then a linear head gives 2 logits per review, shape (32, 2).
+
+The only new line is the packing.
+`h_n[-1]` takes the last layer, so the code stays correct with `num_layers=2`.
+
+</div>
+
+<!--
+The point: embedding, LSTM, linear — and the 200 disappears at the LSTM. Thirty
+seconds to read; this slide is for revision.
+-->
+
+---
+layout: default
 title: Shapes, end to end
 ---
 
@@ -4044,6 +5289,35 @@ Four lines, and they catch every shape mistake on this slide.
 
 Note which dimension is 200 and which is 32 at every row, and that 200 disappears
 after h_n — that is where the sequence becomes a vector.
+-->
+
+---
+layout: default
+title: "In words: Shapes, end to end"
+---
+
+# In words: Shapes, end to end
+
+<div class="dl-describe">
+
+Look at the strip on top first. A 32 × 200 × 64 slab goes into the LSTM. A flat 32 × 128 comes out.
+The linear layer turns that into 32 × 2.
+
+The table writes down every tensor's shape on the way:
+
+- `ids` is (32, 200) and `lengths` is (32,).
+- After the embedding: (32, 200, 64), one vector per token.
+- `h_n[-1]` is (32, 128), one vector per review.
+- The head gives (32, 2) logits.
+
+The 200 time steps disappear at `h_n`.
+Before training, push one batch of random ids through the model and check the shapes.
+
+</div>
+
+<!--
+The point: write every shape down and test the model on one random batch first.
+Thirty seconds to read; this slide is for revision.
 -->
 
 ---
@@ -4125,6 +5399,35 @@ and one model class.
 
 ---
 layout: default
+title: "In words: The training loop, with one line added"
+---
+
+# In words: The training loop, with one line added
+
+<div class="dl-describe">
+
+The strip under the code is the loop in five boxes: forward, loss, backward, clip, step.
+Only **clip** is new, so it is drawn in the accent colour.
+
+1. The model, the cross-entropy loss, and Adam with learning rate 1e-3.
+2. The loader now gives ids, lengths and labels.
+3. Run forward with the lengths. Compute the loss and zero the gradients.
+4. Calling `backward()` computes the gradients.
+5. Then `clip_grad_norm_` rescales them so their total length is at most 1.0.
+6. Finally `step()` moves the weights.
+
+The clip sits after the gradients exist and before the weights change.
+Otherwise this is the MLP and CNN loop.
+
+</div>
+
+<!--
+The point: same training loop as before, plus one clipping line between backward
+and step. Thirty seconds to read; this slide is for revision.
+-->
+
+---
+layout: default
 title: Four bugs, and what each one looks like
 ---
 
@@ -4197,6 +5500,34 @@ restart it; do not wait.
 Click 5: the callout. Three of the four give no error message: the loss still
 falls, just not far enough. The habit that catches all three silent ones: print
 your shapes, and check h_n against lengths.
+-->
+
+---
+layout: default
+title: "In words: Four bugs, and what each one looks like"
+---
+
+# In words: Four bugs, and what each one looks like
+
+<div class="dl-describe">
+
+The chart sketches three loss curves; it is not a measured run.
+The green curve is the correct model and goes lowest.
+The grey curve is any silent bug: it flattens out higher.
+The red curve, without clipping, stops at `nan` ("not a number").
+
+1. **`batch_first` left out:** 32 reviews are read as 32 time steps.
+2. **No packing:** `h_n` is read after the padding.
+3. **Loss on padding**, with a label per word: use `ignore_index=0`.
+4. **No clipping:** one exploding step gives a `nan` loss that spreads to every weight.
+
+The first three give no error: the loss falls, just not far enough.
+
+</div>
+
+<!--
+The point: four common bugs, three of them silent. Thirty seconds to read; this
+slide is for revision.
 -->
 
 ---
@@ -4316,6 +5647,33 @@ repetitive; sampling from softmax(logits / temperature) is the usual knob.
 -->
 
 ---
+layout: default
+title: "In words: Generating one step at a time"
+---
+
+# In words: Generating one step at a time
+
+<div class="dl-describe">
+
+One next-word model, used in two ways. Read each panel bottom to top.
+
+- **Left, training.** The inputs are the true words of review B: *the movie was not*.
+  Each prediction is compared with the true next word: one loss per step.
+  This is **teacher forcing**. One forward call covers the review.
+- **Right, generating.** No true review exists.
+  Only *the* goes in; each guess is fed back as the next input.
+
+One wrong guess changes every later input.
+This gap between training and generating is called **exposure bias**.
+
+</div>
+
+<!--
+The point: training feeds the true words, generating feeds the model's own
+guesses. Thirty seconds to read; this slide is for revision.
+-->
+
+---
 layout: interactive
 heading: One sequence in, another out
 title: One sequence in, another out
@@ -4374,6 +5732,33 @@ from section 03 again.
 
 Cho et al. measured it in 2014 — translation quality (BLEU score) falls off
 sharply past about 20 source words. The fix was published the same year.
+-->
+
+---
+layout: default
+title: "In words: One sequence in, another out"
+---
+
+# In words: One sequence in, another out
+
+<div class="dl-describe">
+
+The widget shows an **encoder–decoder**, two RNNs joined in the middle.
+
+- **Bottom row, the encoder:** an RNN that reads the German source.
+- **Middle box, the context vector:** the encoder's final state, 256 numbers.
+- **Top row, the decoder:** a second RNN that writes the English sentence one word at a time.
+
+Nothing is written until the whole source is read.
+The context vector is all the decoder knows about it.
+The slider changes the source from 2 to 8 words, and the box stays 256 numbers.
+Eight words fit; forty words into the same 256 is the **bottleneck**.
+
+</div>
+
+<!--
+The point: the whole source is squeezed into one fixed-size vector, and that is
+the bottleneck. Thirty seconds to read; this slide is for revision.
 -->
 
 ---
@@ -4438,6 +5823,35 @@ encoder–decoder. The recurrence is still there: the encoder is an RNN and the
 decoder is an RNN. Attention only changes what the decoder reads at each step.
 
 Do not spend the mathematics here — the next slide is three lines.
+-->
+
+---
+layout: default
+title: "In words: Attention — stop choosing in advance"
+---
+
+# In words: Attention — stop choosing in advance
+
+<div class="dl-describe">
+
+The same widget, now with **attention**.
+The source is *Ich habe ein Buch gelesen*; the output is *I have read a book*.
+
+The decoder keeps **every** encoder state.
+Each press of **Next word** writes one English word, and the weights show where it looks.
+
+- Writing *have*, the weight sits on *habe*: 0.85.
+- Writing *read*, 0.85 of the weight is on *gelesen*, the last German word.
+  The lines cross, so the model is not just copying word order.
+
+Nobody told the model these pairs: the alignment is learned.
+No fixed summary to overflow: the decoder looks words up.
+
+</div>
+
+<!--
+The point: attention builds a fresh context for each output word from all the
+encoder states. Thirty seconds to read; this slide is for revision.
 -->
 
 ---
@@ -4640,6 +6054,34 @@ add up to 1.
 
 ---
 layout: default
+title: "In words: Attention, in three lines"
+---
+
+# In words: Attention, in three lines
+
+<div class="dl-describe">
+
+For each output step $t$, attention builds a new context vector $\mathbf{c}_t$ in three steps.
+
+1. **Score.** Compare the decoder state $\mathbf{s}_{t-1}$ with each encoder state $\mathbf{h}_i$.
+   In the example a dot product gives $e = 1.1,\ 0,\ 0$.
+2. **Softmax.** Make the scores positive and divide by their total.
+   $e^{1.1} \approx 3$, so the weights $\alpha$ are 0.6, 0.2 and 0.2. They add up to 1.
+3. **Weighted sum.** Add up the encoder states, each times its weight:
+   $\mathbf{c}_t = [0.6, 0.6]$.
+
+In the picture, the thickest line comes from $\mathbf{h}_1$, the state with the highest weight.
+All three steps are differentiable, so the alignment is learned along with every other weight.
+
+</div>
+
+<!--
+The point: score, softmax, weighted sum, with the [0.6, 0.6] example. Forty
+seconds to read; this slide is for revision.
+-->
+
+---
+layout: default
 title: The other wall — and this one attention does not fix
 ---
 
@@ -4727,6 +6169,35 @@ parallel during training.
 
 ---
 layout: default
+title: "In words: The other wall — and this one attention does not fix"
+---
+
+# In words: The other wall — and this one attention does not fix
+
+<div class="dl-describe">
+
+The picture is drawn against clock time, one tick per column.
+
+- **Top row, the RNN:** one state per tick.
+  $\mathbf{h}_2$ needs $\mathbf{h}_1$, so five words take five ticks.
+- **Bottom row, a CNN or an attention sum:** all five positions are computed in the first tick.
+
+A 200-token review means 200 matrix multiplies, one after another.
+The 32 reviews in a batch can run in parallel, but the time steps cannot.
+A faster GPU shortens each step, not the chain.
+
+Attention removed the bottleneck.
+The recurrence is still there, though: each state still waits for the one before it.
+
+</div>
+
+<!--
+The point: recurrence cannot run in parallel over time, and attention does not
+change that. Thirty seconds to read; this slide is for revision.
+-->
+
+---
+layout: default
 title: Where we got to
 ---
 
@@ -4786,6 +6257,36 @@ every encoder state with attention.
 
 The last callout names both walls. The first is fixed; the second, steps that
 must run one after another, is still open at the end of today.
+-->
+
+---
+layout: default
+title: "In words: Where we got to"
+---
+
+# In words: Where we got to
+
+<div class="dl-describe">
+
+Each glyph stands for one section of the lecture, in order.
+
+1. **Sequence:** order matters, so carry one state forward.
+2. **Loop:** the same weights are used at every step.
+3. **Fade:** the gradient shrinks over time: $0.8^{20} = 0.012$.
+4. **Gate:** the LSTM keeps an additive path, so a forget gate of 0.99 keeps $0.99^{20} = 0.82$.
+5. **Map:** words become learned vectors.
+6. **Shape:** pass `batch_first=True`, pack the padded batch, clip the gradient.
+7. **Generate:** feed outputs back in, and let the decoder attend to the source.
+
+Two walls remain in view.
+A fixed-size summary is fixed by attention.
+Steps that must run one after another are still a problem.
+
+</div>
+
+<!--
+The point: one sentence per section, and the two walls. Forty seconds to read;
+this slide is for revision.
 -->
 
 ---
@@ -4877,6 +6378,35 @@ one looks like": two silent ones, and clipping, the loud one. Each run changes
 exactly one thing against a working baseline.
 
 Practicalities — dataset, deadline, what to hand in — belong on the course page.
+-->
+
+---
+layout: default
+title: "In words: Reading, and the lab"
+---
+
+# In words: Reading, and the lab
+
+<div class="dl-describe">
+
+The three cards are the reading:
+
+- **Understanding LSTMs** (Olah, 2015): the clearest explanation of the gates. Read it before the lab.
+- **The Unreasonable Effectiveness of RNNs** (Karpathy, 2015): a character-level LSTM writing Shakespeare, C code and LaTeX.
+- **The `nn.LSTM` documentation:** the shapes, the two bias vectors and the GRU gate.
+
+The small picture is the lab.
+First train the review classifier.
+Then break it on purpose, one change at a time: no `batch_first`, no packing, no clipping.
+Each run changes one thing against a working model.
+Measure the accuracy each run loses and report it.
+You are graded on that report.
+
+</div>
+
+<!--
+The point: what to read, and what the lab asks for. Twenty seconds; skip in the
+lecture if short on time — this slide is for revision.
 -->
 
 ---

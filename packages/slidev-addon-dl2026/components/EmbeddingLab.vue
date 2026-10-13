@@ -14,7 +14,7 @@
  * do the numbers come from? They are learned, and what they learn is a geometry:
  * the two words that mean the same thing end up in the same place. The
  * coordinates here are hand-written to look like a trained table, and the readout
- * says so; a real one has 100 dimensions and no axis you could name.
+ * says so; a real one has dozens to hundreds of dimensions and no axis you could name.
  */
 import { computed, ref } from 'vue'
 import { num } from '../composables/useConvolution'
@@ -27,9 +27,9 @@ interface Word {
 }
 
 /*
- * Eight words, four dimensions, and the values chosen so the first two columns
+ * Nine words, four dimensions, and the values chosen so the first two columns
  * are readable as "sentiment" and "is a film noun". A trained table has no such
- * columns — but a student cannot see structure in eight rows of noise, and the
+ * columns — but a student cannot see structure in nine rows of noise, and the
  * structure is the point.
  */
 const VOCAB: Word[] = [
