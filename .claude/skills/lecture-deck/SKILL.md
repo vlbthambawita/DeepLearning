@@ -81,7 +81,9 @@ never does it for you. Figures go in `decks/<id>/figures/` and get a `<Citation>
 
 ## 4. Write the slides
 
-Shape of the recent decks — aim here, not at the template:
+Shape of the recent decks — aim here, not at the template. These counts are
+from before the description-slide rule: a new deck has roughly the same number
+of picture slides, plus one "In words" slide after each.
 
 | | L04 | L05 | L06 |
 |---|---|---|---|
@@ -102,7 +104,8 @@ to *read* (maths, code and speaker notes excluded):
 
 The asides held; the `default` slides did not. Hold a new deck to the earlier
 numbers — **70 words on a `default` slide, 55 in an aside, 40 under a figure** —
-and measure rather than guess:
+and measure rather than guess. The "In words" description slides have their own
+budget (60–120 words) and are left out of the `default` median:
 
 ```bash
 python3 .claude/skills/lecture-deck/slide-stats.py lecture-07
@@ -116,7 +119,8 @@ A slide that trips both is the one to fix first. It also lists every slide with
 ### A picture on every slide
 
 **Every slide carries a visual** — title, section dividers, polls, code slides
-and the end slide included. Visualisation is the main teaching tool in these
+and the end slide included (the only exception is the "In words" description
+slide that follows a picture slide — see the next section). Visualisation is the main teaching tool in these
 decks; text labels the picture, it does not replace it. A markdown table or a
 display equation is *not* a picture on its own: it is still something to read.
 What counts:
@@ -159,7 +163,67 @@ click PDF (reveal parts with `v-click` on `<g>` elements if they must build).
 python3 .claude/skills/lecture-deck/slide-stats.py lecture-07   # lists "no picture" slides
 ```
 
-The target is **zero** slides in the "no picture" list.
+The target is **zero** slides in the "no picture" list. Description slides
+(next section) are the one exception: they are text by design.
+
+### A description slide after every picture slide
+
+The picture is what the room remembers; the description is what lets a student
+*rebuild the idea from that picture* when revising alone. So **every content
+slide that carries a diagram, figure, plot, animation or widget is followed by a
+description slide**: a text slide that explains, in clear full sentences, what
+the slide before it showed and why it matters.
+
+Which slides get one:
+
+- Every `default`, `figure` and `interactive` slide with a picture — in practice,
+  every content slide, polls included (the description explains the answer).
+- **Not** `title`, `section` or `end` slides, and not a description slide itself.
+- If the picture slide is followed by a "Reading the equation: …" slide, the
+  description comes **after** that one and covers both.
+
+How to write it:
+
+- `layout: default`, heading **`# In words: <the exact heading of the slide it
+  explains>`** — the checkers recognise description slides by this prefix.
+- Wrap the body in `<div class="dl-describe">` (blank lines inside the tags).
+  The theme class sets it at the secondary size; at body size 100+ words run
+  off the canvas.
+- **Write for a student revising alone** with only the two slides in front of
+  them. Someone who missed the lecture should understand the concept from the
+  picture plus this text.
+- Cover, in this order, leaving out what does not apply:
+  1. **The point** in one sentence: what the slide before shows.
+  2. **How to read the picture**: what the boxes, arrows, axes, colours and
+     glyphs stand for, named the way they are drawn ("the orange arrow", "the
+     left-hand bar").
+  3. **What happens, step by step**, in the order the clicks or the animation
+     built it. Numbered steps when it is a process.
+  4. **The numbers**: the running example's values from the slide, and the
+     result they give.
+  5. **The takeaway**: the sentence to remember, and why it matters for what
+     comes next.
+- **60–120 words**, in 3–6 short bullets, numbered steps or short paragraphs.
+  The plain-language rules apply in full (one idea per sentence, ≤ 22 words,
+  every term explained).
+- **No clicks**: everything is visible at once, so a student can read at their
+  own pace and the PDF export shows it on one page.
+- **Nothing new.** No concept, number or symbol that is not on the slide it
+  explains (or earlier). The description must agree with that slide and its
+  notes: same names, same symbols, same numbers.
+- **Not a copy** of the slide's bullets or its speaker notes. The slide's
+  bullets are captions; the description is the full explanation. The notes say
+  how to *teach* the slide; the description says what to *remember* from it.
+- It needs no new picture. A small copy of the concept's recurring glyph
+  (`FamilyGlyph`) in a corner is welcome as a link back; do not redraw the
+  diagram.
+- Its speaker notes need only the point and the timing (e.g. "Give the room
+  30 seconds to read, then ask …"; "Skip in the lecture if short on time — this
+  slide is for revision").
+
+Plan the slide budget with this in mind: a section of 8 picture slides is about
+16 slides with its descriptions. `slide-stats.py` lists every picture slide
+with **no description** after it; the goal is zero.
 
 ### Reach for a picture before more sentences
 
@@ -280,7 +344,7 @@ Rules that hold on every slide:
   section is plenty.
 - Theme classes: `dl-callout`, `dl-card`, `dl-ledger`, `dl-tight`, `dl-rule`,
   `dl-secondary`, `dl-wrong`, `dl-prompt`, `dl-reveal`, `dl-math-sm`, `dl-math-xs`,
-  `dl-eq-legend` (a symbol legend table).
+  `dl-eq-legend` (a symbol legend table), `dl-describe` (an "In words" slide's body).
 
 ### Speaker notes: explain the slide
 
@@ -328,7 +392,8 @@ The notes must agree with the slide: the same numbers, symbols and names, and no
 claim the slide or the widget contradicts. Any concept the notes rely on has to
 be on the slide or on an earlier one, or be in the plan's *already knows* list.
 Notes cannot introduce a concept the room needs. Section and title slides need
-only items 1 and 8: what the section has to land, and how long it takes. The
+only items 1 and 8: what the section has to land, and how long it takes. So do
+"In words" description slides — the slide itself is the explanation. The
 reference is lecture 07's notes (e.g. the "Start from what the room owns" slide):
 they name the picture, describe each click and give the arithmetic.
 
@@ -466,7 +531,11 @@ once**. The build and `check` passing says nothing about whether the slides are
 11. **Widgets are part of the deck.** Their labels, notes and captions get the
    same review, and a fix to shared logic (`composables/`) needs a check that no
    other deck's numbers moved.
-12. **Verify, then look.** `build:all`, `check` light and dark, `--shots`, and
+12. **Every picture slide has its description.** Write the missing "In words"
+   slides `slide-stats.py` lists under *no description*. For each existing one,
+   check it still matches the slide before it — a slide that was reworked
+   usually leaves its description stale.
+13. **Verify, then look.** `build:all`, `check` light and dark, `--shots`, and
     eyeball every slide you changed.
 
 Record what was wrong and what changed in `TODO/summary_slideset_XX.md` under a
@@ -535,7 +604,8 @@ when the second slide adds something; say so in its notes.
 callout or answer that is visible before the build-up it concludes, a poll whose
 answer is not behind a click, code-highlight ranges past the last line (a dead
 step), a long code block with no highlight steps, `<v-clicks>` nested in a
-`v-click`, and long slides with no clicks at all.
+`v-click`, and long slides with no clicks at all. "In words" description slides
+are skipped: they have no clicks on purpose.
 
 `check:layout` then walks every click state in the browser and reports a
 **dead click** — a click after which nothing on screen changed. The usual causes
@@ -566,6 +636,8 @@ never push a tag unless asked.
 ## Pre-flight checklist
 
 - `slide-stats.py` reports **no picture: 0** — every slide shows something.
+- `slide-stats.py` reports **no description: 0** — every picture slide is
+  followed by an "In words: <heading>" slide that explains it in full sentences.
 - `slide-stats.py` reports **no notes: 0** and **thin notes: 0**. Every slide
   has a notes block, as its last element, that explains what is on screen.
 - `slide-lint.py` is clean, and `check:layout` reports no overlaps and no dead
@@ -583,7 +655,10 @@ never push a tag unless asked.
 - `$...$` inside a raw `<div>` stays literal unless blank lines separate the
   content from the tags.
 - Never write a literal `opacity="0.5"` on an SVG element — UnoCSS attributify
-  poisons it. Use `:style="{ opacity }"`.
+  poisons it. Use `:style="{ opacity }"`. The same goes for `font-size="9"` on a
+  `<tspan>` subscript: it renders huge. Use `style="font-size: 9px"`.
+- Code blocks inside a `dl-tight` container: a `white-space: nowrap` rule for
+  inline code must target `:not(pre) > code`, or the block collapses to one line.
 - Never nest `<v-clicks>` inside a `v-click` element — the children are numbered
   before their container and the clicks do nothing on screen.
 - Display maths in an `interactive` aside pushes the widget off the canvas —

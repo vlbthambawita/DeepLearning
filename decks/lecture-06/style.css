@@ -49,6 +49,6 @@
  * long enough that at body size they wrap mid-identifier in a bullet, which
  * turns a four-item list into a seven-line one. Same fix as lecture-05.
  */
-.dl-tight code {
+.dl-tight :not(pre) > code {
   white-space: nowrap;
 }

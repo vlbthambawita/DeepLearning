@@ -9,7 +9,7 @@
  * answer one", which is the actual reason for multi-head attention.
  *
  * Stop on `it`. Head 1 takes the previous word, head 2 takes the nearby nouns,
- * head 3 takes *cat* — the thing `it` refers to, seven words back — and head 4
+ * head 3 takes *cat* — the thing `it` refers to, five words back — and head 4
  * parks on the first token and contributes nothing. That last row is not a joke:
  * attention sinks on the first token are a well-replicated finding, and a
  * lecture that shows four heads all doing something tidy is teaching a fiction.
@@ -129,7 +129,7 @@ function live(i: number) {
     <template #readout>
       <template v-if="at === 6">
         <strong>it</strong> asks four questions at once: head 1 takes the word before it, head 2
-        the nearby nouns, head 3 goes back seven words to <strong>cat</strong> — what
+        the nearby nouns, head 3 goes back five words to <strong>cat</strong> — what
         <em>it</em> refers to — and head 4 parks on the first token. One softmax puts its mass in
         one place, so one head could answer only one of those.
         <span class="dl-mh__note">

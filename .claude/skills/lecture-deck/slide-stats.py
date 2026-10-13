@@ -7,7 +7,9 @@ text. Prints the slides over budget so they can become a diagram, be split, or
 move into the speaker notes, and every slide with no picture at all — the
 skill's rule is a visual on every slide, and a table or an equation does not
 count as one. It also lists slides whose speaker notes are missing or too thin
-to explain the slide (see the skill's "Speaker notes: explain the slide").
+to explain the slide (see the skill's "Speaker notes: explain the slide"),
+and every picture slide not followed by its "In words: …" description slide
+(see "A description slide after every picture slide").
 
     python3 .claude/skills/lecture-deck/slide-stats.py               # every deck
     python3 .claude/skills/lecture-deck/slide-stats.py lecture-07    # one deck
@@ -20,8 +22,23 @@ from pathlib import Path
 
 # Budgets are roughly what lectures 01-03 held before prose crept up; see the
 # skill's "Text budget" section for where the numbers come from.
-BUDGET = {"default": 70, "interactive": 55, "figure": 40, "section": 10, "title": 40, "end": 20}
-HARD = {"default": 110, "interactive": 70, "figure": 60, "section": 20, "title": 60, "end": 40}
+BUDGET = {"default": 70, "interactive": 55, "figure": 40, "section": 10, "title": 40, "end": 20,
+          "description": 120}
+HARD = {"default": 110, "interactive": 70, "figure": 60, "section": 20, "title": 60, "end": 40,
+        "description": 160}
+
+# A description slide is headed "In words: <heading of the slide it explains>".
+# It is text by design: no picture, no clicks, and its own word budget.
+DESCRIPTION_PREFIX = "in words"
+NEEDS_DESCRIPTION = {"default", "figure", "interactive"}
+
+
+def is_description(label):
+    return label.strip("\"' ").lower().startswith(DESCRIPTION_PREFIX)
+
+
+def is_reading_eq(label):
+    return label.strip("\"' ").lower().startswith("reading the equation")
 
 COMPONENT = re.compile(r"<([A-Z][A-Za-z0-9]+)[\s/>]")
 YAML_LINE = re.compile(r"^\s*(?:[\w-]+\s*:|-\s)")
@@ -118,12 +135,12 @@ def clicks(body):
     return n
 
 
-def notes_problem(layout, body):
+def notes_problem(layout, body, label=""):
     """None if the notes are fine, else a short reason."""
     text = notes(body)
     if text is None:
         return "none"
-    if layout in NOTES_EXEMPT:
+    if layout in NOTES_EXEMPT or is_description(label):
         return None
     words = len(text.split())
     if words < NOTES_MIN:
@@ -139,22 +156,31 @@ def report(deck, show_all):
         print(f"  no slides.md for {deck}")
         return
 
-    rows, by_layout, bare, unnoted, thin = [], {}, [], [], []
-    for n, (layout, label, body) in enumerate(slides(path), start=1):
+    parsed = list(slides(path))
+    rows, by_layout, bare, unnoted, thin, undescribed = [], {}, [], [], [], []
+    for n, (layout, label, body) in enumerate(parsed, start=1):
         words = prose_words(body)
         parts = sorted(set(COMPONENT.findall(body)) - {"Citation"})
-        by_layout.setdefault(layout, []).append(words)
-        rows.append((n, layout, label, words, parts, is_visual(body)))
-        if not has_picture(body):
+        kind = "description" if is_description(label) else layout
+        by_layout.setdefault(kind, []).append(words)
+        rows.append((n, kind, label, words, parts, is_visual(body) or kind == "description"))
+        if kind != "description" and not has_picture(body):
             bare.append((n, layout, label))
-        problem = notes_problem(layout, body)
+        if kind in NEEDS_DESCRIPTION and has_picture(body) and not is_reading_eq(label):
+            # The description follows the slide, or the "Reading the equation" slide after it.
+            k = n
+            if k < len(parsed) and is_reading_eq(parsed[k][1]):
+                k += 1
+            if not (k < len(parsed) and is_description(parsed[k][1])):
+                undescribed.append((n, layout, label))
+        problem = notes_problem(layout, body, label)
         if problem == "none":
             unnoted.append((n, layout, label))
         elif problem:
             thin.append((n, layout, label, problem))
 
     print(f"\n{deck}  —  {len(rows)} slides")
-    for layout in ("default", "interactive", "figure"):
+    for layout in ("default", "interactive", "figure", "description"):
         v = by_layout.get(layout)
         if v:
             over = sum(1 for w in v if w > BUDGET[layout])
@@ -166,6 +192,10 @@ def report(deck, show_all):
 
     print(f"  no picture: {len(bare)}")
     for n, layout, label in bare:
+        print(f"      {n:3d} {layout:12s} {label}")
+
+    print(f"  no description: {len(undescribed)}")
+    for n, layout, label in undescribed:
         print(f"      {n:3d} {layout:12s} {label}")
 
     print(f"  no notes: {len(unnoted)}")

@@ -196,6 +196,26 @@
 }
 
 /*
+ * The "In words" description slide that follows every picture slide: up to
+ * ~120 words of full sentences, read at the student's own pace. At body size
+ * that runs off the canvas, so it is set at the secondary size with tighter
+ * spacing — still larger than any SVG label.
+ */
+.dl-describe {
+  font-size: 1.15rem;
+  line-height: 1.45;
+  max-width: 52rem;
+}
+
+.dl-describe p {
+  margin: 0.4rem 0;
+}
+
+.dl-describe li {
+  margin: 0.22rem 0;
+}
+
+/*
  * A table dense enough that the theme's row padding would run it off the canvas.
  * Lectures 05 and 06 both have several — padded-batch ids, LSTM/GRU comparison,
  * shape ledgers, the parameter table, the scale-over-time table. Tightening the

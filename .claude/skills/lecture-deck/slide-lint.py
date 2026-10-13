@@ -35,6 +35,7 @@ _spec = importlib.util.spec_from_file_location("slide_stats", HERE / "slide-stat
 _stats = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(_stats)
 slides = _stats.slides
+is_description = _stats.is_description
 
 # --- readability ------------------------------------------------------------
 
@@ -258,6 +259,9 @@ def dup_checks(deck, raw):
     for i, a in enumerate(ids):
         for b in ids[i + 1:]:
             A, B = words[a], words[b]
+            # An "In words" slide restates the slide it explains; that overlap is the point.
+            if b - a <= 2 and is_description(deck[b - 1][1]):
+                continue
             if len(A) > 15 and len(B) > 15:
                 j = len(A & B) / len(A | B)
                 if j > 0.55:
@@ -277,6 +281,8 @@ def dup_checks(deck, raw):
 def click_checks(deck):
     rows = []
     for n, (layout, label, body) in enumerate(deck, start=1):
+        if is_description(label):
+            continue                      # read at the student's own pace: no clicks by design
         b = re.sub(r"<!--.*?-->", " ", body, flags=re.S)
         code = re.findall(r"```(\w+)?\s*(\{[^}\n]*\})?[^\n]*\n(.*?)```", b, flags=re.S)
         stripped = re.sub(r"```.*?```", " ", b, flags=re.S)
