@@ -59,7 +59,7 @@ function next() {
         <span v-for="w in SOURCE" :key="w" class="dl-dec__tok is-src">{{ w }}</span>
         <span class="dl-dec__label ml-3">output so far</span>
         <span class="dl-dec__tok is-start">⟨start⟩</span>
-        <span v-for="(w, t) in written" :key="t" class="dl-dec__tok" :class="{ 'is-wrong': w !== VOCAB6[TARGET[t]] }">{{ w }}</span>
+        <span v-for="(w, t) in written" :key="t" class="dl-dec__tok" :class="{ 'is-wrong': w !== VOCAB6[TARGET[t]], 'is-new': t === written.length - 1 }">{{ w }}</span>
       </div>
 
       <div class="dl-dec__chart">
@@ -143,9 +143,26 @@ function next() {
   font-size: 0.86rem;
 }
 
+.dl-dec__tok {
+  border-color: var(--dl-dec);
+  background: color-mix(in srgb, var(--dl-dec) 12%, var(--dl-bg));
+}
+
 .dl-dec__tok.is-src {
-  border-color: var(--dl-border);
-  background: var(--dl-surface);
+  border-color: var(--dl-enc);
+  background: color-mix(in srgb, var(--dl-enc) 12%, var(--dl-bg));
+}
+
+/* The newest word drops in, so the room sees it being appended. */
+@media (prefers-reduced-motion: no-preference) {
+  .dl-dec__tok.is-new {
+    animation: dl-dec-in 0.5s ease-out both;
+  }
+}
+
+@keyframes dl-dec-in {
+  from { transform: translateY(-0.6rem); opacity: 0; }
+  to { transform: none; opacity: 1; }
 }
 
 .dl-dec__tok.is-start {

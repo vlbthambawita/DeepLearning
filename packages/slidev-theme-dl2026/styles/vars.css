@@ -28,6 +28,19 @@
   --dl-fs-body: 1.5rem;
   --dl-fs-secondary: 1.17rem;
   --dl-fs-citation: 0.85rem;
+
+  /*
+   * Role colours for diagrams that need more than one accent: query, key and
+   * value; encoder and decoder; position. One colour per role, the same on
+   * every slide, so a purple box always means "a query". Each passes 4.5:1 as
+   * text on --dl-bg. Soft fills are mixed from these in diagram.css.
+   */
+  --dl-q: #6a3fd6;
+  --dl-k: #c25a00;
+  --dl-v: #1565c0;
+  --dl-enc: #2e7d32;
+  --dl-dec: #ad1457;
+  --dl-pos: #8a6100;
 }
 
 html.dark {
@@ -43,4 +56,10 @@ html.dark {
   --dl-danger: #ff7b72;
   --dl-table-header: #1c2530;
   --dl-code-bg: #161b22;
+  --dl-q: #b69cff;
+  --dl-k: #ffab5e;
+  --dl-v: #74b0ff;
+  --dl-enc: #6fd59a;
+  --dl-dec: #f584b5;
+  --dl-pos: #f2c94c;
 }

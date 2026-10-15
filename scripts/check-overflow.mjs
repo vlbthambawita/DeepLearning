@@ -26,6 +26,7 @@
  *   node scripts/check-overflow.mjs lecture-04 --dark
  *   node scripts/check-overflow.mjs lecture-04 --class    # the class cut
  *   node scripts/check-overflow.mjs --shots out/          # save a PNG per slide
+ *   node scripts/check-overflow.mjs --shots out/ --motion # with animations running
  *
  * Exits non-zero if anything is clipped, so it can gate a release.
  */
@@ -65,6 +66,8 @@ const page = await browser.newPage({
   // 1.2x the theme's 980x551 canvas, so text is measured at a realistic size.
   viewport: { width: 1176, height: 662 },
   colorScheme: dark ? 'dark' : 'light',
+  // Animations off, so shots are stable; --motion keeps them (to eyeball dots).
+  reducedMotion: args.includes('--motion') ? 'no-preference' : 'reduce',
 })
 
 /**

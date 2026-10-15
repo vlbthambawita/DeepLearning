@@ -188,26 +188,37 @@ title: A black box that translates
     <marker id="tv2s0-box" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
       <path class="dl-dg-head" d="M0 0 L7 3.5 L0 7 z" />
     </marker>
+    <marker id="tv2s0-box-enc" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+      <path class="dl-dg-head is-enc" d="M0 0 L7 3.5 L0 7 z" />
+    </marker>
+    <marker id="tv2s0-box-dec" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+      <path class="dl-dg-head is-dec" d="M0 0 L7 3.5 L0 7 z" />
+    </marker>
   </defs>
-  <text class="dl-dg-lab is-sm" x="70" y="58" text-anchor="middle">je suis étudiant</text>
-  <path class="dl-dg-arrow" marker-end="url(#tv2s0-box)" d="M140 54 H200" />
+  <text class="dl-dg-lab is-sm is-enc" x="70" y="58" text-anchor="middle">je suis étudiant</text>
+  <path class="dl-dg-arrow is-enc dl-dg-flow" marker-end="url(#tv2s0-box-enc)" d="M140 54 H200" />
+  <FlowDot path="M140 54 H200" role="enc" :dur="1.2" />
   <rect class="dl-dg-box is-accent" x="206" y="22" width="248" height="64" rx="8" />
   <text class="dl-dg-in" x="330" y="59" text-anchor="middle">TRANSFORMER</text>
-  <path class="dl-dg-arrow" marker-end="url(#tv2s0-box)" d="M454 54 H514" />
-  <text class="dl-dg-lab is-sm" x="588" y="58" text-anchor="middle">i am a student</text>
+  <path class="dl-dg-arrow is-dec dl-dg-flow" marker-end="url(#tv2s0-box-dec)" d="M454 54 H514" />
+  <FlowDot path="M454 54 H514" role="dec" :dur="1.2" :delay="0.6" />
+  <text class="dl-dg-lab is-sm is-dec" x="588" y="58" text-anchor="middle">i am a student</text>
   <g v-click>
     <line class="dl-dg-split" x1="10" y1="108" x2="650" y2="108" />
     <text class="dl-dg-small" x="330" y="128" text-anchor="middle">open the box</text>
     <rect class="dl-dg-box" x="206" y="144" width="248" height="96" rx="8" />
-    <rect class="dl-dg-box is-accent" x="222" y="166" width="96" height="56" rx="5" />
-    <text class="dl-dg-in" x="270" y="199" text-anchor="middle">ENCODERS</text>
-    <rect class="dl-dg-box is-accent" x="342" y="166" width="96" height="56" rx="5" />
-    <text class="dl-dg-in" x="390" y="199" text-anchor="middle">DECODERS</text>
-    <path class="dl-dg-arrow" marker-end="url(#tv2s0-box)" d="M318 194 H340" />
-    <text class="dl-dg-lab is-sm" x="70" y="198" text-anchor="middle">je suis étudiant</text>
-    <path class="dl-dg-arrow" marker-end="url(#tv2s0-box)" d="M140 194 H220" />
-    <path class="dl-dg-arrow" marker-end="url(#tv2s0-box)" d="M438 194 H514" />
-    <text class="dl-dg-lab is-sm" x="588" y="198" text-anchor="middle">i am a student</text>
+    <rect class="dl-dg-box is-enc" x="222" y="166" width="96" height="56" rx="5" />
+    <text class="dl-dg-in is-enc" x="270" y="199" text-anchor="middle">ENCODERS</text>
+    <rect class="dl-dg-box is-dec" x="342" y="166" width="96" height="56" rx="5" />
+    <text class="dl-dg-in is-dec" x="390" y="199" text-anchor="middle">DECODERS</text>
+    <path class="dl-dg-arrow is-enc dl-dg-flow" marker-end="url(#tv2s0-box-enc)" d="M318 194 H340" />
+    <text class="dl-dg-lab is-sm is-enc" x="70" y="198" text-anchor="middle">je suis étudiant</text>
+    <path class="dl-dg-arrow is-enc dl-dg-flow" marker-end="url(#tv2s0-box-enc)" d="M140 194 H220" />
+    <FlowDot path="M140 194 H220" role="enc" :dur="1.2" />
+    <FlowDot path="M318 194 H340" role="enc" :dur="0.8" />
+    <path class="dl-dg-arrow is-dec dl-dg-flow" marker-end="url(#tv2s0-box-dec)" d="M438 194 H514" />
+    <FlowDot path="M438 194 H514" role="dec" :dur="1.2" :delay="0.6" />
+    <text class="dl-dg-lab is-sm is-dec" x="588" y="198" text-anchor="middle">i am a student</text>
   </g>
 </svg>
 </div>
@@ -220,6 +231,10 @@ title: A black box that translates
 </v-clicks>
 
 <!--
+Colours used all through the deck: green is the encoder side, magenta the decoder
+side; purple a query, orange a key, blue a value, gold a position. The moving
+dots and marching dashes show which way the data goes.
+
 The point: start from the outside. In machine translation the model is a black
 box: a sentence in one language goes in, the same sentence in another language
 comes out.
@@ -256,6 +271,8 @@ title: "In words: A black box that translates"
 - The encoder reads all of *je suis étudiant* before anything is written.
 - The decoder produces the English words. It uses the encoder's result, which
   is the arrow between the two parts.
+- Green marks the encoder side and magenta the decoder side, on every slide.
+  The moving dots show the sentence travelling through.
 - Everything in this lecture is a closer look at one of these two parts.
 
 </div>
@@ -279,23 +296,25 @@ title: Six encoders, six decoders
 <svg viewBox="0 0 380 300" class="dl-diagram" role="img" aria-label="Six encoder boxes stacked on the left, six decoder boxes stacked on the right; the top encoder's output feeds every decoder">
   <defs>
     <marker id="tv2s0-stack" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
-      <path class="dl-dg-head" d="M0 0 L7 3.5 L0 7 z" />
+      <path class="dl-dg-head is-enc" d="M0 0 L7 3.5 L0 7 z" />
     </marker>
   </defs>
   <g v-for="k in 6" :key="`e${k}`">
-    <rect class="dl-dg-box" x="30" :y="258 - k * 38" width="120" height="28" rx="4" />
+    <rect class="dl-dg-box is-enc" x="30" :y="258 - k * 38" width="120" height="28" rx="4" />
     <text class="dl-dg-small" x="90" :y="277 - k * 38" text-anchor="middle">encoder {{ k }}</text>
   </g>
   <g v-for="k in 6" :key="`d${k}`">
-    <rect class="dl-dg-box is-accent" x="230" :y="258 - k * 38" width="120" height="28" rx="4" />
+    <rect class="dl-dg-box is-dec" x="230" :y="258 - k * 38" width="120" height="28" rx="4" />
     <text class="dl-dg-small" x="290" :y="277 - k * 38" text-anchor="middle">decoder {{ k }}</text>
   </g>
-  <text class="dl-dg-small" x="90" y="292" text-anchor="middle">je suis étudiant ↑</text>
+  <text class="dl-dg-small is-enc" x="90" y="292" text-anchor="middle">je suis étudiant ↑</text>
+  <FlowDot v-for="d in 3" :key="`fd${d}`" path="M42 270 V26" role="enc" :dur="3" :delay="d"  :r="4" />
   <text class="dl-dg-small" x="290" y="12" text-anchor="middle">↑ i am a student</text>
   <g v-click>
-    <path class="dl-dg-arrow" d="M150 34 H190 V244" />
-    <path v-for="k in 6" :key="`a${k}`" class="dl-dg-arrow" marker-end="url(#tv2s0-stack)" :d="`M190 ${244 - (k - 1) * 38} H228`" />
-    <text class="dl-dg-small is-good" x="196" y="292">top encoder → every decoder</text>
+    <path class="dl-dg-arrow is-enc dl-dg-flow" d="M150 34 H190 V244" />
+    <path v-for="k in 6" :key="`a${k}`" class="dl-dg-arrow is-enc dl-dg-flow" marker-end="url(#tv2s0-stack)" :d="`M190 ${244 - (k - 1) * 38} H228`" />
+    <FlowDot v-for="d in 3" :key="`wd${d}`" path="M150 34 H190 V244" role="enc" :dur="2.4" :delay="d * 0.8" />
+    <text class="dl-dg-small is-enc" x="196" y="292">top encoder → every decoder</text>
   </g>
 </svg>
 
@@ -357,8 +376,8 @@ title: "In words: Six encoders, six decoders"
   The same is true of the decoders.
 - The input sentence enters the bottom encoder. Each encoder passes its result
   to the one above.
-- The wire on the right of the encoders carries the top encoder's output to
-  **every** decoder.
+- The green wire on the right of the encoders carries the top encoder's output to
+  **every** decoder. The green dots travel along it.
 - The paper uses six of each. That number is a design choice; other models use
   more or fewer.
 
@@ -381,33 +400,43 @@ title: Inside one encoder, inside one decoder
 <svg viewBox="0 0 640 250" class="dl-diagram" role="img" aria-label="An encoder holds self-attention under a feed-forward network; a decoder holds self-attention, then encoder-decoder attention, then a feed-forward network">
   <defs>
     <marker id="tv2s0-inside" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
-      <path class="dl-dg-head" d="M0 0 L7 3.5 L0 7 z" />
+      <path class="dl-dg-head is-enc" d="M0 0 L7 3.5 L0 7 z" />
+    </marker>
+    <marker id="tv2s0-inside-dec" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+      <path class="dl-dg-head is-dec" d="M0 0 L7 3.5 L0 7 z" />
     </marker>
   </defs>
-  <rect class="dl-dg-box" x="40" y="20" width="230" height="200" rx="8" />
-  <text class="dl-dg-small" x="155" y="40" text-anchor="middle">ENCODER</text>
+  <rect class="dl-dg-box is-enc" x="40" y="20" width="230" height="200" rx="8" />
+  <text class="dl-dg-small is-enc" x="155" y="40" text-anchor="middle">ENCODER</text>
   <rect class="dl-dg-box is-accent" x="65" y="60" width="180" height="44" rx="5" />
   <text class="dl-dg-in" x="155" y="87" text-anchor="middle">Feed-forward</text>
   <rect class="dl-dg-box is-accent" x="65" y="150" width="180" height="44" rx="5" />
   <text class="dl-dg-in" x="155" y="177" text-anchor="middle">Self-attention</text>
-  <path class="dl-dg-arrow" marker-end="url(#tv2s0-inside)" d="M155 150 V106" />
-  <path class="dl-dg-arrow" marker-end="url(#tv2s0-inside)" d="M155 244 V196" />
-  <path class="dl-dg-arrow" marker-end="url(#tv2s0-inside)" d="M155 60 V4" />
+  <path class="dl-dg-arrow is-enc dl-dg-flow" marker-end="url(#tv2s0-inside)" d="M155 150 V106" />
+  <path class="dl-dg-arrow is-enc dl-dg-flow" marker-end="url(#tv2s0-inside)" d="M155 244 V196" />
+  <path class="dl-dg-arrow is-enc dl-dg-flow" marker-end="url(#tv2s0-inside)" d="M155 60 V4" />
+  <FlowDot path="M155 244 V198" role="enc" :dur="1" />
+  <FlowDot path="M155 150 V108" role="enc" :dur="1" :delay="0.33" />
+  <FlowDot path="M155 60 V6" role="enc" :dur="1" :delay="0.66" />
   <g v-click>
-    <rect class="dl-dg-box" x="370" y="10" width="230" height="226" rx="8" />
-    <text class="dl-dg-small" x="485" y="28" text-anchor="middle">DECODER</text>
+    <rect class="dl-dg-box is-dec" x="370" y="10" width="230" height="226" rx="8" />
+    <text class="dl-dg-small is-dec" x="485" y="28" text-anchor="middle">DECODER</text>
     <rect class="dl-dg-box is-accent" x="395" y="40" width="180" height="40" rx="5" />
     <text class="dl-dg-in" x="485" y="65" text-anchor="middle">Feed-forward</text>
     <rect class="dl-dg-box is-accent" x="395" y="106" width="180" height="40" rx="5" />
     <text class="dl-dg-in" x="485" y="131" text-anchor="middle">Encoder–decoder attention</text>
     <rect class="dl-dg-box is-accent" x="395" y="172" width="180" height="40" rx="5" />
     <text class="dl-dg-in" x="485" y="197" text-anchor="middle">Self-attention</text>
-    <path class="dl-dg-arrow" marker-end="url(#tv2s0-inside)" d="M485 172 V148" />
-    <path class="dl-dg-arrow" marker-end="url(#tv2s0-inside)" d="M485 106 V82" />
-    <path class="dl-dg-arrow" marker-end="url(#tv2s0-inside)" d="M485 244 V214" />
-    <path class="dl-dg-loss" marker-end="url(#tv2s0-inside)" d="M272 126 H392" />
-    <text class="dl-dg-small" x="320" y="114" text-anchor="middle">from the</text>
-    <text class="dl-dg-small" x="320" y="144" text-anchor="middle">top encoder</text>
+    <path class="dl-dg-arrow is-dec dl-dg-flow" marker-end="url(#tv2s0-inside-dec)" d="M485 172 V148" />
+    <path class="dl-dg-arrow is-dec dl-dg-flow" marker-end="url(#tv2s0-inside-dec)" d="M485 106 V82" />
+    <path class="dl-dg-arrow is-dec dl-dg-flow" marker-end="url(#tv2s0-inside-dec)" d="M485 244 V214" />
+    <FlowDot path="M485 244 V216" role="dec" :dur="1" />
+    <FlowDot path="M485 172 V150" role="dec" :dur="1" :delay="0.33" />
+    <FlowDot path="M485 106 V84" role="dec" :dur="1" :delay="0.66" />
+    <path class="dl-dg-arrow is-enc dl-dg-flow" marker-end="url(#tv2s0-inside)" d="M272 126 H392" />
+    <FlowDot path="M272 126 H390" role="enc" :dur="1.4" />
+    <text class="dl-dg-small is-enc" x="320" y="114" text-anchor="middle">from the</text>
+    <text class="dl-dg-small is-enc" x="320" y="144" text-anchor="middle">top encoder</text>
   </g>
 </svg>
 </div>
@@ -455,8 +484,8 @@ title: "In words: Inside one encoder, inside one decoder"
   **self-attention**, then through a **feed-forward network**, and leaves at the top.
 - The right box is one decoder. It has the same two parts, plus
   **encoder–decoder attention** between them.
-- The dashed arrow shows where that middle part reads from: the output of the top
-  encoder.
+- The green arrow shows where that middle part reads from: the output of the
+  top encoder. The moving dots show data climbing each box.
 - Self-attention is the part where each word looks at the other words.
 - The feed-forward network is a small MLP (multilayer perceptron). It works on
   each word on its own.
@@ -482,7 +511,7 @@ title: "Refresher: a word becomes a vector"
 <svg viewBox="0 0 400 230" class="dl-diagram" role="img" aria-label="An embedding table with one row per vocabulary word; looking up a word returns its row, a vector of numbers">
   <defs>
     <marker id="tv2s0-emb" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
-      <path class="dl-dg-head" d="M0 0 L7 3.5 L0 7 z" />
+      <path class="dl-dg-head is-accent" d="M0 0 L7 3.5 L0 7 z" />
     </marker>
   </defs>
   <text class="dl-dg-small" x="150" y="14" text-anchor="middle">embedding table (learned)</text>
@@ -491,7 +520,9 @@ title: "Refresher: a word becomes a vector"
     <rect v-for="c in 4" :key="c" :class="r === 4 ? 'dl-dg-box is-accent' : 'dl-dg-box'" :x="80 + (c - 1) * 34" :y="28 + r * 30" width="30" height="22" rx="2" />
   </g>
   <g v-click>
-    <path class="dl-dg-arrow" marker-end="url(#tv2s0-emb)" d="M220 159 H262" />
+    <rect class="dl-dg-fill dl-dg-pulse" x="76" y="144" width="140" height="30" rx="4" style="fill: none" />
+    <path class="dl-dg-arrow is-accent dl-dg-flow" marker-end="url(#tv2s0-emb)" d="M220 159 H262" />
+    <FlowDot path="M220 159 H260" :dur="0.9" />
     <rect v-for="(n, c) in [1, 0, 1, 0]" :key="`x${c}`" class="dl-dg-box is-accent" :x="270 + c * 30" y="146" width="26" height="26" rx="2" />
     <text v-for="(n, c) in [1, 0, 1, 0]" :key="`t${c}`" class="dl-dg-small" :x="283 + c * 30" y="164" text-anchor="middle">{{ n }}</text>
     <text class="dl-dg-lab is-sm" x="330" y="196" text-anchor="middle">x₁ for "Thinking"</text>
@@ -577,22 +608,27 @@ title: A list of vectors flows up the stack
 <svg viewBox="0 0 640 250" class="dl-diagram" role="img" aria-label="Three word vectors enter an encoder; in self-attention the three paths are joined by lines; in the feed-forward network each path has its own copy of the same network">
   <defs>
     <marker id="tv2s0-flow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
-      <path class="dl-dg-head" d="M0 0 L7 3.5 L0 7 z" />
+      <path class="dl-dg-head is-enc" d="M0 0 L7 3.5 L0 7 z" />
     </marker>
   </defs>
   <g v-for="(w, i) in ['je', 'suis', 'étudiant']" :key="w">
     <text class="dl-dg-small" :x="150 + i * 170" y="244" text-anchor="middle">{{ w }}</text>
     <rect v-for="c in 4" :key="c" class="dl-dg-box is-accent" :x="114 + i * 170 + (c - 1) * 18" y="208" width="16" height="16" rx="2" />
-    <path class="dl-dg-arrow" marker-end="url(#tv2s0-flow)" :d="`M${150 + i * 170} 206 V176`" />
-    <path class="dl-dg-arrow" marker-end="url(#tv2s0-flow)" :d="`M${150 + i * 170} 128 V96`" />
-    <path class="dl-dg-arrow" marker-end="url(#tv2s0-flow)" :d="`M${150 + i * 170} 52 V18`" />
+    <path class="dl-dg-arrow is-enc dl-dg-flow" marker-end="url(#tv2s0-flow)" :d="`M${150 + i * 170} 206 V176`" />
+    <path class="dl-dg-arrow is-enc dl-dg-flow" marker-end="url(#tv2s0-flow)" :d="`M${150 + i * 170} 128 V96`" />
+    <path class="dl-dg-arrow is-enc dl-dg-flow" marker-end="url(#tv2s0-flow)" :d="`M${150 + i * 170} 52 V18`" />
+    <FlowDot :path="`M${150 + i * 170} 206 V178`" role="enc" :dur="0.9" :delay="i * 0.3" />
+    <FlowDot :path="`M${150 + i * 170} 128 V98`" role="enc" :dur="0.9" :delay="0.3 + i * 0.3" />
+    <FlowDot :path="`M${150 + i * 170} 52 V20`" role="enc" :dur="0.9" :delay="0.6 + i * 0.3" />
   </g>
   <rect class="dl-dg-box" x="90" y="130" width="460" height="44" rx="6" />
   <text class="dl-dg-small" x="566" y="156">self-attention</text>
   <g v-click>
-    <path class="dl-dg-line" d="M150 152 L320 152 L490 152" />
-    <path class="dl-dg-line" d="M150 152 C 220 136, 420 136, 490 152" />
-    <text class="dl-dg-small is-good" x="320" y="146" text-anchor="middle">paths depend on each other</text>
+    <path class="dl-dg-line dl-dg-flow is-slow" d="M150 152 L320 152 L490 152" />
+    <path class="dl-dg-line dl-dg-flow is-slow" d="M150 152 C 220 136, 420 136, 490 152" />
+    <FlowDot path="M150 152 L320 152 L490 152 L320 152 Z" :dur="3" :r="4" />
+    <FlowDot path="M490 152 C 420 136, 220 136, 150 152 C 220 136, 420 136, 490 152" :dur="3.4" :r="4" />
+    <text class="dl-dg-small is-good" x="320" y="169" text-anchor="middle">paths depend on each other</text>
   </g>
   <g v-for="i in 3" :key="`f${i}`">
     <rect class="dl-dg-box" :x="100 + (i - 1) * 170" y="54" width="100" height="40" rx="5" />
@@ -650,7 +686,7 @@ title: "In words: A list of vectors flows up the stack"
 <div class="dl-describe">
 
 - Each word of *je suis étudiant* becomes a vector at the bottom. The three
-  vectors climb on three separate paths.
+  vectors climb on three separate paths, shown by the moving dots.
 - The wide box is **self-attention**. The lines inside it join the paths: each
   word's new vector depends on the other words.
 - The three small boxes are copies of one **feed-forward network**. Each word
@@ -774,21 +810,28 @@ title: "Step 1: three vectors for every word"
 
 <div class="mt-1 flex justify-center">
 <svg viewBox="0 0 660 216" class="dl-diagram" role="img" aria-label="The embedding x1 = [1,0,1,0] times three learned matrices gives the query q1 = [1,1], the key k1 = [2,2] and the value v1 = [2,0]">
+  <defs>
+    <marker v-for="c in ['q', 'k', 'v']" :id="`tv2s1-qkv-${c}`" :key="c" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+      <path :class="`dl-dg-head is-${c}`" d="M0 0 L7 3.5 L0 7 z" />
+    </marker>
+  </defs>
   <text class="dl-dg-small" x="10" y="14">"Thinking"</text>
   <rect v-for="(n, c) in [1, 0, 1, 0]" :key="`x${c}`" class="dl-dg-box" :x="10 + c * 28" y="86" width="24" height="24" rx="2" />
   <text v-for="(n, c) in [1, 0, 1, 0]" :key="`xt${c}`" class="dl-dg-small" :x="22 + c * 28" y="102" text-anchor="middle">{{ n }}</text>
   <text class="dl-dg-lab is-sm" x="62" y="132" text-anchor="middle">x₁</text>
-  <g v-for="(m, r) in [{ n: 'W_Q', w: [[1,0],[0,1],[0,1],[0,0]], out: [1, 1], o: 'q₁', role: 'query: what I look for' }, { n: 'W_K', w: [[1,1],[1,0],[1,1],[0,0]], out: [2, 2], o: 'k₁', role: 'key: what I offer to match' }, { n: 'W_V', w: [[2,0],[0,2],[0,0],[0,0]], out: [2, 0], o: 'v₁', role: 'value: what I hand over' }]" :key="m.n" v-click>
-    <text class="dl-dg-small" x="140" :y="30 + r * 66">× {{ m.n }}</text>
+  <g v-for="(m, r) in [{ n: 'W_Q', c: 'q', w: [[1,0],[0,1],[0,1],[0,0]], out: [1, 1], o: 'q₁', role: 'query: what I look for' }, { n: 'W_K', c: 'k', w: [[1,1],[1,0],[1,1],[0,0]], out: [2, 2], o: 'k₁', role: 'key: what I offer to match' }, { n: 'W_V', c: 'v', w: [[2,0],[0,2],[0,0],[0,0]], out: [2, 0], o: 'v₁', role: 'value: what I hand over' }]" :key="m.n" v-click>
+    <path :class="`dl-dg-arrow is-${m.c} dl-dg-flow`" :marker-end="`url(#tv2s1-qkv-${m.c})`" :d="`M118 98 C 126 98, 122 ${26 + r * 66}, 134 ${26 + r * 66}`" />
+    <FlowDot :path="`M118 98 C 126 98, 122 ${26 + r * 66}, 134 ${26 + r * 66}`" :role="m.c" :dur="1.1" :r="3.5" />
+    <text :class="`dl-dg-small is-${m.c}`" x="140" :y="30 + r * 66">× {{ m.n }}</text>
     <g v-for="(row, i) in m.w" :key="i">
       <text v-for="(n, j) in row" :key="j" class="dl-dg-small" :x="196 + j * 18" :y="18 + r * 66 + i * 13" text-anchor="middle">{{ n }}</text>
     </g>
     <rect class="dl-dg-box" x="184" :y="6 + r * 66" width="42" height="54" rx="2" style="fill: none" />
     <text class="dl-dg-small" x="248" :y="36 + r * 66" text-anchor="middle">=</text>
-    <rect v-for="(n, c) in m.out" :key="`o${c}`" class="dl-dg-box is-accent" :x="268 + c * 28" :y="20 + r * 66" width="24" height="24" rx="2" />
+    <rect v-for="(n, c) in m.out" :key="`o${c}`" :class="`dl-dg-box is-${m.c}`" :x="268 + c * 28" :y="20 + r * 66" width="24" height="24" rx="2" />
     <text v-for="(n, c) in m.out" :key="`ot${c}`" class="dl-dg-small" :x="280 + c * 28" :y="36 + r * 66" text-anchor="middle">{{ n }}</text>
-    <text class="dl-dg-lab is-sm" x="334" :y="37 + r * 66">{{ m.o }}</text>
-    <text class="dl-dg-small" x="370" :y="37 + r * 66">{{ m.role }}</text>
+    <text :class="`dl-dg-lab is-sm is-${m.c}`" x="334" :y="37 + r * 66">{{ m.o }}</text>
+    <text :class="`dl-dg-small is-${m.c}`" x="370" :y="37 + r * 66">{{ m.role }}</text>
   </g>
 </svg>
 </div>
@@ -816,6 +859,9 @@ what this word offers, so that other words' queries can match it.
 
 Click 3: x_1 times W_V gives the value v_1 = [2, 0] + [0, 0] = [2, 0]. The value
 is what this word hands over once it has been chosen.
+
+The colours return on every later slide: purple is always a query, orange a key,
+blue a value. The dots run from x_1 into each matrix.
 
 Click 4: the callout. The three matrices are learned in training and are shared
 by every word in the sentence. They shrink the vector: 4 to 2 in the toy, 512 to
@@ -847,9 +893,9 @@ title: "In words: Step 1: three vectors for every word"
 - Every word makes three new vectors from its embedding $\mathbf{x}$.
 - On the left is *Thinking*'s toy embedding, $\mathbf{x}_1 = [1, 0, 1, 0]$. Each row
   multiplies it by one learned matrix.
-- $\mathbf{x}_1 W_Q = \mathbf{q}_1 = [1, 1]$, the **query**: what this word is looking for.
-- $\mathbf{x}_1 W_K = \mathbf{k}_1 = [2, 2]$, the **key**: what it offers to be matched.
-- $\mathbf{x}_1 W_V = \mathbf{v}_1 = [2, 0]$, the **value**: what it hands over.
+- $\mathbf{x}_1 W_Q = \mathbf{q}_1 = [1, 1]$, the **query** (purple): what this word is looking for.
+- $\mathbf{x}_1 W_K = \mathbf{k}_1 = [2, 2]$, the **key** (orange): what it offers to be matched.
+- $\mathbf{x}_1 W_V = \mathbf{v}_1 = [2, 0]$, the **value** (blue): what it hands over.
 - *Machines*, $\mathbf{x}_2 = [0, 1, 0, 1]$, gives $\mathbf{q}_2 = [0, 1]$,
   $\mathbf{k}_2 = [1, 0]$, $\mathbf{v}_2 = [0, 2]$.
 - The same three matrices serve every word. They map 4 numbers to 2 (paper: 512 to 64).
@@ -874,19 +920,21 @@ title: "Step 2: score every word"
 
 <svg viewBox="0 0 380 200" class="dl-diagram" role="img" aria-label="Thinking's query [1,1] dotted with Thinking's key [2,2] gives 4; with Machines' key [1,0] gives 1">
   <text class="dl-dg-small" x="10" y="16">asking: "Thinking"</text>
-  <rect class="dl-dg-box is-accent" x="10" y="80" width="70" height="36" rx="4" />
-  <text class="dl-dg-in" x="45" y="103" text-anchor="middle">q₁ [1, 1]</text>
+  <rect class="dl-dg-box is-q dl-dg-pulse" x="10" y="80" width="70" height="36" rx="4" />
+  <text class="dl-dg-in is-q" x="45" y="103" text-anchor="middle">q₁ [1, 1]</text>
   <g v-click>
-    <path class="dl-dg-line" d="M82 92 L180 52" />
-    <rect class="dl-dg-box" x="182" y="34" width="86" height="36" rx="4" />
-    <text class="dl-dg-small" x="225" y="56" text-anchor="middle">k₁ [2, 2]</text>
+    <path class="dl-dg-line is-q dl-dg-flow" d="M82 92 L180 52" />
+    <FlowDot path="M82 92 L180 52" role="q" :dur="1.2" />
+    <rect class="dl-dg-box is-k" x="182" y="34" width="86" height="36" rx="4" />
+    <text class="dl-dg-small is-k" x="225" y="56" text-anchor="middle">k₁ [2, 2]</text>
     <text class="dl-dg-lab is-sm" x="290" y="46">1·2 + 1·2</text>
     <text class="dl-dg-lab" x="290" y="68">= 4</text>
   </g>
   <g v-click>
-    <path class="dl-dg-line is-muted" d="M82 104 L180 146" />
-    <rect class="dl-dg-box" x="182" y="128" width="86" height="36" rx="4" />
-    <text class="dl-dg-small" x="225" y="150" text-anchor="middle">k₂ [1, 0]</text>
+    <path class="dl-dg-line is-q dl-dg-flow is-slow" d="M82 104 L180 146" style="stroke-width: 1.2" />
+    <FlowDot path="M82 104 L180 146" role="q" :dur="1.2" :delay="0.6" :r="3" />
+    <rect class="dl-dg-box is-k" x="182" y="128" width="86" height="36" rx="4" />
+    <text class="dl-dg-small is-k" x="225" y="150" text-anchor="middle">k₂ [1, 0]</text>
     <text class="dl-dg-lab is-sm" x="290" y="140">1·1 + 1·0</text>
     <text class="dl-dg-lab" x="290" y="162">= 1</text>
   </g>
@@ -949,7 +997,8 @@ title: "In words: Step 2: score every word"
 
 <div class="dl-describe">
 
-- The asking word is *Thinking*. Its query is $\mathbf{q}_1 = [1, 1]$.
+- The asking word is *Thinking*. Its query is the purple box, $\mathbf{q}_1 = [1, 1]$.
+  The orange boxes are the keys.
 - The **score** of a word is the asking word's query dotted with that word's key:
   multiply element by element, then add.
 - With its own key, $\mathbf{k}_1 = [2, 2]$: $1 \cdot 2 + 1 \cdot 2 = 4$.
@@ -982,6 +1031,13 @@ title: "Steps 3 and 4: scale, then softmax"
   <text class="dl-dg-lab is-sm" x="120" y="44" text-anchor="middle">4</text>
   <text class="dl-dg-lab is-sm" x="250" y="44" text-anchor="middle">1</text>
   <g v-click>
+    <defs>
+      <marker id="tv2s1-scale" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+        <path class="dl-dg-head is-accent" d="M0 0 L6 3 L0 6 z" />
+      </marker>
+    </defs>
+    <path class="dl-dg-arrow is-accent dl-dg-flow" marker-end="url(#tv2s1-scale)" d="M150 40 V62" />
+    <path class="dl-dg-arrow is-accent dl-dg-flow" marker-end="url(#tv2s1-scale)" d="M280 40 V62" />
     <text class="dl-dg-small" x="10" y="78">÷ √2</text>
     <text class="dl-dg-lab is-sm" x="120" y="78" text-anchor="middle">2.83</text>
     <text class="dl-dg-lab is-sm" x="250" y="78" text-anchor="middle">0.71</text>
@@ -1176,31 +1232,36 @@ title: "Steps 5 and 6: weigh the values, then add"
 <svg viewBox="0 0 640 200" class="dl-diagram" role="img" aria-label="0.89 times v1 = [2,0] gives [1.79, 0]; 0.11 times v2 = [0,2] gives [0, 0.21]; their sum is z1 = [1.79, 0.21]">
   <defs>
     <marker id="tv2s1-sum" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
-      <path class="dl-dg-head" d="M0 0 L7 3.5 L0 7 z" />
+      <path class="dl-dg-head is-v" d="M0 0 L7 3.5 L0 7 z" />
+    </marker>
+    <marker id="tv2s1-sum-out" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+      <path class="dl-dg-head is-accent" d="M0 0 L7 3.5 L0 7 z" />
     </marker>
   </defs>
   <text class="dl-dg-small" x="10" y="44">Thinking</text>
   <text class="dl-dg-small" x="10" y="134">Machines</text>
-  <rect class="dl-dg-box" x="90" y="24" width="90" height="32" rx="4" />
-  <text class="dl-dg-small" x="135" y="45" text-anchor="middle">v₁ [2, 0]</text>
-  <rect class="dl-dg-box" x="90" y="114" width="90" height="32" rx="4" />
-  <text class="dl-dg-small" x="135" y="135" text-anchor="middle">v₂ [0, 2]</text>
+  <rect class="dl-dg-box is-v" x="90" y="24" width="90" height="32" rx="4" />
+  <text class="dl-dg-small is-v" x="135" y="45" text-anchor="middle">v₁ [2, 0]</text>
+  <rect class="dl-dg-box is-v" x="90" y="114" width="90" height="32" rx="4" />
+  <text class="dl-dg-small is-v" x="135" y="135" text-anchor="middle">v₂ [0, 2]</text>
   <g v-click>
     <text class="dl-dg-lab is-sm" x="214" y="45" text-anchor="middle">× 0.893</text>
     <text class="dl-dg-lab is-sm" x="214" y="135" text-anchor="middle">× 0.107</text>
-    <rect class="dl-dg-box is-accent" x="250" y="20" width="110" height="40" rx="4" />
-    <text class="dl-dg-in" x="305" y="45" text-anchor="middle">[1.79, 0]</text>
-    <rect class="dl-dg-box" x="250" y="110" width="110" height="40" rx="4" />
+    <rect class="dl-dg-box is-v" x="250" y="20" width="110" height="40" rx="4" style="stroke-width: 2.6" />
+    <text class="dl-dg-in is-v" x="305" y="45" text-anchor="middle">[1.79, 0]</text>
+    <rect class="dl-dg-box is-v" x="250" y="110" width="110" height="40" rx="4" style="stroke-width: 0.8" />
     <text class="dl-dg-small" x="305" y="135" text-anchor="middle">[0, 0.21]</text>
     <text class="dl-dg-small" x="305" y="176" text-anchor="middle">nearly gone</text>
   </g>
   <g v-click>
-    <path class="dl-dg-arrow" marker-end="url(#tv2s1-sum)" d="M362 40 L440 78" />
-    <path class="dl-dg-arrow" marker-end="url(#tv2s1-sum)" d="M362 130 L440 94" />
+    <path class="dl-dg-arrow is-v dl-dg-flow" marker-end="url(#tv2s1-sum)" d="M362 40 L440 78" style="stroke-width: 3" />
+    <path class="dl-dg-arrow is-v dl-dg-flow" marker-end="url(#tv2s1-sum)" d="M362 130 L440 94" style="stroke-width: 1" />
+    <FlowDot path="M362 40 L438 77" role="v" :dur="1.1" :r="5.5" />
+    <FlowDot path="M362 130 L438 95" role="v" :dur="1.1" :delay="0.4" :r="2.2" />
     <circle class="dl-dg-op" cx="458" cy="86" r="16" />
     <text class="dl-dg-lab is-sm" x="458" y="91" text-anchor="middle">+</text>
-    <path class="dl-dg-arrow" marker-end="url(#tv2s1-sum)" d="M474 86 H500" />
-    <rect class="dl-dg-box is-accent" x="504" y="64" width="126" height="44" rx="4" />
+    <path class="dl-dg-arrow is-accent dl-dg-flow" marker-end="url(#tv2s1-sum-out)" d="M474 86 H500" />
+    <rect class="dl-dg-box is-accent dl-dg-pulse" x="504" y="64" width="126" height="44" rx="4" />
     <text class="dl-dg-in" x="567" y="91" text-anchor="middle">z₁ [1.79, 0.21]</text>
     <text class="dl-dg-small" x="567" y="128" text-anchor="middle">Thinking's output</text>
   </g>
@@ -1227,6 +1288,10 @@ use three decimals here. Alammar's
 intuition: keep the values of the words we want to focus on, and drown out the
 others by multiplying them by tiny numbers like 0.001.
 
+Point at the two blue dots: a big one on the upper arrow, a tiny one on the
+lower. Their size is the weight: almost all of what flows into the sum comes
+from Thinking's value.
+
 Click 2: add. [1.79, 0] + [0, 0.21] = [1.79, 0.21]. That is z_1, the output of
 self-attention for Thinking. It is mostly Thinking's own value, with a little
 of Machines mixed in.
@@ -1251,8 +1316,9 @@ title: "In words: Steps 5 and 6: weigh the values, then add"
 
 <div class="dl-describe">
 
-- The left boxes are the two values: $\mathbf{v}_1 = [2, 0]$ for *Thinking* and
-  $\mathbf{v}_2 = [0, 2]$ for *Machines*.
+- The blue boxes on the left are the two values: $\mathbf{v}_1 = [2, 0]$ for
+  *Thinking* and $\mathbf{v}_2 = [0, 2]$ for *Machines*. The big and small blue
+  dots show how much of each value flows into the sum.
 - **Step 5, weigh:** multiply each value by its attention weight.
   $0.893 \times [2, 0] = [1.79, 0]$ and $0.107 \times [0, 2] = [0, 0.21]$
   (the weights 0.89 and 0.11, to three decimals).
@@ -1377,12 +1443,14 @@ title: "Poll: does a word attend most to itself?"
 <div class="mt-12">
 
 <svg viewBox="0 0 240 150" class="dl-diagram" role="img" aria-label="Machines asks: one line to Thinking, one line back to itself, weights hidden">
-  <rect class="dl-dg-box" x="10" y="20" width="96" height="30" rx="4" />
+  <rect class="dl-dg-box is-k" x="10" y="20" width="96" height="30" rx="4" />
   <text class="dl-dg-small" x="58" y="40" text-anchor="middle">Thinking</text>
-  <rect class="dl-dg-box is-accent" x="10" y="100" width="96" height="30" rx="4" />
+  <rect class="dl-dg-box is-q" x="10" y="100" width="96" height="30" rx="4" />
   <text class="dl-dg-small" x="58" y="120" text-anchor="middle">Machines</text>
-  <path class="dl-dg-line" d="M106 115 C 170 115, 170 35, 106 35" />
-  <path class="dl-dg-line is-muted" d="M106 122 C 150 140, 150 100, 106 108" />
+  <path class="dl-dg-line is-q dl-dg-flow is-slow" d="M106 115 C 170 115, 170 35, 106 35" />
+  <path class="dl-dg-line is-q dl-dg-flow is-slow" d="M106 122 C 150 140, 150 100, 106 108" />
+  <FlowDot path="M106 115 C 170 115, 170 35, 106 35" role="q" :dur="1.8" :r="3.5" />
+  <FlowDot path="M106 122 C 150 140, 150 100, 106 108" role="q" :dur="1.8" :delay="0.9" :r="3.5" />
   <text class="dl-dg-small" x="168" y="80">?</text>
   <text class="dl-dg-small" x="150" y="146">?</text>
 </svg>
@@ -1493,6 +1561,19 @@ gives every query, key and value at once.
 
 <div class="mt-1 flex justify-center">
 <svg viewBox="0 0 660 210" class="dl-diagram" role="img" aria-label="X, two rows of four numbers, times W_Q, four rows of two, gives Q, two rows of two. The same X times W_K and W_V gives K and V">
+  <defs>
+    <marker id="tv2s2-mat-q" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+      <path class="dl-dg-head is-q" d="M0 0 L7 3.5 L0 7 z" />
+    </marker>
+    <marker id="tv2s2-mat-k" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+      <path class="dl-dg-head is-k" d="M0 0 L7 3.5 L0 7 z" />
+    </marker>
+    <marker id="tv2s2-mat-v" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+      <path class="dl-dg-head is-v" d="M0 0 L7 3.5 L0 7 z" />
+    </marker>
+  </defs>
+  <path class="dl-dg-arrow is-q dl-dg-flow" marker-end="url(#tv2s2-mat-q)" d="M150 40 C 205 12, 320 12, 368 40" />
+  <FlowDot path="M150 40 C 205 12, 320 12, 368 40" role="q" :dur="2" />
   <text class="dl-dg-small" x="84" y="62" text-anchor="end">Thinking</text>
   <text class="dl-dg-small" x="84" y="88" text-anchor="end">Machines</text>
   <g v-for="(row, r) in [[1, 0, 1, 0], [0, 1, 0, 1]]" :key="'x' + r">
@@ -1505,34 +1586,38 @@ gives every query, key and value at once.
   <text class="dl-dg-lab" x="226" y="76" text-anchor="middle">×</text>
   <g v-for="(row, r) in [[1, 0], [0, 1], [0, 1], [0, 0]]" :key="'w' + r">
     <g v-for="(v, c) in row" :key="c">
-      <rect class="dl-dg-box" :x="244 + c * 30" :y="26 + r * 22" width="30" height="22" />
+      <rect class="dl-dg-box is-q" :x="244 + c * 30" :y="26 + r * 22" width="30" height="22" />
       <text class="dl-dg-lab is-sm" :x="259 + c * 30" :y="42 + r * 22" text-anchor="middle">{{ v }}</text>
     </g>
   </g>
-  <text class="dl-dg-small" x="274" y="130" text-anchor="middle">W_Q (4 × 2)</text>
+  <text class="dl-dg-small is-q" x="274" y="130" text-anchor="middle">W_Q (4 × 2)</text>
   <text class="dl-dg-lab" x="324" y="76" text-anchor="middle">=</text>
   <g v-for="(row, r) in [[1, 1], [0, 1]]" :key="'q' + r">
     <g v-for="(v, c) in row" :key="c">
-      <rect class="dl-dg-box is-accent" :x="344 + c * 30" :y="44 + r * 26" width="30" height="26" />
+      <rect class="dl-dg-box is-q" :x="344 + c * 30" :y="44 + r * 26" width="30" height="26" />
       <text class="dl-dg-lab is-sm" :x="359 + c * 30" :y="62 + r * 26" text-anchor="middle">{{ v }}</text>
     </g>
   </g>
-  <text class="dl-dg-small" x="374" y="118" text-anchor="middle">Q (2 × 2)</text>
+  <text class="dl-dg-small is-q" x="374" y="118" text-anchor="middle">Q (2 × 2)</text>
   <g v-click>
+    <path class="dl-dg-arrow is-k dl-dg-flow" marker-end="url(#tv2s2-mat-k)" d="M150 40 C 230 4, 420 4, 474 40" />
+    <path class="dl-dg-arrow is-v dl-dg-flow" marker-end="url(#tv2s2-mat-v)" d="M150 40 C 250 -2, 520 -2, 584 40" />
+    <FlowDot path="M150 40 C 230 4, 420 4, 474 40" role="k" :dur="2.2" :delay="0.7" />
+    <FlowDot path="M150 40 C 250 -2, 520 -2, 584 40" role="v" :dur="2.4" :delay="1.4" />
     <g v-for="(row, r) in [[2, 2], [1, 0]]" :key="'k' + r">
       <g v-for="(v, c) in row" :key="c">
-        <rect class="dl-dg-box is-accent" :x="450 + c * 30" :y="44 + r * 26" width="30" height="26" />
+        <rect class="dl-dg-box is-k" :x="450 + c * 30" :y="44 + r * 26" width="30" height="26" />
         <text class="dl-dg-lab is-sm" :x="465 + c * 30" :y="62 + r * 26" text-anchor="middle">{{ v }}</text>
       </g>
     </g>
-    <text class="dl-dg-small" x="480" y="118" text-anchor="middle">K = X W_K</text>
+    <text class="dl-dg-small is-k" x="480" y="118" text-anchor="middle">K = X W_K</text>
     <g v-for="(row, r) in [[2, 0], [0, 2]]" :key="'v' + r">
       <g v-for="(v, c) in row" :key="c">
-        <rect class="dl-dg-box is-accent" :x="560 + c * 30" :y="44 + r * 26" width="30" height="26" />
+        <rect class="dl-dg-box is-v" :x="560 + c * 30" :y="44 + r * 26" width="30" height="26" />
         <text class="dl-dg-lab is-sm" :x="575 + c * 30" :y="62 + r * 26" text-anchor="middle">{{ v }}</text>
       </g>
     </g>
-    <text class="dl-dg-small" x="590" y="118" text-anchor="middle">V = X W_V</text>
+    <text class="dl-dg-small is-v" x="590" y="118" text-anchor="middle">V = X W_V</text>
   </g>
   <g v-click>
     <line class="dl-dg-split" x1="10" y1="150" x2="650" y2="150" />
@@ -1567,6 +1652,9 @@ only one W_Q, one W_K and one W_V, shared by every word.
 Click 3: the callout. This is why the layer is fast on a GPU (graphics
 processing unit): a matrix product is the operation those chips are built for.
 
+Colours: purple is everything query (W_Q and Q), orange the keys, blue the
+values. The moving dots along the arcs show X flowing into each product.
+
 Check for the room: row 2 of Q is x_2 times W_Q. Machines is [0, 1, 0, 1], so
 it picks rows 2 and 4 of W_Q: [0, 1] + [0, 0] = [0, 1].
 
@@ -1585,13 +1673,13 @@ title: "In words: Every word at once: matrices"
 
 - The slide stacks the two word vectors as the rows of a matrix $X$. Row 1 is
   *Thinking*, $[1, 0, 1, 0]$. Row 2 is *Machines*, $[0, 1, 0, 1]$.
-- Multiplying $X$ by $W_Q$ gives $Q$. Each row of $Q$ is one word's query.
-  Row 1 is $[1, 1]$, the same $\mathbf{q}_1$ as in the six steps.
-- The same $X$ times $W_K$ gives $K = [[2, 2], [1, 0]]$. Times $W_V$ it gives
-  $V = [[2, 0], [0, 2]]$.
+- Multiplying $X$ by $W_Q$ gives $Q$ (purple). Each row of $Q$ is one word's
+  query. Row 1 is $[1, 1]$, the same $\mathbf{q}_1$ as in the six steps.
+- $X W_K$ gives the keys $K$ (orange): rows $[2, 2]$ and $[1, 0]$.
+- $X W_V$ gives the values $V$ (blue): rows $[2, 0]$ and $[0, 2]$.
+- The moving arcs show $X$ feeding each product.
 - There is one set of weight matrices, shared by every word.
-- So three matrix products make every query, key and value at once. That is
-  fast on modern hardware.
+- Three matrix products make every query, key and value at once.
 
 </div>
 
@@ -1623,7 +1711,7 @@ $$
 <svg viewBox="0 0 660 150" class="dl-diagram" style="max-height: 10.5rem" role="img" aria-label="Q K transpose is 4 1 over 2 0. Divided by root 2: 2.83 0.71 over 1.41 0. Softmax of each row: 0.89 0.11 over 0.80 0.20. Times V gives Z: 1.79 0.21 over 1.61 0.39">
   <defs>
     <marker id="tv2s2-one-head" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
-      <path class="dl-dg-head" d="M0 0 L7 3.5 L0 7 z" />
+      <path class="dl-dg-head is-accent" d="M0 0 L7 3.5 L0 7 z" />
     </marker>
   </defs>
   <text class="dl-dg-small" x="84" y="66" text-anchor="end">Thinking</text>
@@ -1633,11 +1721,12 @@ $$
       <text class="dl-dg-small" :x="136 + k * 140" y="30" text-anchor="middle">{{ m[0] }}</text>
       <g v-for="(row, r) in m[1]" :key="r">
         <g v-for="(v, c) in row" :key="c">
-          <rect :class="k === 3 && r === 0 ? 'dl-dg-box is-accent' : 'dl-dg-box'" :x="90 + k * 140 + c * 46" :y="44 + r * 30" width="46" height="30" />
+          <rect :class="k === 3 ? (r === 0 ? 'dl-dg-box is-accent dl-dg-pulse' : 'dl-dg-box is-accent') : 'dl-dg-box'" :x="90 + k * 140 + c * 46" :y="44 + r * 30" width="46" height="30" />
           <text class="dl-dg-lab is-sm" :x="113 + k * 140 + c * 46" :y="64 + r * 30" text-anchor="middle">{{ v }}</text>
         </g>
       </g>
-      <path v-if="k < 3" class="dl-dg-arrow" marker-end="url(#tv2s2-one-head)" :d="`M${186 + k * 140} 74 H${224 + k * 140}`" />
+      <path v-if="k < 3" class="dl-dg-arrow is-accent dl-dg-flow" marker-end="url(#tv2s2-one-head)" :d="`M${186 + k * 140} 74 H${224 + k * 140}`" />
+      <FlowDot v-if="k < 3" :path="`M${186 + k * 140} 74 H${224 + k * 140}`" role="accent" :dur="1" :delay="k * 0.3" />
     </g>
   </g>
   <text class="dl-dg-small" x="136" y="128" text-anchor="middle">columns: the key read</text>
@@ -1672,6 +1761,9 @@ Click 3: softmax along each row, so each row adds up to 1. Row 1 is 0.89,
 because Thinking's key is big.
 
 Click 4: times V. Row 1 is 0.893 x [2, 0] + 0.107 x [0, 2] = [1.79, 0.21].
+
+The arrows march and a dot runs along each one, left to right: the numbers
+flow from scores to Z. Row 1 of Z breathes, because it is the answer.
 
 Click 5: the callout. Ask the room: what is the first row? They have it in
 their notebooks already. That moment — the one line agrees with the hand
@@ -1715,19 +1807,19 @@ title: "Reading the equation: the whole layer"
 <div>
 
 <svg viewBox="0 0 300 120" class="dl-diagram" role="img" aria-label="Shapes: Q is T by d_k, K transpose is d_k by T, their product is T by T; times V, T by d_v, gives Z, T by d_v">
-  <rect class="dl-dg-box is-accent" x="6" y="30" width="40" height="40" />
-  <text class="dl-dg-small" x="26" y="88" text-anchor="middle">Q</text>
+  <rect class="dl-dg-box is-q" x="6" y="30" width="40" height="40" />
+  <text class="dl-dg-small is-q" x="26" y="88" text-anchor="middle">Q</text>
   <text class="dl-dg-small" x="26" y="104" text-anchor="middle">T × dₖ</text>
-  <rect class="dl-dg-box is-accent" x="58" y="30" width="40" height="40" />
-  <text class="dl-dg-small" x="78" y="88" text-anchor="middle">Kᵀ</text>
+  <rect class="dl-dg-box is-k" x="58" y="30" width="40" height="40" />
+  <text class="dl-dg-small is-k" x="78" y="88" text-anchor="middle">Kᵀ</text>
   <text class="dl-dg-small" x="78" y="104" text-anchor="middle">dₖ × T</text>
   <text class="dl-dg-lab is-sm" x="114" y="56" text-anchor="middle">=</text>
   <rect class="dl-dg-box" x="128" y="30" width="40" height="40" />
   <text class="dl-dg-small" x="148" y="88" text-anchor="middle">scores</text>
   <text class="dl-dg-small" x="148" y="104" text-anchor="middle">T × T</text>
   <text class="dl-dg-lab is-sm" x="182" y="56" text-anchor="middle">×</text>
-  <rect class="dl-dg-box is-accent" x="196" y="30" width="40" height="40" />
-  <text class="dl-dg-small" x="216" y="88" text-anchor="middle">V</text>
+  <rect class="dl-dg-box is-v" x="196" y="30" width="40" height="40" />
+  <text class="dl-dg-small is-v" x="216" y="88" text-anchor="middle">V</text>
   <text class="dl-dg-small" x="216" y="104" text-anchor="middle">T × dᵥ</text>
   <text class="dl-dg-lab is-sm" x="250" y="56" text-anchor="middle">→</text>
   <rect class="dl-dg-fill" x="262" y="30" width="34" height="40" />
@@ -1751,6 +1843,8 @@ $\phantom{\mathbf{z}_1} = [1.79, 0.21]$
 Every symbol of the one-line formula, with the toy's numbers.
 
 Clicks 1 to 9: one legend row per click. Click 10: the worked arithmetic.
+
+The shape boxes use the deck's colours: Q purple, K orange, V blue, Z accent.
 
 Walk the shapes first, using the picture on the right. Q has one row per word
 and d_k columns. K-transpose turns K on its side, so it has d_k rows and one
@@ -1788,8 +1882,8 @@ for every word at once. Read the picture left to right:
 3. **Softmax.** Each row becomes weights that add up to 1: $[[0.89, 0.11], [0.80, 0.20]]$.
 4. **Weighted sum.** Multiply by $V$. Row 1 of $Z$ is $[1.79, 0.21]$.
 
-That first row is the $\mathbf{z}_1$ found by hand. The matrix form changes the
-speed, not the answer.
+Dots run left to right along the arrows to show the order. Row 1 of $Z$ is the
+$\mathbf{z}_1$ found by hand.
 
 </div>
 
@@ -1834,8 +1928,9 @@ softmax spreads one budget of weight over the words. If one word needs two
 different things from the sentence, one head has to compromise.
 
 On screen: the sentence twice. The asking word, it, is on the right. Each line
-goes to a word on the left and is as thick as the attention weight. Accent
-lines are head 1, red lines are head 2. The buttons switch between head 1,
+goes to a word on the left and is as thick as the attention weight. Teal
+lines are head 1, orange lines are head 2. The lines grow out from the asking
+word each time you change it. The buttons switch between head 1,
 head 2 and both; the arrow buttons (or the arrow keys, once the picture has
 focus) move the asking word.
 
@@ -1873,9 +1968,9 @@ title: "In words: Many heads: one question each"
 - The picture writes the sentence twice. The asking word, *it*, is on the
   right. Each line goes to a word on the left, as thick as its weight.
 - One head has one softmax, so it can spread only one budget of weight.
-- The word *it* needs two answers. Head 1 (accent lines) asks who *it* is and
-  puts 0.55 on *animal*. Head 2 (red lines) asks what is said about it and puts
-  0.45 on *tired*.
+- The word *it* needs two answers. Head 1 (teal lines) asks who *it* is and
+  puts 0.55 on *animal*. Head 2 (orange lines) asks what is said about it and
+  puts 0.45 on *tired*.
 - Each head has its own $W_Q$, $W_K$ and $W_V$, so each can learn a different
   question.
 - These weights were drawn by hand to show the idea.
@@ -1900,31 +1995,35 @@ title: Eight heads, then glue them back
 <svg viewBox="0 0 660 230" class="dl-diagram" role="img" aria-label="X goes into eight heads, each giving a T by 64 output. The eight outputs are put side by side into one T by 512 matrix, then multiplied by W_O, 512 by 512, to give Z, T by 512">
   <defs>
     <marker id="tv2s2-glue" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
-      <path class="dl-dg-head" d="M0 0 L7 3.5 L0 7 z" />
+      <path class="dl-dg-head is-accent" d="M0 0 L7 3.5 L0 7 z" />
     </marker>
   </defs>
   <rect class="dl-dg-box" x="10" y="82" width="56" height="60" rx="3" />
   <text class="dl-dg-lab is-sm" x="38" y="117" text-anchor="middle">X</text>
   <text class="dl-dg-small" x="38" y="160" text-anchor="middle">T × 512</text>
   <g v-for="h in 8" :key="h">
-    <path class="dl-dg-arrow" :d="`M66 112 L104 ${21 + (h - 1) * 24}`" />
-    <rect :class="h === 1 ? 'dl-dg-box is-accent' : 'dl-dg-box'" x="106" :y="12 + (h - 1) * 24" width="96" height="19" rx="3" />
+    <path class="dl-dg-arrow dl-dg-flow is-slow" :class="h === 1 ? 'is-accent' : h === 2 ? 'is-k' : ''" :d="`M66 112 L104 ${21 + (h - 1) * 24}`" />
+    <rect :class="h === 1 ? 'dl-dg-box is-accent' : h === 2 ? 'dl-dg-box is-k' : 'dl-dg-box'" x="106" :y="12 + (h - 1) * 24" width="96" height="19" rx="3" />
     <text class="dl-dg-small" x="154" :y="26 + (h - 1) * 24" text-anchor="middle">head {{ h }} → Z{{ h }}</text>
   </g>
+  <FlowDot path="M66 112 L104 21" role="accent" :dur="1.2" />
+  <FlowDot path="M66 112 L104 45" role="k" :dur="1.2" :delay="0.6" />
   <text class="dl-dg-small" x="154" y="218" text-anchor="middle">each Zᵢ is T × 64</text>
   <g v-click>
     <g v-for="h in 8" :key="'c' + h">
-      <path class="dl-dg-arrow" :d="`M202 ${21 + (h - 1) * 24} L${246 + (h - 1) * 22} 92`" />
-      <rect :class="h === 1 ? 'dl-dg-box is-accent' : 'dl-dg-box'" :x="240 + (h - 1) * 22" y="94" width="22" height="40" />
+      <path class="dl-dg-arrow dl-dg-flow is-slow" :class="h === 1 ? 'is-accent' : h === 2 ? 'is-k' : ''" :d="`M202 ${21 + (h - 1) * 24} L${246 + (h - 1) * 22} 92`" />
+      <rect :class="h === 1 ? 'dl-dg-box is-accent' : h === 2 ? 'dl-dg-box is-k' : 'dl-dg-box'" :x="240 + (h - 1) * 22" y="94" width="22" height="40" />
+      <FlowDot :path="`M202 ${21 + (h - 1) * 24} L${246 + (h - 1) * 22} 92`" :role="h === 1 ? 'accent' : h === 2 ? 'k' : 'body'" :r="3" :dur="1.4" :delay="(h - 1) * 0.17" />
     </g>
     <text class="dl-dg-small" x="328" y="156" text-anchor="middle">concatenate: T × 512</text>
   </g>
   <g v-click>
-    <path class="dl-dg-arrow" marker-end="url(#tv2s2-glue)" d="M420 114 H446" />
+    <path class="dl-dg-arrow is-accent dl-dg-flow" marker-end="url(#tv2s2-glue)" d="M420 114 H446" />
     <rect class="dl-dg-fill is-muted" x="450" y="84" width="76" height="60" rx="3" />
     <text class="dl-dg-lab is-sm" x="488" y="119" text-anchor="middle">× W_O</text>
     <text class="dl-dg-small" x="488" y="160" text-anchor="middle">512 × 512, learned</text>
-    <path class="dl-dg-arrow" marker-end="url(#tv2s2-glue)" d="M526 114 H556" />
+    <path class="dl-dg-arrow is-accent dl-dg-flow" marker-end="url(#tv2s2-glue)" d="M526 114 H556" />
+    <FlowDot path="M420 114 H556" role="accent" :dur="1.4" />
     <rect class="dl-dg-box is-accent" x="560" y="84" width="60" height="60" rx="3" />
     <text class="dl-dg-lab is-sm" x="590" y="119" text-anchor="middle">Z</text>
     <text class="dl-dg-small" x="590" y="160" text-anchor="middle">T × 512</text>
@@ -1957,6 +2056,10 @@ width as the input.
 Click 3: the callout. The next part of the layer (the feed-forward network)
 expects one matrix of width 512, not eight.
 
+Colours: head 1 is teal and head 2 orange, as in the "it" picture; heads 3
+to 8 are grey. Dots flow from X into every head, then from every head into
+the concatenated block.
+
 In the toy, d_model = 4 with two heads of width 2: two outputs of width 2
 side by side are 4 wide, so the same picture holds with smaller numbers.
 
@@ -1974,6 +2077,9 @@ title: "In words: Eight heads, then glue them back"
 
 <div class="dl-describe">
 
+Head 1 is drawn teal and head 2 orange; moving dots show the data flowing
+left to right.
+
 1. The input $X$ has one row per word and 512 columns ($T \times 512$).
 2. Eight heads each run the one-line attention formula with their own weights.
    Each gives an output $Z_i$ of shape $T \times 64$.
@@ -1982,8 +2088,7 @@ title: "In words: Eight heads, then glue them back"
 4. One more learned matrix, $W_O$ ($512 \times 512$), mixes what the heads
    found. The result $Z$ is $T \times 512$.
 
-So the layer's output has the same shape as its input. That lets the next part
-of the model take it directly.
+So the output has the same shape as the input.
 
 </div>
 
@@ -2003,12 +2108,13 @@ title: The whole multi-head layer
 <svg viewBox="0 0 660 220" class="dl-diagram" role="img" aria-label="Five steps left to right: the words; embed them into X; per head, multiply X by W_Q, W_K and W_V; attention in each head gives Z1 to Z8; concatenate and multiply by W_O to get Z">
   <defs>
     <marker id="tv2s2-recap" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
-      <path class="dl-dg-head" d="M0 0 L7 3.5 L0 7 z" />
+      <path class="dl-dg-head is-accent" d="M0 0 L7 3.5 L0 7 z" />
     </marker>
   </defs>
   <g v-for="(lab, s) in ['1 · words', '2 · embed: X', '3 · per head: Q, K, V', '4 · attention', '5 · concat × W_O']" :key="s">
     <text class="dl-dg-small" :x="66 + s * 132" y="20" text-anchor="middle">{{ lab }}</text>
-    <path v-if="s < 4" class="dl-dg-arrow" marker-end="url(#tv2s2-recap)" :d="`M${116 + s * 132} 110 H${144 + s * 132}`" />
+    <path v-if="s < 4" class="dl-dg-arrow is-accent dl-dg-flow" marker-end="url(#tv2s2-recap)" :d="`M${116 + s * 132} 110 H${144 + s * 132}`" />
+    <FlowDot v-if="s < 4" :path="`M${116 + s * 132} 110 H${144 + s * 132}`" role="accent" :r="3.5" :dur="0.9" :delay="s * 0.2" />
   </g>
   <text class="dl-dg-lab is-sm" x="66" y="100" text-anchor="middle">Thinking</text>
   <text class="dl-dg-lab is-sm" x="66" y="124" text-anchor="middle">Machines</text>
@@ -2017,11 +2123,11 @@ title: The whole multi-head layer
   </g>
   <g v-click>
     <g v-for="h in 8" :key="'w' + h">
-      <rect :class="h === 1 ? 'dl-dg-box is-accent' : 'dl-dg-box'" :x="290 + ((h - 1) % 4) * 22" :y="56 + Math.floor((h - 1) / 4) * 60" width="18" height="48" rx="2" />
+      <rect :class="h === 1 ? 'dl-dg-box is-accent' : h === 2 ? 'dl-dg-box is-k' : 'dl-dg-box'" :x="290 + ((h - 1) % 4) * 22" :y="56 + Math.floor((h - 1) / 4) * 60" width="18" height="48" rx="2" />
     </g>
     <text class="dl-dg-small" x="330" y="190" text-anchor="middle">8 × (W_Q, W_K, W_V)</text>
     <g v-for="h in 8" :key="'z' + h">
-      <rect :class="h === 1 ? 'dl-dg-fill' : 'dl-dg-fill is-muted'" :x="422 + ((h - 1) % 4) * 22" :y="66 + Math.floor((h - 1) / 4) * 50" width="18" height="34" rx="2" />
+      <rect :class="h === 1 ? 'dl-dg-fill' : h === 2 ? 'dl-dg-fill is-k' : 'dl-dg-fill is-muted'" :x="422 + ((h - 1) % 4) * 22" :y="66 + Math.floor((h - 1) / 4) * 50" width="18" height="34" rx="2" />
     </g>
     <text class="dl-dg-small" x="462" y="190" text-anchor="middle">Z1 … Z8</text>
   </g>
@@ -2047,6 +2153,9 @@ On screen, left to right: (1) the words, (2) their embeddings stacked into X,
 (3) eight sets of W_Q, W_K, W_V, one per head, (4) eight outputs Z_1 to Z_8,
 (5) the outputs side by side, times W_O, giving Z.
 
+The four arrows between steps march, with a dot on each, left to right. Head
+1 is teal and head 2 orange, as on the previous slides.
+
 Click: steps 3 and 4 appear — the heads and their outputs.
 
 Click 2: step 5, concatenate and multiply by W_O.
@@ -2066,7 +2175,8 @@ title: "In words: The whole multi-head layer"
 
 <div class="dl-describe">
 
-The picture has five steps, left to right.
+The picture has five steps, left to right; the moving dots on the arrows show
+the order. Head 1 is teal and head 2 orange.
 
 1. **Words.** *Thinking Machines*.
 2. **Embed.** Each word becomes a vector; the vectors are the rows of $X$.
@@ -2107,9 +2217,9 @@ title: "Poll: eight small heads or one big one?"
 <div class="mt-10">
 
 <svg viewBox="0 0 260 170" class="dl-diagram" role="img" aria-label="Left: eight thin matrices, each 512 rows by 64 columns. Right: one wide matrix, 512 rows by 512 columns">
-  <rect v-for="h in 8" :key="h" class="dl-dg-box" :x="8 + (h - 1) * 13" y="20" width="11" height="110" />
+  <rect v-for="h in 8" :key="h" class="dl-dg-box is-q" :x="8 + (h - 1) * 13" y="20" width="11" height="110" />
   <text class="dl-dg-small" x="58" y="150" text-anchor="middle">8 × (512 × 64)</text>
-  <rect class="dl-dg-box is-accent" x="150" y="20" width="104" height="110" />
+  <rect class="dl-dg-box is-q" x="150" y="20" width="104" height="110" />
   <text class="dl-dg-small" x="202" y="150" text-anchor="middle">1 × (512 × 512)</text>
   <text class="dl-dg-small" x="130" y="12" text-anchor="middle">W_Q for every head together</text>
 </svg>
@@ -2133,8 +2243,8 @@ Heads split the width. They do not add weights.
 The point: more heads do not mean more parameters. The paper picks d_k = 512 / 8
 = 64 exactly so that eight heads cost the same as one wide head.
 
-On screen beside the question: on the left, the eight W_Q matrices, each 512
-rows by 64 columns. On the right, one W_Q of 512 by 512.
+On screen beside the question (in purple, the query colour): on the left, the
+eight W_Q matrices, each 512 rows by 64 columns. On the right, one W_Q of 512 by 512.
 
 Hands up for each option before revealing.
 
@@ -2159,7 +2269,8 @@ title: "In words: Poll: eight small heads or one big one?"
 
 <div class="dl-describe">
 
-- The question compares the query weights $W_Q$ of two designs.
+- The question compares the query weights $W_Q$ of two designs, drawn in
+  purple, the colour of queries.
 - Eight heads of width 64 need eight $512 \times 64$ matrices.
 - Together: $8 \times 512 \times 64 = 262\,144$ weights.
 - One head of width 512 needs one matrix of $512 \times 512 = 262\,144$ weights.
@@ -2208,7 +2319,7 @@ title: Attention does not see order
 <svg viewBox="0 0 660 200" class="dl-diagram" role="img" aria-label="Thinking Machines gives Thinking 1.79 0.21 and Machines 1.61 0.39. Machines Thinking gives the same two vectors, just in the other order">
   <defs>
     <marker id="tv2s3-order" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
-      <path class="dl-dg-head" d="M0 0 L7 3.5 L0 7 z" />
+      <path class="dl-dg-head is-accent" d="M0 0 L7 3.5 L0 7 z" />
     </marker>
   </defs>
   <g>
@@ -2219,7 +2330,9 @@ title: Attention does not see order
     <text class="dl-dg-lab is-sm" x="225" y="170" text-anchor="middle">Machines</text>
     <rect class="dl-dg-fill" x="40" y="86" width="240" height="34" rx="4" />
     <text class="dl-dg-in" x="160" y="108" text-anchor="middle">self-attention</text>
-    <path class="dl-dg-arrow" marker-end="url(#tv2s3-order)" d="M95 150 V122 M225 150 V122 M95 86 V62 M225 86 V62" />
+    <path class="dl-dg-arrow is-accent dl-dg-flow" marker-end="url(#tv2s3-order)" d="M95 150 V122 M225 150 V122 M95 86 V62 M225 86 V62" />
+    <FlowDot path="M95 150 V62" role="accent" :dur="1.6" />
+    <FlowDot path="M225 150 V62" role="accent" :dur="1.6" :delay="0.8" />
     <rect class="dl-dg-box is-accent" x="40" y="30" width="110" height="30" rx="4" />
     <text class="dl-dg-lab is-sm" x="95" y="50" text-anchor="middle">[1.79, 0.21]</text>
     <rect class="dl-dg-box is-accent" x="170" y="30" width="110" height="30" rx="4" />
@@ -2234,7 +2347,9 @@ title: Attention does not see order
     <text class="dl-dg-lab is-sm" x="565" y="170" text-anchor="middle">Thinking</text>
     <rect class="dl-dg-fill" x="380" y="86" width="240" height="34" rx="4" />
     <text class="dl-dg-in" x="500" y="108" text-anchor="middle">self-attention</text>
-    <path class="dl-dg-arrow" marker-end="url(#tv2s3-order)" d="M435 150 V122 M565 150 V122 M435 86 V62 M565 86 V62" />
+    <path class="dl-dg-arrow is-accent dl-dg-flow" marker-end="url(#tv2s3-order)" d="M435 150 V122 M565 150 V122 M435 86 V62 M565 86 V62" />
+    <FlowDot path="M435 150 V62" role="accent" :dur="1.6" />
+    <FlowDot path="M565 150 V62" role="accent" :dur="1.6" :delay="0.8" />
     <rect class="dl-dg-box is-accent" x="380" y="30" width="110" height="30" rx="4" />
     <text class="dl-dg-lab is-sm" x="435" y="50" text-anchor="middle">[1.61, 0.39]</text>
     <rect class="dl-dg-box is-accent" x="510" y="30" width="110" height="30" rx="4" />
@@ -2265,6 +2380,9 @@ On screen, left: the toy sentence "Thinking Machines" through the layer. The
 outputs are the two rows of Z from the previous section: [1.79, 0.21] for
 Thinking, [1.61, 0.39] for Machines.
 
+The arrows march upwards and a dot climbs each column: each word goes up
+through the layer and comes out as its output.
+
 Click: the same two words in the other order. Thinking still scores 4 against
 its own key and 1 against Machines' key, wherever it stands. So its output is
 still [1.79, 0.21]. The outputs simply swap places.
@@ -2289,6 +2407,7 @@ title: "In words: Attention does not see order"
 
 <div class="dl-describe">
 
+- The moving dots climb from each word, through self-attention, to its output.
 - The left half runs *Thinking Machines* through self-attention. *Thinking*
   comes out as $[1.79, 0.21]$ and *Machines* as $[1.61, 0.39]$.
 - The right half swaps the words. Each word still meets the same keys and
@@ -2321,7 +2440,7 @@ embedding. Same width, so nothing else changes.
 <div class="mt-1 flex justify-center">
 <svg viewBox="0 0 660 200" class="dl-diagram" role="img" aria-label="Thinking at position 0: 1 0 1 0 plus 0 1 0 1 equals 1 1 1 1. Machines at position 1: 0 1 0 1 plus 0.84 0.54 0.01 1.00 equals 0.84 1.54 0.01 2.00">
   <text class="dl-dg-small" x="10" y="54">embedding</text>
-  <text class="dl-dg-small" x="10" y="104">+ position</text>
+  <text class="dl-dg-small is-pos" x="10" y="104">+ position</text>
   <text class="dl-dg-small" x="10" y="154">= input</text>
   <text class="dl-dg-lab is-sm" x="218" y="20" text-anchor="middle">Thinking · position 0</text>
   <text class="dl-dg-lab is-sm" x="498" y="20" text-anchor="middle">Machines · position 1</text>
@@ -2332,11 +2451,12 @@ embedding. Same width, so nothing else changes.
     </g>
     <g v-click="1">
       <g v-for="c in 4" :key="'p' + c">
-        <rect class="dl-dg-fill" :x="120 + w * 280 + (c - 1) * 49" y="84" width="49" height="28" />
+        <rect class="dl-dg-fill is-pos" :x="120 + w * 280 + (c - 1) * 49" y="84" width="49" height="28" />
         <text class="dl-dg-lab is-sm" :x="144 + w * 280 + (c - 1) * 49" y="103" text-anchor="middle">{{ col[1][c - 1] }}</text>
       </g>
     </g>
     <g v-click="2">
+      <FlowDot v-for="c in 4" :key="'d' + c" :path="`M${144 + w * 280 + (c - 1) * 49} 112 V134`" role="pos" :r="3.5" :dur="1.1" :delay="(c - 1) * 0.25" />
       <g v-for="c in 4" :key="'s' + c">
         <rect class="dl-dg-box is-accent" :x="120 + w * 280 + (c - 1) * 49" y="134" width="49" height="28" />
         <text class="dl-dg-lab is-sm" :x="144 + w * 280 + (c - 1) * 49" y="153" text-anchor="middle">{{ col[2][c - 1] }}</text>
@@ -2361,10 +2481,12 @@ first layer.
 On screen: the toy, with d_model = 4. Top row: the two embeddings,
 [1, 0, 1, 0] for Thinking and [0, 1, 0, 1] for Machines.
 
-Click: the position vectors. Position 0 gets [0, 1, 0, 1]. Position 1 gets
+Click: the position vectors, in gold (the position colour throughout). Position
+0 gets [0, 1, 0, 1]. Position 1 gets
 [0.84, 0.54, 0.01, 1.00]. Where those numbers come from is the next slide.
 
-Click 2: the sums. Thinking's input is [1, 1, 1, 1]; Machines' input is
+Click 2: the sums. Gold dots drop from each position number into the sum
+below it. Thinking's input is [1, 1, 1, 1]; Machines' input is
 [0.84, 1.54, 0.01, 2.00]. If Machines came first, it would get position 0's
 vector instead, and its input would be different — so the layer can now see
 order.
@@ -2423,7 +2545,7 @@ $$
 <svg viewBox="0 0 250 92" class="dl-diagram" role="img" aria-label="Position 1 with width 4: sin 1, cos 1, sin 0.01, cos 0.01 give 0.84, 0.54, 0.01, 1.00">
   <g v-for="(lab, c) in ['sin 1', 'cos 1', 'sin 0.01', 'cos 0.01']" :key="c">
     <text class="dl-dg-small" :x="31 + c * 60" y="16" text-anchor="middle">{{ lab }}</text>
-    <rect class="dl-dg-fill" :x="4 + c * 60" y="24" width="54" height="30" />
+    <rect class="dl-dg-fill is-pos" :x="4 + c * 60" y="24" width="54" height="30" />
     <text class="dl-dg-lab is-sm" :x="31 + c * 60" y="44" text-anchor="middle">{{ ['0.84', '0.54', '0.01', '1.00'][c] }}</text>
   </g>
   <text class="dl-dg-small" x="125" y="80" text-anchor="middle">PE for pos = 1, d_model = 4</text>
@@ -2472,8 +2594,8 @@ title: "In words: Add a position vector"
 
 <div class="dl-describe">
 
-- Each word's input is its embedding **plus** a position vector of the same
-  width.
+- Each word's input is its embedding (grey) **plus** a position vector (gold)
+  of the same width. Gold dots drop into the sum (accent).
 - *Thinking* stands at position 0: $[1, 0, 1, 0] + [0, 1, 0, 1] = [1, 1, 1, 1]$.
 - *Machines* stands at position 1: $[0, 1, 0, 1] + [0.84, 0.54, 0.01, 1.00] = [0.84, 1.54, 0.01, 2.00]$.
 - The position vector is not learned. Its even dimensions are $\sin(pos / 10000^{2i/d_{model}})$
@@ -2606,36 +2728,39 @@ title: A shortcut around every sub-layer
 <svg viewBox="0 0 660 160" class="dl-diagram" role="img" aria-label="x goes through self-attention, then add, then normalise, then feed-forward, then add, then normalise. A dashed shortcut carries x around self-attention to the first add, and another carries the normalised vector around the feed-forward network to the second add">
   <defs>
     <marker id="tv2s4-res" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
-      <path class="dl-dg-head" d="M0 0 L7 3.5 L0 7 z" />
+      <path class="dl-dg-head is-enc" d="M0 0 L7 3.5 L0 7 z" />
     </marker>
     <marker id="tv2s4-res-acc" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
       <path d="M0 0 L7 3.5 L0 7 z" style="fill: var(--dl-accent)" />
     </marker>
   </defs>
   <text class="dl-dg-lab is-sm" x="18" y="120" text-anchor="middle">x</text>
-  <path class="dl-dg-arrow" marker-end="url(#tv2s4-res)" d="M28 115 H58" />
+  <path class="dl-dg-arrow is-enc dl-dg-flow" marker-end="url(#tv2s4-res)" d="M28 115 H58" />
   <rect class="dl-dg-box is-accent" x="60" y="94" width="110" height="42" rx="4" />
   <text class="dl-dg-small" x="115" y="120" text-anchor="middle">self-attention</text>
-  <path class="dl-dg-arrow" marker-end="url(#tv2s4-res)" d="M170 115 H189" />
+  <path class="dl-dg-arrow is-enc dl-dg-flow" marker-end="url(#tv2s4-res)" d="M170 115 H189" />
   <circle class="dl-dg-op" cx="205" cy="115" r="14" />
   <text class="dl-dg-lab is-sm" x="205" y="120" text-anchor="middle">+</text>
-  <path class="dl-dg-arrow" marker-end="url(#tv2s4-res)" d="M219 115 H233" />
+  <path class="dl-dg-arrow is-enc dl-dg-flow" marker-end="url(#tv2s4-res)" d="M219 115 H233" />
   <rect class="dl-dg-fill" x="235" y="94" width="76" height="42" rx="4" />
   <text class="dl-dg-small" x="273" y="120" text-anchor="middle">normalise</text>
-  <path class="dl-dg-arrow" marker-end="url(#tv2s4-res)" d="M311 115 H333" />
+  <path class="dl-dg-arrow is-enc dl-dg-flow" marker-end="url(#tv2s4-res)" d="M311 115 H333" />
   <rect class="dl-dg-box" x="335" y="94" width="110" height="42" rx="4" />
   <text class="dl-dg-small" x="390" y="120" text-anchor="middle">feed-forward</text>
-  <path class="dl-dg-arrow" marker-end="url(#tv2s4-res)" d="M445 115 H464" />
+  <path class="dl-dg-arrow is-enc dl-dg-flow" marker-end="url(#tv2s4-res)" d="M445 115 H464" />
   <circle class="dl-dg-op" cx="480" cy="115" r="14" />
   <text class="dl-dg-lab is-sm" x="480" y="120" text-anchor="middle">+</text>
-  <path class="dl-dg-arrow" marker-end="url(#tv2s4-res)" d="M494 115 H508" />
+  <path class="dl-dg-arrow is-enc dl-dg-flow" marker-end="url(#tv2s4-res)" d="M494 115 H508" />
   <rect class="dl-dg-fill" x="510" y="94" width="76" height="42" rx="4" />
   <text class="dl-dg-small" x="548" y="120" text-anchor="middle">normalise</text>
-  <path class="dl-dg-arrow" marker-end="url(#tv2s4-res)" d="M586 115 H620" />
+  <path class="dl-dg-arrow is-enc dl-dg-flow" marker-end="url(#tv2s4-res)" d="M586 115 H620" />
   <text class="dl-dg-small" x="640" y="120" text-anchor="middle">out</text>
+  <FlowDot path="M28 115 H620" role="enc" :dur="4" />
   <g v-click>
-    <path d="M44 115 V56 H205 V99" marker-end="url(#tv2s4-res-acc)" style="fill: none; stroke: var(--dl-accent); stroke-width: 2; stroke-dasharray: 5 4" />
-    <path d="M323 115 V56 H480 V99" marker-end="url(#tv2s4-res-acc)" style="fill: none; stroke: var(--dl-accent); stroke-width: 2; stroke-dasharray: 5 4" />
+    <path class="dl-dg-flow" d="M44 115 V56 H205 V99" marker-end="url(#tv2s4-res-acc)" style="fill: none; stroke: var(--dl-accent); stroke-width: 2" />
+    <path class="dl-dg-flow" d="M323 115 V56 H480 V99" marker-end="url(#tv2s4-res-acc)" style="fill: none; stroke: var(--dl-accent); stroke-width: 2" />
+    <FlowDot path="M44 115 V56 H205 V99" role="accent" :dur="2.2" />
+    <FlowDot path="M323 115 V56 H480 V99" role="accent" :dur="2.2" :delay="1.1" />
     <text class="dl-dg-small is-good" x="125" y="48" text-anchor="middle">shortcut: add x back</text>
     <text class="dl-dg-small is-good" x="401" y="48" text-anchor="middle">shortcut: add its input back</text>
   </g>
@@ -2666,8 +2791,11 @@ On screen: one encoder layer, left to right. x goes into self-attention, then
 an add (the circle), then normalise, then the feed-forward network, then
 another add, then normalise again.
 
-Click: the dashed shortcuts. The input of each sub-layer jumps around it and
-is added to its output.
+The main path is green, the encoder colour; its dashes march left to right
+and a green dot travels the whole layer.
+
+Click: the dashed shortcuts, in accent, with their own moving dots. The input
+of each sub-layer jumps around it and is added to its output.
 
 Click 2: the formula. The vector leaving the add is x + Sublayer(x), where
 Sublayer is self-attention or the feed-forward network.
@@ -2697,7 +2825,9 @@ title: "In words: A shortcut around every sub-layer"
 
 <div class="dl-describe">
 
-The picture is one encoder layer, read left to right.
+The picture is one encoder layer, read left to right. The green path is the
+main road; the teal dashed paths are the shortcuts. Moving dots show the data
+travelling along both.
 
 1. The vector $\mathbf{x}$ goes into self-attention.
 2. The dashed shortcut carries $\mathbf{x}$ around it. The circle adds the two:
@@ -2903,17 +3033,18 @@ weights for every word.
 <svg viewBox="0 0 360 190" class="dl-diagram" role="img" aria-label="z1 for Thinking and z2 for Machines each go through a copy of the same feed-forward network, 512 wide, then 2048, then 512, and come out as r1 and r2">
   <defs>
     <marker id="tv2s4-ffn" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
-      <path class="dl-dg-head" d="M0 0 L7 3.5 L0 7 z" />
+      <path class="dl-dg-head is-accent" d="M0 0 L7 3.5 L0 7 z" />
     </marker>
   </defs>
   <g v-for="(w, k) in ['Thinking', 'Machines']" :key="k">
     <text class="dl-dg-small" :x="90 + k * 180" y="182" text-anchor="middle">z{{ k + 1 }} · {{ w }}</text>
-    <path class="dl-dg-arrow" marker-end="url(#tv2s4-ffn)" :d="`M${90 + k * 180} 168 V146`" />
+    <path class="dl-dg-arrow is-accent dl-dg-flow" marker-end="url(#tv2s4-ffn)" :d="`M${90 + k * 180} 168 V146`" />
     <polygon class="dl-dg-net" :points="`${60 + k * 180},144 ${120 + k * 180},144 ${150 + k * 180},104 ${30 + k * 180},104`" />
     <polygon class="dl-dg-net" :points="`${30 + k * 180},100 ${150 + k * 180},100 ${120 + k * 180},60 ${60 + k * 180},60`" />
     <text class="dl-dg-small" :x="90 + k * 180" y="128" text-anchor="middle">512 → 2048</text>
     <text class="dl-dg-small" :x="90 + k * 180" y="84" text-anchor="middle">2048 → 512</text>
-    <path class="dl-dg-arrow" marker-end="url(#tv2s4-ffn)" :d="`M${90 + k * 180} 58 V36`" />
+    <path class="dl-dg-arrow is-accent dl-dg-flow" marker-end="url(#tv2s4-ffn)" :d="`M${90 + k * 180} 58 V36`" />
+    <FlowDot :path="`M${90 + k * 180} 168 V36`" role="accent" :dur="2" :delay="k * 1" />
     <text class="dl-dg-small" :x="90 + k * 180" y="26" text-anchor="middle">r{{ k + 1 }}</text>
   </g>
   <text class="dl-dg-small is-good" x="180" y="102" text-anchor="middle">same</text>
@@ -2951,6 +3082,9 @@ On screen: Thinking's vector z_1 and Machines' vector z_2, each going through
 its own copy of the same network. The lower trapezoid widens 512 to 2048
 (d_ff = 2048 in the paper); the upper one narrows back to 512. The outputs
 r_1 and r_2 go to the next layer.
+
+A dot climbs each column on its own: neither word's dot ever crosses to the
+other network, which is the point of the picture.
 
 Read the formula aloud: FFN of x is ReLU of (x times W_1 plus b_1), times W_2,
 plus b_2. max(0, ...) is ReLU. The next slide names every symbol and works a
@@ -3050,7 +3184,7 @@ title: "In words: The feed-forward network, one word at a time"
 - The feed-forward network is a small MLP. It widens each word's vector, applies
   ReLU, then narrows it back: 512 → 2048 → 512 in the paper.
 - The picture shows *Thinking* and *Machines* going through copies of **one**
-  network with the same weights.
+  network with the same weights. Each moving dot stays in its own column.
 - No word sees another here, so all words run at once.
 - Toy example, with $d_{model} = 2$ and $d_{ff} = 3$: $\mathbf{x} = [1, 2]$
   gives $\mathbf{x}W_1 + \mathbf{b}_1 = [1, 1, -1]$.
@@ -3078,9 +3212,12 @@ title: The full picture, two layers deep
     <marker id="tv2s4-full" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
       <path class="dl-dg-head" d="M0 0 L7 3.5 L0 7 z" />
     </marker>
+    <marker id="tv2s4-full-k" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+      <path class="dl-dg-head is-k" d="M0 0 L7 3.5 L0 7 z" />
+    </marker>
   </defs>
   <g v-for="(y0, e) in [214, 120]" :key="'e' + e">
-    <rect class="dl-dg-fill is-muted" x="60" :y="y0" width="220" height="86" rx="5" />
+    <rect class="dl-dg-fill is-enc" x="60" :y="y0" width="220" height="86" rx="5" />
     <rect class="dl-dg-fill" x="70" :y="y0 + 4" width="200" height="14" rx="2" />
     <text class="dl-dg-small" x="170" :y="y0 + 15" text-anchor="middle">add &amp; norm</text>
     <rect class="dl-dg-box" x="70" :y="y0 + 21" width="200" height="20" rx="3" />
@@ -3089,14 +3226,16 @@ title: The full picture, two layers deep
     <text class="dl-dg-small" x="170" :y="y0 + 55" text-anchor="middle">add &amp; norm</text>
     <rect class="dl-dg-box is-accent" x="70" :y="y0 + 61" width="200" height="20" rx="3" />
     <text class="dl-dg-small" x="170" :y="y0 + 75" text-anchor="middle">self-attention</text>
-    <text class="dl-dg-small" x="286" :y="y0 + 48">encoder {{ 2 - e }}</text>
+    <text class="dl-dg-small is-enc" x="286" :y="y0 + 48">encoder {{ 2 - e }}</text>
   </g>
   <path class="dl-dg-arrow" marker-end="url(#tv2s4-full)" d="M170 304 V302" />
   <path class="dl-dg-arrow" marker-end="url(#tv2s4-full)" d="M170 214 V208" />
   <text class="dl-dg-small" x="170" y="318" text-anchor="middle">Thinking, Machines + positions</text>
+  <FlowDot path="M170 306 V100" role="enc" :dur="3" />
+  <FlowDot path="M170 306 V100" role="enc" :dur="3" :delay="1.5" />
   <g v-click>
     <g v-for="(y0, d) in [174, 40]" :key="'d' + d">
-      <rect class="dl-dg-fill is-muted" x="380" :y="y0" width="220" height="126" rx="5" />
+      <rect class="dl-dg-fill is-dec" x="380" :y="y0" width="220" height="126" rx="5" />
       <rect class="dl-dg-fill" x="390" :y="y0 + 4" width="200" height="14" rx="2" />
       <text class="dl-dg-small" x="490" :y="y0 + 15" text-anchor="middle">add &amp; norm</text>
       <rect class="dl-dg-box" x="390" :y="y0 + 21" width="200" height="20" rx="3" />
@@ -3109,15 +3248,18 @@ title: The full picture, two layers deep
       <text class="dl-dg-small" x="490" :y="y0 + 95" text-anchor="middle">add &amp; norm</text>
       <rect class="dl-dg-box is-accent" x="390" :y="y0 + 101" width="200" height="20" rx="3" />
       <text class="dl-dg-small" x="490" :y="y0 + 115" text-anchor="middle">self-attention</text>
-      <text class="dl-dg-small" x="606" :y="y0 + 68">decoder {{ 2 - d }}</text>
+      <text class="dl-dg-small is-dec" x="606" :y="y0 + 68">decoder {{ 2 - d }}</text>
     </g>
     <path class="dl-dg-arrow" marker-end="url(#tv2s4-full)" d="M490 174 V168" />
     <text class="dl-dg-small" x="490" y="318" text-anchor="middle">outputs so far + positions</text>
     <path class="dl-dg-arrow" marker-end="url(#tv2s4-full)" d="M490 310 V302" />
-    <path class="dl-dg-arrow" d="M170 120 V104 H345" />
-    <path class="dl-dg-arrow" marker-end="url(#tv2s4-full)" d="M345 104 V111 H388" />
-    <path class="dl-dg-arrow" marker-end="url(#tv2s4-full)" d="M345 104 V245 H388" />
-    <text class="dl-dg-small is-good" x="186" y="97">K, V for every decoder</text>
+    <path class="dl-dg-arrow is-k dl-dg-flow" d="M170 120 V104 H345" />
+    <path class="dl-dg-arrow is-k dl-dg-flow" marker-end="url(#tv2s4-full-k)" d="M345 104 V111 H388" />
+    <path class="dl-dg-arrow is-k dl-dg-flow" marker-end="url(#tv2s4-full-k)" d="M345 104 V245 H388" />
+    <FlowDot path="M170 120 V104 H345 V111 H388" role="k" :dur="2" />
+    <FlowDot path="M170 120 V104 H345 V245 H388" role="v" :dur="2.6" :delay="1" />
+    <FlowDot path="M490 312 V40" role="dec" :dur="3" />
+    <text class="dl-dg-small is-k" x="186" y="97">K, V for every decoder</text>
   </g>
   <g v-click>
     <path class="dl-dg-arrow" marker-end="url(#tv2s4-full)" d="M490 40 V32" />
@@ -3130,6 +3272,11 @@ title: The full picture, two layers deep
 <!--
 The point: the whole model in one picture, two layers deep (the paper uses
 six). Every box is now a part the room has met, or meets in the next section.
+
+Colours: encoders green, decoders magenta, the K/V wire orange. Green dots
+climb the encoder stack; once the decoders appear, orange and blue dots (keys
+and values) run along the wire into both decoders, and a magenta dot climbs
+the decoder stack.
 
 On screen, left: two encoder layers stacked. Each has self-attention and a
 feed-forward network, each followed by add & norm. The input at the bottom is
@@ -3163,10 +3310,10 @@ title: "In words: The full picture, two layers deep"
 
 <div class="dl-describe">
 
+- Encoders are green, decoders magenta. Dots climb each stack and run along
+  the orange key–value wire.
 - The left column is two encoder layers. Each has self-attention and a
   feed-forward network, and each of those is followed by "add & norm".
-- The encoders read the word embeddings plus position vectors, from the bottom
-  up.
 - The right column is two decoder layers. Each has **three** sub-layers:
   self-attention, encoder–decoder attention and a feed-forward network.
 - The top encoder's output goes to the encoder–decoder attention of every
@@ -3216,46 +3363,58 @@ title: The encoder hands over keys and values
 <div class="mt-1 flex justify-center">
 <svg viewBox="0 0 660 256" class="dl-diagram" role="img" aria-label="The encoder stack reads je suis étudiant once; its top output is turned into keys and values that go to every one of the six decoders">
   <defs>
-    <marker id="tv2s5-kv-head" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
-      <path class="dl-dg-head" d="M0 0 L7 3.5 L0 7 z" />
+    <marker id="tv2s5-kv-enc" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+      <path class="dl-dg-head is-enc" d="M0 0 L7 3.5 L0 7 z" />
+    </marker>
+    <marker id="tv2s5-kv-dec" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+      <path class="dl-dg-head is-dec" d="M0 0 L7 3.5 L0 7 z" />
+    </marker>
+    <marker id="tv2s5-kv-k" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+      <path class="dl-dg-head is-k" d="M0 0 L7 3.5 L0 7 z" />
     </marker>
   </defs>
-  <text class="dl-dg-small" x="130" y="250" text-anchor="middle">input: je suis étudiant</text>
-  <rect class="dl-dg-box" x="50" y="204" width="50" height="24" rx="4" />
-  <rect class="dl-dg-box" x="105" y="204" width="50" height="24" rx="4" />
-  <rect class="dl-dg-box" x="160" y="204" width="50" height="24" rx="4" />
+  <text class="dl-dg-small is-enc" x="130" y="250" text-anchor="middle">input: je suis étudiant</text>
+  <rect class="dl-dg-box is-enc" x="50" y="204" width="50" height="24" rx="4" />
+  <rect class="dl-dg-box is-enc" x="105" y="204" width="50" height="24" rx="4" />
+  <rect class="dl-dg-box is-enc" x="160" y="204" width="50" height="24" rx="4" />
   <text class="dl-dg-small" x="75" y="220" text-anchor="middle">je</text>
   <text class="dl-dg-small" x="130" y="220" text-anchor="middle">suis</text>
   <text class="dl-dg-small" x="185" y="220" text-anchor="middle">étudiant</text>
-  <path class="dl-dg-arrow" marker-end="url(#tv2s5-kv-head)" d="M130 202 V186" />
-  <rect class="dl-dg-box" x="40" y="150" width="180" height="34" rx="4" />
+  <path class="dl-dg-arrow is-enc dl-dg-flow is-slow" marker-end="url(#tv2s5-kv-enc)" d="M130 202 V186" />
+  <rect class="dl-dg-box is-enc" x="40" y="150" width="180" height="34" rx="4" />
   <text class="dl-dg-lab is-sm" x="130" y="172" text-anchor="middle">encoder 1</text>
-  <path class="dl-dg-arrow" marker-end="url(#tv2s5-kv-head)" d="M130 148 V134" />
-  <text class="dl-dg-small" x="130" y="124" text-anchor="middle">encoders 2 to 5</text>
-  <path class="dl-dg-arrow" marker-end="url(#tv2s5-kv-head)" d="M130 112 V98" />
-  <rect class="dl-dg-box" x="40" y="62" width="180" height="34" rx="4" />
+  <path class="dl-dg-arrow is-enc dl-dg-flow is-slow" marker-end="url(#tv2s5-kv-enc)" d="M130 148 V134" />
+  <text class="dl-dg-small is-enc" x="130" y="124" text-anchor="middle">encoders 2 to 5</text>
+  <path class="dl-dg-arrow is-enc dl-dg-flow is-slow" marker-end="url(#tv2s5-kv-enc)" d="M130 112 V98" />
+  <rect class="dl-dg-box is-enc" x="40" y="62" width="180" height="34" rx="4" />
   <text class="dl-dg-lab is-sm" x="130" y="84" text-anchor="middle">encoder 6</text>
-  <path class="dl-dg-arrow" marker-end="url(#tv2s5-kv-head)" d="M130 60 V44" />
-  <rect class="dl-dg-box is-accent" x="70" y="20" width="36" height="22" rx="3" />
-  <rect class="dl-dg-box is-accent" x="112" y="20" width="36" height="22" rx="3" />
-  <rect class="dl-dg-box is-accent" x="154" y="20" width="36" height="22" rx="3" />
+  <path class="dl-dg-arrow is-enc dl-dg-flow is-slow" marker-end="url(#tv2s5-kv-enc)" d="M130 60 V44" />
+  <rect class="dl-dg-box is-enc" x="70" y="20" width="36" height="22" rx="3" />
+  <rect class="dl-dg-box is-enc" x="112" y="20" width="36" height="22" rx="3" />
+  <rect class="dl-dg-box is-enc" x="154" y="20" width="36" height="22" rx="3" />
   <text class="dl-dg-small" x="130" y="13" text-anchor="middle">one vector per input word</text>
-  <rect class="dl-dg-box" x="440" y="150" width="180" height="34" rx="4" />
+  <rect class="dl-dg-box is-dec" x="440" y="150" width="180" height="34" rx="4" />
   <text class="dl-dg-lab is-sm" x="530" y="172" text-anchor="middle">decoder 1</text>
-  <path class="dl-dg-arrow" marker-end="url(#tv2s5-kv-head)" d="M530 148 V134" />
-  <text class="dl-dg-small" x="530" y="124" text-anchor="middle">decoders 2 to 5</text>
-  <path class="dl-dg-arrow" marker-end="url(#tv2s5-kv-head)" d="M530 112 V98" />
-  <rect class="dl-dg-box" x="440" y="62" width="180" height="34" rx="4" />
+  <path class="dl-dg-arrow is-dec" marker-end="url(#tv2s5-kv-dec)" d="M530 148 V134" />
+  <text class="dl-dg-small is-dec" x="530" y="124" text-anchor="middle">decoders 2 to 5</text>
+  <path class="dl-dg-arrow is-dec" marker-end="url(#tv2s5-kv-dec)" d="M530 112 V98" />
+  <rect class="dl-dg-box is-dec" x="440" y="62" width="180" height="34" rx="4" />
   <text class="dl-dg-lab is-sm" x="530" y="84" text-anchor="middle">decoder 6</text>
-  <path class="dl-dg-arrow" marker-end="url(#tv2s5-kv-head)" d="M530 60 V44" />
-  <text class="dl-dg-small" x="530" y="34" text-anchor="middle">the next output word</text>
-  <path class="dl-dg-arrow" marker-end="url(#tv2s5-kv-head)" d="M530 230 V186" />
-  <text class="dl-dg-small" x="530" y="248" text-anchor="middle">output so far: ⟨start⟩ …</text>
+  <path class="dl-dg-arrow is-dec" marker-end="url(#tv2s5-kv-dec)" d="M530 60 V44" />
+  <text class="dl-dg-small is-dec" x="530" y="34" text-anchor="middle">the next output word</text>
+  <path class="dl-dg-arrow is-dec" marker-end="url(#tv2s5-kv-dec)" d="M530 230 V186" />
+  <text class="dl-dg-small is-dec" x="530" y="248" text-anchor="middle">output so far: ⟨start⟩ …</text>
   <g v-click>
-    <path class="dl-dg-grad is-good" marker-end="url(#tv2s5-kv-head)" d="M192 31 C 330 31, 330 167, 436 167" />
-    <path class="dl-dg-grad is-good" marker-end="url(#tv2s5-kv-head)" d="M192 31 C 330 31, 340 122, 436 122" />
-    <path class="dl-dg-grad is-good" marker-end="url(#tv2s5-kv-head)" d="M192 31 C 330 31, 350 79, 436 79" />
-    <text class="dl-dg-in" x="300" y="22" text-anchor="middle">K and V</text>
+    <path class="dl-dg-arrow is-k dl-dg-flow" marker-end="url(#tv2s5-kv-k)" d="M192 31 C 330 31, 330 167, 436 167" />
+    <path class="dl-dg-arrow is-k dl-dg-flow" marker-end="url(#tv2s5-kv-k)" d="M192 31 C 330 31, 340 122, 436 122" />
+    <path class="dl-dg-arrow is-k dl-dg-flow" marker-end="url(#tv2s5-kv-k)" d="M192 31 C 330 31, 350 79, 436 79" />
+    <FlowDot path="M192 31 C 330 31, 330 167, 436 167" role="k" :dur="2.4" :delay="0" />
+    <FlowDot path="M192 31 C 330 31, 330 167, 436 167" role="v" :dur="2.4" :delay="1.2" />
+    <FlowDot path="M192 31 C 330 31, 340 122, 436 122" role="k" :dur="2.4" :delay="0.4" />
+    <FlowDot path="M192 31 C 330 31, 340 122, 436 122" role="v" :dur="2.4" :delay="1.6" />
+    <FlowDot path="M192 31 C 330 31, 350 79, 436 79" role="k" :dur="2.4" :delay="0.8" />
+    <FlowDot path="M192 31 C 330 31, 350 79, 436 79" role="v" :dur="2.4" :delay="2.0" />
+    <text class="dl-dg-in" x="300" y="22" text-anchor="middle"><tspan style="fill: var(--dl-k)">K</tspan> and <tspan style="fill: var(--dl-v)">V</tspan></text>
     <text class="dl-dg-small is-good" x="330" y="200" text-anchor="middle">the same K and V</text>
     <text class="dl-dg-small is-good" x="330" y="214" text-anchor="middle">go to every decoder</text>
   </g>
@@ -3279,7 +3438,11 @@ one accent box per input word: the encoder's output, one vector of 512 numbers
 per word. Right, the decoder stack, also six high. Its input at the bottom is
 the output written so far, starting from a start symbol.
 
-Click: the dashed accent curves. The top encoder output is multiplied by a key
+Colours: the encoder side is green, the decoder side magenta, keys orange and
+values blue; the marching dashes and dots show the direction data moves.
+
+Click: the orange curves, with orange (K) and blue (V) dots travelling along
+them. The top encoder output is multiplied by a key
 matrix and a value matrix to make K and V. The same K and V go into every one of
 the six decoders, into a layer called encoder–decoder attention. That layer is
 two slides on.
@@ -3304,12 +3467,13 @@ title: "In words: The encoder hands over keys and values"
 
 <div class="dl-describe">
 
-- The left stack is the encoder: six encoders on top of each other. It reads
-  the input *je suis étudiant* from the bottom.
-- The accent boxes at the top are its output: one vector per input word.
-- The dashed curves show that output turned into keys $K$ and values $V$.
-- The same $K$ and $V$ go to **all six** decoders on the right. Decoder 3 does
-  not read encoder 3; every decoder reads the top encoder.
+- The green stack on the left is the encoder: six encoders on top of each
+  other. It reads the input *je suis étudiant* from the bottom.
+- The green boxes at the top are its output: one vector per input word.
+- The orange curves carry that output, turned into keys $K$ (orange dots) and
+  values $V$ (blue dots), to the magenta decoders.
+- The same $K$ and $V$ go to **all six** decoders. Decoder 3 does not read
+  encoder 3; every decoder reads the top encoder.
 - The encoder runs once per sentence. The decoder runs once per output word.
 
 </div>
@@ -3346,8 +3510,9 @@ The decoder writes **one word per step**.
 The point: the decoder is a loop. It writes a word, then reads everything it
 has written so far, then writes the next word.
 
-On screen: the input row shows the French sentence, already read once by the
-encoder. The output row starts with the start symbol only. The bars are the
+On screen: the input row shows the French sentence in green (the encoder's
+colour), already read once by the encoder. Output words are magenta (the
+decoder's colour), and each new word drops into place. The output row starts with the start symbol only. The bars are the
 probability the model gives each of the six words in our tiny vocabulary for
 the current output position. The ringed word is the right answer; the accent
 bar is the word the model picks, the highest one.
@@ -3386,8 +3551,8 @@ title: "In words: One word per step"
 
 <div class="dl-describe">
 
-1. The encoder has already read *je suis étudiant*. The decoder starts from a
-   ⟨start⟩ symbol.
+1. The encoder has already read *je suis étudiant* (green). The decoder starts
+   from a ⟨start⟩ symbol; its words are magenta.
 2. At each step it gives a probability to every word in the vocabulary. Here
    the vocabulary has six words.
 3. It picks the most likely word: *i* (0.80), then *am* (0.75), *a* (0.70),
@@ -3416,11 +3581,11 @@ title: "No looking ahead: the mask"
 
 <svg viewBox="0 0 320 210" class="dl-diagram" role="img" aria-label="Scaled scores for three decoder positions. Every cell to the right of the diagonal is minus infinity. After softmax the rows are 1 0 0, 0.5 0.5 0, and 0.79 0.11 0.11">
   <text class="dl-dg-small" x="10" y="14">scaled scores, one row per asking position</text>
-  <text v-for="(h, c) in ['⟨start⟩', 'i', 'am']" :key="'h' + c" class="dl-dg-small" :x="128 + c * 64" y="36" text-anchor="middle">{{ h }}</text>
+  <text v-for="(h, c) in ['⟨start⟩', 'i', 'am']" :key="'h' + c" class="dl-dg-small is-dec" :x="128 + c * 64" y="36" text-anchor="middle">{{ h }}</text>
   <g v-for="(row, r) in [['⟨start⟩', ['3', '−∞', '−∞']], ['i', ['1', '1', '−∞']], ['am', ['2', '0', '0']]]" :key="r">
-    <text class="dl-dg-small" x="88" :y="64 + r * 40" text-anchor="end">{{ row[0] }}</text>
+    <text class="dl-dg-small is-dec" x="88" :y="64 + r * 40" text-anchor="end">{{ row[0] }}</text>
     <g v-for="(v, c) in row[1]" :key="c">
-      <rect :class="c > r ? 'dl-dg-box is-bad' : 'dl-dg-box'" :x="100 + c * 64" :y="44 + r * 40" width="56" height="32" rx="3" />
+      <rect :class="c > r ? 'dl-dg-box is-bad dl-dg-pulse' : 'dl-dg-box is-accent'" :x="100 + c * 64" :y="44 + r * 40" width="56" height="32" rx="3" />
       <text :class="c > r ? 'dl-dg-small is-bad' : 'dl-dg-lab is-sm'" :x="128 + c * 64" :y="65 + r * 40" text-anchor="middle">{{ v }}</text>
     </g>
   </g>
@@ -3461,6 +3626,10 @@ The mask blocks the future. Each word is predicted from the words before it only
 <!--
 The point: the decoder's self-attention is the same attention as the encoder's,
 with one change. A position may only read itself and the positions before it.
+
+Colours: the word labels are magenta, the decoder's colour. Teal cells are
+allowed; the red cells to the right of the diagonal pulse to show they are
+blocked.
 
 On screen, left: a 3 by 3 grid of scaled scores, that is q·k divided by the
 square root of d_k, for the decoder input "⟨start⟩ i am". Rows are the asking
@@ -3577,7 +3746,8 @@ title: "In words: No looking ahead: the mask"
 - In training, the decoder gets the whole correct sentence at once. Without a
   rule, each position could copy the next word.
 - The mask $M$ adds $-\infty$ to every score to the right of the diagonal, the
-  red cells. Their softmax weight becomes $e^{-\infty} = 0$.
+  pulsing red cells. Their softmax weight becomes $e^{-\infty} = 0$. The teal
+  cells are the ones a position may read.
 - So the full line is $\operatorname{softmax}(QK^\top / \sqrt{d_k} + M)\,V$.
 - Row 1 (scores $3, -\infty, -\infty$) becomes $1, 0, 0$. Row 2 ($1, 1,
   -\infty$) becomes $0.5, 0.5, 0$.
@@ -3601,25 +3771,27 @@ title: Encoder–decoder attention
 
 <div class="mt-1 flex justify-center">
 <svg viewBox="0 0 640 230" class="dl-diagram" style="max-height: 12rem" role="img" aria-label="The decoder position about to write am sends its query down to the three encoder outputs je, suis, étudiant; the line to suis is thickest at 0.8">
-  <text class="dl-dg-small" x="320" y="16" text-anchor="middle">decoder: the position about to write "am"</text>
-  <circle class="dl-dg-dot is-accent" cx="320" cy="44" r="13" />
+  <text class="dl-dg-small is-dec" x="320" y="16" text-anchor="middle">decoder: the position about to write "am"</text>
+  <circle class="dl-dg-dot" cx="320" cy="44" r="13" style="fill: var(--dl-q)" />
   <text class="dl-dg-in" x="320" y="49" text-anchor="middle" style="fill: var(--dl-bg)">q</text>
-  <text class="dl-dg-small is-good" x="346" y="48">query from the decoder layer below</text>
+  <text class="dl-dg-small is-q" x="346" y="48">query from the decoder layer below</text>
   <g v-click>
-    <line class="dl-dg-line is-muted" x1="312" y1="56" x2="140" y2="150" style="stroke-width: 1.6" />
-    <line class="dl-dg-line" x1="320" y1="58" x2="320" y2="150" style="stroke-width: 9" />
-    <line class="dl-dg-line is-muted" x1="328" y1="56" x2="500" y2="150" style="stroke-width: 1.6" />
+    <line class="dl-dg-line is-q dl-dg-flow is-slow" x1="312" y1="56" x2="140" y2="150" style="stroke-width: 1.6" />
+    <line class="dl-dg-line is-q" x1="320" y1="58" x2="320" y2="150" style="stroke-width: 9" />
+    <line class="dl-dg-line is-q dl-dg-flow is-slow" x1="328" y1="56" x2="500" y2="150" style="stroke-width: 1.6" />
+    <FlowDot path="M320 58 V150" role="q" :dur="2" :delay="0" />
+    <FlowDot path="M320 150 V58" role="v" :dur="2" :delay="1" r="5" />
     <text class="dl-dg-small" x="214" y="98" text-anchor="end">0.1</text>
     <text class="dl-dg-small is-good" x="332" y="110">0.8</text>
     <text class="dl-dg-small" x="426" y="98">0.1</text>
   </g>
-  <rect class="dl-dg-box" x="100" y="152" width="80" height="30" rx="4" />
-  <rect class="dl-dg-box is-accent" x="280" y="152" width="80" height="30" rx="4" />
-  <rect class="dl-dg-box" x="460" y="152" width="80" height="30" rx="4" />
+  <rect class="dl-dg-box is-k" x="100" y="152" width="80" height="30" rx="4" />
+  <rect class="dl-dg-box is-k" x="280" y="152" width="80" height="30" rx="4" style="stroke-width: 3" />
+  <rect class="dl-dg-box is-k" x="460" y="152" width="80" height="30" rx="4" />
   <text class="dl-dg-lab is-sm" x="140" y="172" text-anchor="middle">je</text>
   <text class="dl-dg-lab is-sm" x="320" y="172" text-anchor="middle">suis</text>
   <text class="dl-dg-lab is-sm" x="500" y="172" text-anchor="middle">étudiant</text>
-  <text class="dl-dg-small" x="320" y="204" text-anchor="middle">keys and values from the top encoder's output</text>
+  <text class="dl-dg-small" x="320" y="204" text-anchor="middle"><tspan style="fill: var(--dl-k)">keys</tspan> and <tspan style="fill: var(--dl-v)">values</tspan> from the top encoder's output</text>
   <text class="dl-dg-small" x="320" y="222" text-anchor="middle">weights drawn to show the idea, not from a trained model</text>
 </svg>
 </div>
@@ -3642,7 +3814,9 @@ The point: encoder–decoder attention is the same scaled dot-product attention,
 with the queries taken from one place and the keys and values from another.
 
 On screen: at the top, one decoder position, the one about to write "am". Its
-query is the accent dot. At the bottom, the three encoder outputs for "je",
+query is the purple dot. The encoder outputs are orange, the colour of keys.
+After the click a purple dot runs down the thick line (the query) and a blue
+dot runs back up (the value it brings home). At the bottom, the three encoder outputs for "je",
 "suis" and "étudiant". The weights are drawn by hand; the slide says so.
 
 Click: the three lines appear, as thick as their weight. 0.1 on "je", 0.8 on
@@ -3674,14 +3848,14 @@ title: "In words: Encoder–decoder attention"
 
 <div class="dl-describe">
 
-- The accent dot at the top is the query of one decoder position: the one about
-  to write *am*. It comes from the decoder layer below.
-- The three boxes at the bottom are the encoder's outputs for *je*, *suis* and
-  *étudiant*. They supply the keys and the values.
+- The purple dot at the top is the query of one decoder position: the one
+  about to write *am*. It comes from the decoder layer below.
+- The three orange boxes at the bottom are the encoder's outputs for *je*,
+  *suis* and *étudiant*. They supply the keys and the values.
+- A purple dot travels down to the keys; a blue dot carries the value back up.
 - Each line is as thick as its attention weight: 0.1, 0.8 and 0.1. To write
-  *am*, the decoder reads mostly *suis*. These weights are drawn, not trained.
-- The computation is ordinary attention. There is no mask, because the whole
-  input sentence is known.
+  *am*, the decoder reads mostly *suis*. The weights are drawn, not trained.
+- It is ordinary attention, with no mask: the whole input is known.
 
 </div>
 
@@ -3704,14 +3878,21 @@ title: "From a vector to a word: linear and softmax"
     <marker id="tv2s5-out-head" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
       <path class="dl-dg-head" d="M0 0 L7 3.5 L0 7 z" />
     </marker>
+    <marker id="tv2s5-out-dec" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+      <path class="dl-dg-head is-dec" d="M0 0 L7 3.5 L0 7 z" />
+    </marker>
+    <marker id="tv2s5-out-acc" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+      <path class="dl-dg-head is-accent" d="M0 0 L7 3.5 L0 7 z" />
+    </marker>
   </defs>
-  <rect class="dl-dg-box is-accent" x="10" y="40" width="34" height="150" rx="4" />
+  <rect class="dl-dg-box is-dec" x="10" y="40" width="34" height="150" rx="4" />
   <text class="dl-dg-small" x="27" y="210" text-anchor="middle">512 numbers</text>
-  <text class="dl-dg-small" x="27" y="26" text-anchor="middle">decoder</text>
-  <path class="dl-dg-arrow" marker-end="url(#tv2s5-out-head)" d="M48 115 H72" />
+  <text class="dl-dg-small is-dec" x="27" y="26" text-anchor="middle">decoder</text>
+  <path class="dl-dg-arrow is-dec dl-dg-flow" marker-end="url(#tv2s5-out-dec)" d="M48 115 H72" />
+  <FlowDot path="M27 115 H76" role="dec" :dur="1.2" />
   <polygon class="dl-dg-net" points="76,70 156,40 156,190 76,160" />
   <text class="dl-dg-in" x="116" y="120" text-anchor="middle">linear</text>
-  <path class="dl-dg-arrow" marker-end="url(#tv2s5-out-head)" d="M160 115 H184" />
+  <path class="dl-dg-arrow dl-dg-flow" marker-end="url(#tv2s5-out-head)" d="M160 115 H184" />
   <g v-click>
     <text class="dl-dg-small" x="252" y="26" text-anchor="middle">logits: one score per word</text>
     <line class="dl-dg-split" x1="252" y1="40" x2="252" y2="190" />
@@ -3722,7 +3903,8 @@ title: "From a vector to a word: linear and softmax"
     </g>
   </g>
   <g v-click>
-    <path class="dl-dg-arrow" marker-end="url(#tv2s5-out-head)" d="M380 115 H420" />
+    <path class="dl-dg-arrow is-accent dl-dg-flow" marker-end="url(#tv2s5-out-acc)" d="M380 115 H420" />
+    <FlowDot path="M376 115 H422" role="accent" :dur="1.2" />
     <text class="dl-dg-small" x="400" y="105" text-anchor="middle">softmax</text>
     <text class="dl-dg-small" x="520" y="26" text-anchor="middle">probabilities: sum to 1</text>
     <line class="dl-dg-split" x1="490" y1="40" x2="490" y2="190" />
@@ -3733,7 +3915,7 @@ title: "From a vector to a word: linear and softmax"
     </g>
   </g>
   <g v-click>
-    <text class="dl-dg-lab" x="645" y="110" text-anchor="middle">"i"</text>
+    <text class="dl-dg-lab is-dec" x="645" y="110" text-anchor="middle">"i"</text>
     <text class="dl-dg-small is-good" x="645" y="128" text-anchor="middle">the largest</text>
   </g>
 </svg>
@@ -3748,6 +3930,9 @@ A linear layer gives one score per vocabulary word. Softmax turns the scores int
 <!--
 The point: the last decoder outputs a vector of numbers, and two familiar pieces
 turn it into a word — a fully connected layer and a softmax.
+
+Colours: the decoder's vector is magenta; the moving dots follow the data
+from the decoder, through the linear layer, through the softmax, to the word.
 
 On screen, left: the top decoder's output for one position, a vector of 512
 numbers. The trapezoid is a linear layer, a fully connected layer with no
@@ -3863,7 +4048,7 @@ title: "In words: From a vector to a word: linear and softmax"
 <div class="dl-describe">
 
 1. The top decoder gives one vector $\mathbf{h}$ of 512 numbers per output
-   position.
+   position: the tall magenta bar. Moving dots trace it to the word.
 2. A linear layer, $\mathbf{z} = \mathbf{h}\,W_{out} + \mathbf{b}$, makes one
    score per vocabulary word. These scores are the logits.
 3. Softmax turns the logits into probabilities $\mathbf{p}$.
@@ -3915,9 +4100,9 @@ title: The target, as one-hot vectors
   <text v-for="(h, c) in ['a', 'am', 'i', 'thanks', 'student', '⟨eos⟩']" :key="'h' + c" class="dl-dg-small" :x="196 + c * 58" y="18" text-anchor="middle">{{ h }}</text>
   <g v-for="(t, r) in [2, 1, 0, 4, 5]" :key="r">
     <text class="dl-dg-small" x="10" :y="48 + r * 38">position {{ r + 1 }}</text>
-    <text class="dl-dg-lab is-sm" x="150" :y="48 + r * 38" text-anchor="end">{{ ['i', 'am', 'a', 'student', '⟨eos⟩'][r] }}</text>
+    <text class="dl-dg-lab is-sm is-dec" x="150" :y="48 + r * 38" text-anchor="end">{{ ['i', 'am', 'a', 'student', '⟨eos⟩'][r] }}</text>
     <g v-for="c in 6" :key="c">
-      <rect :class="c - 1 === t ? 'dl-dg-box is-accent' : 'dl-dg-box'" :x="170 + (c - 1) * 58" :y="28 + r * 38" width="52" height="30" rx="3" />
+      <rect :class="c - 1 === t ? 'dl-dg-box is-accent dl-dg-pulse' : 'dl-dg-box'" :x="170 + (c - 1) * 58" :y="28 + r * 38" width="52" height="30" rx="3" />
       <text :class="c - 1 === t ? 'dl-dg-lab is-sm' : 'dl-dg-small'" :x="196 + (c - 1) * 58" :y="48 + r * 38" text-anchor="middle">{{ c - 1 === t ? 1 : 0 }}</text>
     </g>
   </g>
@@ -3937,8 +4122,8 @@ have the same shape as the model's output: one number per vocabulary word.
 
 On screen: six columns, one per word of the toy vocabulary: a, am, i, thanks,
 student and the end symbol. Five rows, one per position of the target sentence
-"i am a student ⟨eos⟩". Each row has one accent cell holding 1 and five cells
-holding 0.
+"i am a student ⟨eos⟩" (in magenta, the decoder's colour). Each row has one
+teal cell holding 1, gently pulsing, and five cells holding 0.
 
 Click: the vocabulary. Alammar uses six words so the picture fits; a real
 translation model has tens of thousands.
@@ -3963,8 +4148,9 @@ title: "In words: The target, as one-hot vectors"
 - The columns are the six vocabulary words: *a, am, i, thanks, student* and
   ⟨eos⟩.
 - The rows are the five positions of the target sentence *i am a student
-  ⟨eos⟩*.
-- Each row is a one-hot vector: a 1 under the right word and 0 everywhere else.
+  ⟨eos⟩*, written in magenta.
+- Each row is a one-hot vector: a 1 (the teal cell) under the right word and 0
+  everywhere else.
   For example, *am* is $[0, 1, 0, 0, 0, 0]$.
 - A one-hot row is the perfect output: all the probability on the right word.
   Training pushes the model's output towards it.
@@ -4078,8 +4264,15 @@ $$
 
 <svg viewBox="0 0 260 150" class="dl-diagram" role="img" aria-label="Probability 0.17 gives loss 1.79; probability 0.9 gives loss 0.11">
   <line class="dl-dg-split" x1="20" y1="120" x2="240" y2="120" />
+  <defs>
+    <marker id="tv2s6-ce-acc" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+      <path class="dl-dg-head is-accent" d="M0 0 L7 3.5 L0 7 z" />
+    </marker>
+  </defs>
   <rect class="dl-dg-bar is-bad" x="40" y="50" width="50" height="70" rx="2" />
   <rect class="dl-dg-bar is-q" x="160" y="116" width="50" height="4" rx="2" />
+  <path class="dl-dg-arrow is-accent dl-dg-flow is-slow" marker-end="url(#tv2s6-ce-acc)" d="M96 70 C 130 70, 150 90, 160 104" />
+  <FlowDot path="M96 70 C 130 70, 150 90, 160 104" role="accent" :dur="2.2" />
   <text class="dl-dg-small" x="65" y="44" text-anchor="middle">loss 1.79</text>
   <text class="dl-dg-small" x="185" y="110" text-anchor="middle">loss 0.11</text>
   <text class="dl-dg-small" x="65" y="138" text-anchor="middle">p = 0.17</text>
@@ -4101,6 +4294,9 @@ Trained sentence: $0.22 + 0.29 + 0.36 + 0.16 + 0.11 = 1.14$
 Read it aloud: the loss on one word is minus the log of the probability the model
 gave to the right word. The loss on a sentence is the same thing added up over
 every position.
+
+The picture: the red bar is the untrained loss (p = 0.17); the moving teal
+arrow leads to the short teal bar, the loss once p reaches 0.90.
 
 Clicks 1 to 5: one legend row per click. y is the target word, data from the
 training pair. p_y is its probability, the output of the softmax. log is the
@@ -4137,7 +4333,8 @@ title: "In words: The loss on one word: merci → thanks"
 - The loss is $L = -\log p_{y}$, minus the log of the right word's probability:
   $-\log 0.17 = 1.79$.
 - Raising the *thanks* logit raises its probability and lowers the loss. A
-  probability of 0.90 gives a loss of 0.11.
+  probability of 0.90 gives a loss of 0.11: the moving teal arrow from the
+  red bar to the short teal bar.
 - Backpropagation finds how every weight should change to do this. Gradient
   descent takes the step.
 - For a sentence, add the losses of all its positions.
@@ -4275,6 +4472,9 @@ The sentence loss adds one $-\log p$ per position.
 The point: a sentence is trained position by position, and its loss is the sum
 of the per-position losses.
 
+Colours as before: input words green (encoder), output words magenta (decoder);
+each new output word drops in as it is written.
+
 On screen: the same decoding widget as before, now with a loss row at the bottom.
 It starts with an untrained model: every bar is 1/6, and the ringed word is the
 right one.
@@ -4341,21 +4541,27 @@ title: Greedy or beam search
     <marker id="tv2s6-beam-head" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
       <path class="dl-dg-head" d="M0 0 L7 3.5 L0 7 z" />
     </marker>
+    <marker id="tv2s6-beam-acc" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+      <path class="dl-dg-head is-accent" d="M0 0 L7 3.5 L0 7 z" />
+    </marker>
   </defs>
   <text class="dl-dg-small" x="60" y="16" text-anchor="middle">start</text>
   <text class="dl-dg-small" x="250" y="16" text-anchor="middle">step 1</text>
   <text class="dl-dg-small" x="500" y="16" text-anchor="middle">step 2: score = product</text>
-  <rect class="dl-dg-box" x="20" y="96" width="80" height="30" rx="4" />
+  <rect class="dl-dg-box is-dec" x="20" y="96" width="80" height="30" rx="4" />
   <text class="dl-dg-lab is-sm" x="60" y="116" text-anchor="middle">⟨start⟩</text>
-  <path class="dl-dg-arrow" marker-end="url(#tv2s6-beam-head)" d="M100 104 L196 66" />
-  <path class="dl-dg-arrow" marker-end="url(#tv2s6-beam-head)" d="M100 118 L196 156" />
+  <path class="dl-dg-arrow is-accent dl-dg-flow" marker-end="url(#tv2s6-beam-acc)" d="M100 104 L196 66" style="stroke-width: 2.6" />
+  <FlowDot path="M100 104 L196 66" role="accent" :dur="1.4" />
+  <path class="dl-dg-arrow dl-dg-flow is-slow" marker-end="url(#tv2s6-beam-head)" d="M100 118 L196 156" />
   <rect class="dl-dg-box is-accent" x="200" y="48" width="100" height="32" rx="4" />
   <text class="dl-dg-lab is-sm" x="250" y="69" text-anchor="middle">i  0.80</text>
   <rect class="dl-dg-box" x="200" y="140" width="100" height="32" rx="4" />
   <text class="dl-dg-lab is-sm" x="250" y="161" text-anchor="middle">a  0.08</text>
   <g v-click>
-    <path class="dl-dg-arrow" marker-end="url(#tv2s6-beam-head)" d="M300 58 L416 36" />
-    <path class="dl-dg-arrow" marker-end="url(#tv2s6-beam-head)" d="M300 70 L416 84" />
+    <path class="dl-dg-arrow is-accent dl-dg-flow" marker-end="url(#tv2s6-beam-acc)" d="M300 58 L416 36" style="stroke-width: 2.6" />
+    <FlowDot path="M300 58 L416 36" role="accent" :dur="1.4" :delay="0.7" />
+    <path class="dl-dg-arrow is-accent dl-dg-flow is-slow" marker-end="url(#tv2s6-beam-acc)" d="M300 70 L416 84" />
+    <FlowDot path="M300 70 L416 84" role="accent" :dur="1.8" :delay="0.3" r="3.5" />
     <path class="dl-dg-arrow" marker-end="url(#tv2s6-beam-head)" d="M300 150 L416 136" />
     <path class="dl-dg-arrow" marker-end="url(#tv2s6-beam-head)" d="M300 162 L416 184" />
     <rect class="dl-dg-box is-accent" x="420" y="22" width="220" height="28" rx="4" />
@@ -4367,7 +4573,7 @@ title: Greedy or beam search
     <rect class="dl-dg-box is-bad" x="420" y="170" width="220" height="28" rx="4" />
     <text class="dl-dg-small" x="430" y="189">a am: 0.08 × 0.20 = 0.016</text>
   </g>
-  <text class="dl-dg-small" x="330" y="214" text-anchor="middle">toy numbers; beam size 2 keeps the two accent boxes</text>
+  <text class="dl-dg-small" x="330" y="214" text-anchor="middle">toy numbers; beam size 2 keeps the two teal boxes</text>
 </svg>
 </div>
 
@@ -4389,7 +4595,10 @@ The point: the model gives probabilities; turning them into one sentence is a
 separate choice, made after training.
 
 On screen: a small search tree with made-up numbers. From the start symbol, the
-two most likely first words: "i" at 0.80 and "a" at 0.08.
+two most likely first words: "i" at 0.80 and "a" at 0.08. The thick teal arrows
+with moving dots are the greedy path, start → i → i am; the thinner teal arrow
+with a smaller dot is the second kept beam, i a. Dropped branches stay grey and
+red.
 
 Click: step 2. Each kept sentence is extended by its two best next words. A
 partial sentence is scored by multiplying its word probabilities: "i am" is 0.80
@@ -4430,10 +4639,10 @@ title: "In words: Greedy or beam search"
   probabilities: *i am* is $0.80 \times 0.75 = 0.60$.
 - With beam size 2, the two best survive: *i am* (0.60) and *i a* (0.08). The
   red boxes are dropped.
-- Greedy decoding keeps only the single best word at each step.
+- Greedy decoding keeps only the single best word at each step: the thick
+  teal arrows with moving dots.
 - If the best first word turns out wrong, beam search still holds a second
-  option. The beam size is a hyperparameter, set by hand. The numbers are toy
-  numbers.
+  option. The beam size is a hyperparameter, set by hand.
 
 </div>
 

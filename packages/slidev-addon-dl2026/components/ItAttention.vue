@@ -69,7 +69,7 @@ function onKey(e: KeyboardEvent) {
       @keydown="onKey"
     >
       <line
-        v-for="l in lines" :key="`${l.h}-${l.j}`"
+        v-for="l in lines" :key="`${l.h}-${l.j}-${at}`"
         :x1="Q_X - 8" :y1="TOP + at * ROW - 4" :x2="KEY_X + 8" :y2="l.y - 4"
         class="dl-ita__line" :class="{ 'is-h2': l.h === 1 }"
         :style="{ strokeWidth: 0.6 + l.w * 16, opacity: 0.25 + l.w * 1.5 }"
@@ -101,7 +101,7 @@ function onKey(e: KeyboardEvent) {
 
     <template #readout>
       <template v-for="h in heads" :key="h">
-        <span :class="{ 'dl-ita__h2': h === 1 }">Head {{ h + 1 }}</span>:
+        <span :class="h === 1 ? 'dl-ita__h2' : 'dl-ita__h1'">Head {{ h + 1 }}</span>:
         <strong>{{ IT_SENTENCE[at] }}</strong> reads <strong>{{ top(h).word }}</strong>
         most ({{ top(h).w.toFixed(2) }}).
       </template>
@@ -129,7 +129,7 @@ function onKey(e: KeyboardEvent) {
 }
 
 .dl-ita__line.is-h2 {
-  stroke: var(--dl-danger);
+  stroke: var(--dl-k);
 }
 
 .dl-ita__word {
@@ -139,7 +139,7 @@ function onKey(e: KeyboardEvent) {
 }
 
 .dl-ita__word.is-ask {
-  fill: var(--dl-accent);
+  fill: var(--dl-q);
   font-weight: 700;
 }
 
@@ -149,7 +149,24 @@ function onKey(e: KeyboardEvent) {
 }
 
 .dl-ita__h2 {
-  color: var(--dl-danger);
+  color: var(--dl-k);
+}
+
+.dl-ita__h1 {
+  color: var(--dl-accent);
+}
+
+/* The lines grow in from the asking word whenever it or the head changes. */
+@media (prefers-reduced-motion: no-preference) {
+  .dl-ita__line {
+    stroke-dasharray: 400;
+    animation: dl-ita-draw 0.9s ease-out both;
+  }
+}
+
+@keyframes dl-ita-draw {
+  from { stroke-dashoffset: 400; }
+  to { stroke-dashoffset: 0; }
 }
 
 .dl-ita__note {

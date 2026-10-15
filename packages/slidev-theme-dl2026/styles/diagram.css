@@ -198,3 +198,83 @@
 .dl-diagram.is-sm-h {
   max-height: 11.5rem;
 }
+
+/*
+ * Role colours (vars.css): query, key, value, encoder, decoder, position.
+ * `is-q` on a box, a line, a label or an arrowhead paints it in that role.
+ */
+.dl-dg-box.is-q, .dl-dg-fill.is-q { fill: color-mix(in srgb, var(--dl-q) 14%, var(--dl-bg)); stroke: var(--dl-q); }
+.dl-dg-box.is-k, .dl-dg-fill.is-k { fill: color-mix(in srgb, var(--dl-k) 14%, var(--dl-bg)); stroke: var(--dl-k); }
+.dl-dg-box.is-v, .dl-dg-fill.is-v { fill: color-mix(in srgb, var(--dl-v) 14%, var(--dl-bg)); stroke: var(--dl-v); }
+.dl-dg-box.is-enc, .dl-dg-fill.is-enc { fill: color-mix(in srgb, var(--dl-enc) 14%, var(--dl-bg)); stroke: var(--dl-enc); }
+.dl-dg-box.is-dec, .dl-dg-fill.is-dec { fill: color-mix(in srgb, var(--dl-dec) 14%, var(--dl-bg)); stroke: var(--dl-dec); }
+.dl-dg-box.is-pos, .dl-dg-fill.is-pos { fill: color-mix(in srgb, var(--dl-pos) 16%, var(--dl-bg)); stroke: var(--dl-pos); }
+
+.dl-dg-line.is-q, .dl-dg-arrow.is-q { stroke: var(--dl-q); }
+.dl-dg-line.is-k, .dl-dg-arrow.is-k { stroke: var(--dl-k); }
+.dl-dg-line.is-v, .dl-dg-arrow.is-v { stroke: var(--dl-v); }
+.dl-dg-line.is-enc, .dl-dg-arrow.is-enc { stroke: var(--dl-enc); }
+.dl-dg-line.is-dec, .dl-dg-arrow.is-dec { stroke: var(--dl-dec); }
+.dl-dg-line.is-pos, .dl-dg-arrow.is-pos { stroke: var(--dl-pos); }
+.dl-dg-arrow.is-accent { stroke: var(--dl-accent); }
+
+.dl-dg-head.is-q { fill: var(--dl-q); }
+.dl-dg-head.is-k { fill: var(--dl-k); }
+.dl-dg-head.is-v { fill: var(--dl-v); }
+.dl-dg-head.is-enc { fill: var(--dl-enc); }
+.dl-dg-head.is-dec { fill: var(--dl-dec); }
+.dl-dg-head.is-pos { fill: var(--dl-pos); }
+.dl-dg-head.is-accent { fill: var(--dl-accent); }
+
+.dl-dg-lab.is-q, .dl-dg-in.is-q, .dl-dg-small.is-q { fill: var(--dl-q); }
+.dl-dg-lab.is-k, .dl-dg-in.is-k, .dl-dg-small.is-k { fill: var(--dl-k); }
+.dl-dg-lab.is-v, .dl-dg-in.is-v, .dl-dg-small.is-v { fill: var(--dl-v); }
+.dl-dg-lab.is-enc, .dl-dg-in.is-enc, .dl-dg-small.is-enc { fill: var(--dl-enc); }
+.dl-dg-lab.is-dec, .dl-dg-in.is-dec, .dl-dg-small.is-dec { fill: var(--dl-dec); }
+.dl-dg-lab.is-pos, .dl-dg-in.is-pos, .dl-dg-small.is-pos { fill: var(--dl-pos); }
+
+.dl-dg-bar.is-v { fill: var(--dl-v); }
+.dl-dg-bar.is-k { fill: var(--dl-k); }
+.dl-dg-bar.is-pos { fill: var(--dl-pos); }
+
+/* Role colours for HTML text: <span class="dl-c-q">query</span>. */
+.dl-c-q { color: var(--dl-q); font-weight: 600; }
+.dl-c-k { color: var(--dl-k); font-weight: 600; }
+.dl-c-v { color: var(--dl-v); font-weight: 600; }
+.dl-c-enc { color: var(--dl-enc); font-weight: 600; }
+.dl-c-dec { color: var(--dl-dec); font-weight: 600; }
+.dl-c-pos { color: var(--dl-pos); font-weight: 600; }
+
+/*
+ * Motion. `dl-dg-flow` on a stroked path makes its dashes march along it, so
+ * an arrow shows which way data moves. `dl-dg-pulse` gently breathes a shape
+ * the room should look at. `FlowDot` (addon) sends a dot along a path.
+ *
+ * Every animation is off under prefers-reduced-motion, and every frame is a
+ * legible still, so the PDF export (one page per click) is unaffected.
+ */
+.dl-dg-flow {
+  stroke-dasharray: 7 5;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .dl-dg-flow {
+    animation: dl-dg-march 0.8s linear infinite;
+  }
+
+  .dl-dg-flow.is-slow {
+    animation-duration: 1.6s;
+  }
+
+  .dl-dg-pulse {
+    animation: dl-dg-pulse 1.8s ease-in-out infinite;
+  }
+}
+
+@keyframes dl-dg-march {
+  to { stroke-dashoffset: -12; }
+}
+
+@keyframes dl-dg-pulse {
+  50% { stroke-width: 3.2; }
+}

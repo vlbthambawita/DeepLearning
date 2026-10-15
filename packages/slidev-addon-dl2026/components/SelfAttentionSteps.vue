@@ -88,15 +88,15 @@ const CAPTIONS = [
             <th class="dl-sas__rl">embedding x</th>
             <td v-for="(x, j) in TM_X" :key="`x${j}`" class="is-given">{{ vec(x) }}</td>
           </tr>
-          <tr :class="{ 'is-hidden': line < 1 }">
+          <tr :class="{ 'is-hidden': line < 1 }" class="is-q">
             <th class="dl-sas__rl"><span class="dl-sas__n">1</span> query q</th>
             <td v-for="(q, j) in data.q" :key="`q${j}`" :class="{ 'is-ask': j === at }">{{ vec(q) }}</td>
           </tr>
-          <tr :class="{ 'is-hidden': line < 1 }">
+          <tr :class="{ 'is-hidden': line < 1 }" class="is-k">
             <th class="dl-sas__rl">key k</th>
             <td v-for="(k, j) in data.k" :key="`k${j}`">{{ vec(k) }}</td>
           </tr>
-          <tr :class="{ 'is-hidden': line < 1 }">
+          <tr :class="{ 'is-hidden': line < 1 }" class="is-v">
             <th class="dl-sas__rl">value v</th>
             <td v-for="(v, j) in data.v" :key="`v${j}`">{{ vec(v) }}</td>
           </tr>
@@ -115,7 +115,7 @@ const CAPTIONS = [
               <div class="dl-sas__bar"><span :style="{ width: `${w * 100}%` }" /></div>
             </td>
           </tr>
-          <tr :class="{ 'is-hidden': line < 5 }" class="is-step">
+          <tr :class="{ 'is-hidden': line < 5 }" class="is-step is-v">
             <th class="dl-sas__rl"><span class="dl-sas__n">5</span> weight × v</th>
             <td v-for="(t, j) in row.terms" :key="`t${j}`">{{ vec(t) }}</td>
           </tr>
@@ -238,6 +238,19 @@ const CAPTIONS = [
 
 .dl-sas__grid tr.is-step td {
   font-weight: 600;
+}
+
+/* Role colours: purple query, orange key, blue value (theme vars.css). */
+.dl-sas__grid tr.is-q td,
+.dl-sas__grid tr.is-q th { color: var(--dl-q) !important; }
+.dl-sas__grid tr.is-k td,
+.dl-sas__grid tr.is-k th { color: var(--dl-k) !important; }
+.dl-sas__grid tr.is-v td,
+.dl-sas__grid tr.is-v th { color: var(--dl-v) !important; }
+
+.dl-sas__grid tr.is-q td.is-ask {
+  background: color-mix(in srgb, var(--dl-q) 12%, transparent);
+  border-radius: 4px;
 }
 
 /* Hidden rows keep their height, so the widget does not grow as the room clicks. */

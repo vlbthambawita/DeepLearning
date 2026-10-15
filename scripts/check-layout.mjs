@@ -60,7 +60,9 @@ if (!decks.length)
   throw new Error(`No deck matched ${only.join(', ')}`)
 
 const browser = await chromium.launch()
-const page = await browser.newPage({ viewport: { width: 1176, height: 662 } })
+// Reduced motion: marching dashes and travelling dots (diagram.css, FlowDot)
+// would otherwise make every click look "changed" and every dot an overlap.
+const page = await browser.newPage({ viewport: { width: 1176, height: 662 }, reducedMotion: 'reduce' })
 page.on('pageerror', () => {})
 
 /** Everything the overlap check needs, measured inside the page. */
