@@ -25,7 +25,7 @@ npm run preview                        # serve dist/ at http://localhost:4173
 npm run check -- lecture-01            # overflow/clipping check against a running preview (see below)
 npm run check                          # every deck; --dark, --shots <dir> and --class also available
 npm run check:layout -- lecture-07 --from 30 --to 40   # overlapping text + dead clicks (--no-clicks = faster)
-python3 .claude/skills/lecture-deck/slide-lint.py lecture-07 [--only read,dup,click,eq]  # source-level lint
+python3 .claude/skills/lecture-deck/slide-lint.py lecture-07 [--only read,dup,click,eq,alone]  # source-level lint; alone = refs to other lectures
 python3 .claude/skills/lecture-deck/slide-stats.py lecture-07   # per-slide stats, lists "no picture" slides
 python3 scripts/extract_figures.py --only lecture-02   # pull figures out of a 2025 PDF
 ```

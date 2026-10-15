@@ -14,7 +14,7 @@
  * whole source, and the decoder runs **once per output token**, which is where
  * the "transformers are parallel" claim gets its asterisk. And cross-attention
  * is the only place the two stacks touch — queries from the decoder, keys and
- * values from the encoder — which is exactly last week's Bahdanau attention with
+ * values from the encoder — which is exactly Bahdanau's 2014 attention with
  * the recurrence taken out from under it.
  */
 import { computed, ref } from 'vue'
@@ -71,7 +71,7 @@ const STAGES: Stage[] = [
   {
     title: 'Embed the source',
     lit: ['enc-in', 'enc-emb'],
-    note: 'The source sentence is split into tokens and each one is looked up in an embedding table — the same `nn.Embedding` as last week. Nothing here knows anything about order yet.',
+    note: 'The source sentence is split into tokens and each one is looked up in an embedding table (`nn.Embedding`), which turns a token id into a learned vector. Nothing here knows anything about order yet.',
   },
   {
     title: 'Add position',
@@ -91,7 +91,7 @@ const STAGES: Stage[] = [
   {
     title: 'The decoder starts',
     lit: ['dec-in', 'dec-emb', 'dec-pe'],
-    note: 'The decoder is fed what has been produced so far, shifted right by one and starting from a begin-of-sequence token. During training that is the true target sentence, so every position trains at once — teacher forcing, exactly as last week.',
+    note: 'The decoder is fed what has been produced so far, shifted right by one and starting from a begin-of-sequence token. During training that is the true target sentence, so every position trains at once. This is teacher forcing: training on the true previous words instead of the model’s own guesses.',
   },
   {
     title: 'Masked self-attention',
@@ -101,7 +101,7 @@ const STAGES: Stage[] = [
   {
     title: 'Cross-attention',
     lit: ['dec-ca', 'cross'],
-    note: 'The only place the two stacks meet. Queries come from the decoder — “what do I need next?” — and keys and values from the encoder’s output. This is last week’s Bahdanau attention, with the recurrence removed from both sides.',
+    note: 'The only place the two stacks meet. Queries come from the decoder — “what do I need next?” — and keys and values from the encoder’s output. This is Bahdanau’s 2014 attention for translation, with the recurrence removed from both sides.',
   },
   {
     title: 'Decoder block, ×N',

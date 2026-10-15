@@ -16,13 +16,15 @@
  *   encdec   two stacks, the right one reading the left: the original
  *            encoder–decoder
  *   decoder  one tall stack under a triangular mask: decoder-only
+ *   fork     one trunk splitting into three stacks — plain, accent, and a
+ *            pair: encoder-only, decoder-only, encoder–decoder
  *   code     a tensor slab with its (B, T, d) sizes: the PyTorch section
  *
  * Opacity goes through `:style`, never a literal `opacity="…"` attribute —
  * UnoCSS attributify would emit a rule that overrides it (see CONTRIBUTING.md).
  */
 const props = withDefaults(defineProps<{
-  kind: 'cut' | 'qkv' | 'heads' | 'block' | 'encdec' | 'decoder' | 'code'
+  kind: 'cut' | 'qkv' | 'heads' | 'block' | 'encdec' | 'decoder' | 'fork' | 'code'
   size?: number
   label?: string
 }>(), {
@@ -90,6 +92,14 @@ const MASK = Array.from({ length: 16 }, (_, i) => ({ r: Math.floor(i / 4), c: i 
         <rect v-for="m in MASK" :key="`${m.r}-${m.c}`" :x="30 + m.c * 15" :y="8 + m.r * 15" width="13" height="13" rx="1.5" :class="m.c <= m.r ? 'dl-tglyph__mask is-on' : 'dl-tglyph__mask'" />
         <rect v-for="k in 2" :key="`s${k}`" x="30" :y="70 + (k - 1) * 14" width="58" height="11" rx="2" class="dl-tglyph__cell" />
         <path d="M14 96 V12" class="dl-tglyph__arrow" :marker-end="`url(#tg-head-${props.kind})`" />
+      </g>
+
+      <g v-else-if="props.kind === 'fork'">
+        <path d="M50 96 V80 M50 80 L16 60 M50 80 V60 M50 80 L84 60" class="dl-tglyph__line" />
+        <rect v-for="k in 3" :key="`a${k}`" x="6" :y="6 + (k - 1) * 16" width="20" height="12" rx="2" class="dl-tglyph__tile" />
+        <rect v-for="k in 3" :key="`b${k}`" x="40" :y="6 + (k - 1) * 16" width="20" height="12" rx="2" class="dl-tglyph__cell" />
+        <rect v-for="k in 3" :key="`c${k}`" x="72" :y="6 + (k - 1) * 16" width="10" height="12" rx="2" class="dl-tglyph__tile" />
+        <rect v-for="k in 3" :key="`d${k}`" x="85" :y="6 + (k - 1) * 16" width="10" height="12" rx="2" class="dl-tglyph__cell" />
       </g>
 
       <g v-else-if="props.kind === 'code'">

@@ -160,7 +160,7 @@ const row = ref<number | null>(null)
           <strong>Every word's output vector is exactly what it was.</strong> Attention is a
           weighted sum over a <em>set</em>, and a sum has no order in it — so as far as this layer
           is concerned <em>the river bank</em> and <em>bank river the</em> are the same input.
-          Last week's whole lecture was about order mattering.
+          Yet in language, word order changes the meaning.
           <span class="dl-pe__note">
             Permute the input and the outputs permute with it, unchanged. That property is called
             permutation equivariance, and here it is a bug.

@@ -128,7 +128,6 @@ def net_input(X, w, b):
 ---
 layout: end
 email: vajira@simula.no
-next: The next lecture
 ---
 
 # To be continued…

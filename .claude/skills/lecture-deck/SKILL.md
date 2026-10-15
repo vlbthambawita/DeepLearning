@@ -19,6 +19,38 @@ Every deck serves **two audiences from one source**:
   generated from the full deck: the slides flagged `core: true`. See "The class
   cut: a 2-hour teaching deck" below.
 
+## Every deck stands alone
+
+**A deck never refers to another lecture.** The teaching order changes, and the
+lecturer must be able to give any lecture in any week without editing it. So
+every deck is written as a fresh start:
+
+- **No references to other lectures**, on the slides, in the speaker notes, in
+  the "In words" slides, or in a widget's visible text. Not "last week", "next
+  week", "week 6", "lecture 05", "the previous lecture", "as we saw before",
+  "remember from …", nor a heading such as "Where last week stopped".
+- **No course timeline** that places the lecture between two others ("week 7
+  of 12", "second of three in this block"). An agenda of *today's* sections
+  is fine.
+- **No hand-off from, and no teaser for, another lecture.** The deck opens on a
+  problem stated from scratch and ends on its own recap. The `end` slide has
+  no `next:` field (the layout prints it as "Next: <title>"). "What this cannot do
+  yet" is fine if it names the limitation, not the lecture that fixes it.
+- **Prerequisites are stated, not referred to.** Name the background the deck
+  assumes as topics ("this deck assumes you know what a CNN and a loss
+  function are"), never as lectures. When an idea from another topic carries
+  weight on a slide, re-teach it briefly in this deck: a one-slide refresher
+  with its own picture, early in the section that needs it. The refresher says
+  what the idea *is*. It does not say where the room met it.
+- **Notation and the running example are defined here.** Every symbol, name
+  and toy number is introduced in this deck, even if another deck uses the same
+  one.
+- **Outside sources are fine:** papers, books, documentation, the lab. Only
+  references to other lectures of this course are out.
+
+`slide-lint.py --only alone` lists every phrase that looks like a reference
+to another lecture, on the slide or in its notes. The target is **alone: 0**.
+
 ## Read before writing anything
 
 1. **`CONTRIBUTING.md`** — "Things that will catch you out" is the real reference.
@@ -27,13 +59,14 @@ Every deck serves **two audiences from one source**:
    also the reference for a visual on every slide).
    Match its voice and rhythm, not `_template`'s — the template shows mechanics,
    the shipped decks show the standard.
-3. **`TODO/summary_slideset_<prev>.md`** — the concept summary for the lecture
-   before yours. The new deck has to pick up exactly where that one stopped.
+3. **Other decks' `TODO/summary_slideset_XX.md`**, only to keep the notation
+   consistent across the course. They are not a starting point: the deck does
+   not pick up where another one stopped (see "Every deck stands alone").
 4. **`PLAN.md` § "Content conversion strategy"** — only if converting a 2025 PDF.
-5. **What the room actually knows.** The deck number and the syllabus week do
-   not tell you this — the teaching order changes, and a lecture can be given
-   before the one numbered ahead of it. Ask the user if it is not stated. Write
-   the answer into the plan (below) and hold every slide to it.
+5. **What background the deck assumes.** The deck number and the syllabus week
+   do not tell you this. The teaching order changes, and any lecture can be
+   given in any week. Ask the user if it is not stated. Write the answer into
+   the plan (below) as *topics*, not lectures, and hold every slide to it.
 
 ## 1. Fix the through-line first, in `TODO/plan_slideset_XX.md`
 
@@ -41,17 +74,17 @@ Do not open `slides.md` until this exists and the user has seen it:
 
 - **One sentence** saying what the room can do at the end that it could not at
   the start.
-- **The prerequisites**, as two lists: what the room *has* (e.g. "CNNs, BCE,
-  BatchNorm, Adam") and what it *does not have yet* (e.g. "RNNs, LSTMs,
-  attention, transformers"). Nothing from the second list may carry weight on a
-  slide: no hand-off from it, no "remember week N's X" analogy, no poll option
-  or code line that needs it. If a modern result genuinely uses one (a
+- **The prerequisites**, as two lists of *topics* (never lectures): what the
+  deck *assumes* (e.g. "CNNs, BCE, BatchNorm, Adam") and what it *does not
+  assume* (e.g. "RNNs, LSTMs, attention, transformers"). Nothing from the
+  second list may carry weight on a slide: no analogy to it, no poll option or
+  code line that needs it. An assumed topic that carries weight still gets a
+  one-slide refresher in the deck. If a modern result genuinely uses one (a
   transformer denoiser, say), name it in a phrase as *a different architecture*
   and say the idea on the slide does not depend on it. Grep the finished deck for
   the second list's words.
-- **The hand-off**: what the previous lecture ended on, and how slide 3 picks it
-  up — from a lecture on the *has* list. Lecture 06 opens on week 6's two walls and spends the deck knocking down
-  the second — that continuity is deliberate.
+- **The opening**: the problem the deck solves, stated from scratch on the
+  first content slide, with a picture. It does not pick up from another lecture.
 - **The running example**: one concrete case carried across every section, with
   real numbers the room can verify. Lecture 06 runs "the river bank" through
   four dimensions from §01 to §03, shared by five widgets via
@@ -475,7 +508,7 @@ Cover these, in this order, leaving out any that do not apply:
 
 The notes must agree with the slide: the same numbers, symbols and names, and no
 claim the slide or the widget contradicts. Any concept the notes rely on has to
-be on the slide or on an earlier one, or be in the plan's *already knows* list.
+be on the slide or on an earlier one, or be in the plan's *assumes* list.
 Notes cannot introduce a concept the room needs. Section and title slides need
 only items 1 and 8: what the section has to land, and how long it takes. So do
 "In words" description slides — the slide itself is the explanation. The
@@ -608,8 +641,10 @@ once**. The build and `check` passing says nothing about whether the slides are
 7. **Equations.** Each display equation is said in words, has a legend that
    names every symbol (name, meaning, shape, example value), and has a worked
    example whose arithmetic you have re-done. Check `slide-lint.py --only eq`.
-8. **Prerequisites.** Grep for the plan's *does not have yet* list, in the deck
-   and in the widgets it uses.
+8. **Prerequisites and standing alone.** Grep for the plan's *does not
+   assume* list, in the deck and in the widgets it uses. Run `slide-lint.py
+   --only alone` and rewrite every reference to another lecture. A dependency
+   becomes a refresher slide; a hand-off or a teaser is cut.
 9. **Overclaims.** "every", "always", "nobody", "the default", "in every image
    tool" — keep only what you could source; soften the rest.
 10. **Every slide has explaining notes.** Run `slide-stats.py` and write or
@@ -638,7 +673,8 @@ Five more review passes, each with a tool that finds candidates and a human
 judgement that decides. Run them on every new deck and on every review.
 
 ```bash
-python3 .claude/skills/lecture-deck/slide-lint.py lecture-07            # read, dup, click, eq
+python3 .claude/skills/lecture-deck/slide-lint.py lecture-07            # read, dup, click, eq, alone
+python3 .claude/skills/lecture-deck/slide-lint.py lecture-07 --only alone # references to other lectures
 python3 .claude/skills/lecture-deck/slide-lint.py lecture-07 --only read
 python3 .claude/skills/lecture-deck/slide-lint.py lecture-07 --only eq   # unexplained symbols
 npm run build:all && npm run preview &
@@ -719,7 +755,7 @@ element only when the overlap is the point (a label deliberately on a line).
 
 Write `TODO/summary_slideset_XX.md`: the through-line, the running example with
 its actual numbers, and a short per-section account of what each slide is doing
-and why. The next deck starts by reading it.
+and why. It records the deck's notation, so other decks can keep it consistent.
 
 Flip `"published": true` only when the user says so. Publishing is tag-driven —
 never push a tag unless asked.
@@ -736,8 +772,10 @@ never push a tag unless asked.
 - `slide-stats.py` reports a **class cut of at most 100 minutes**, with no core
   description slides and no core slide without a picture. You clicked through
   it with `npm run dev -- <id> --class`, and it reads as one story.
-- No slide leans on a concept from the plan's *does not have yet* list; grep
+- No slide leans on a concept from the plan's *does not assume* list; grep
   for those words before calling the deck done.
+- `slide-lint.py` reports **alone: 0**: no slide, note or description refers to
+  another lecture, so the deck can be taught in any week.
 - Every display equation is said in words, has a symbol legend (name, meaning,
   shape, example value) and a worked example with the running example's numbers.
 

@@ -20,9 +20,9 @@ email: vajira@simula.no
 
 # Transformers
 
-Last week's network could look anywhere, but it had to read in order. Delete
-the reading-in-order part and almost nothing is lost. Everything since 2017 is
-built on that idea.
+A network that reads a sentence one word at a time is slow to train and forgets
+the start. Let every word look at every other word at once instead. Every large
+language model since 2017 is built on that idea.
 
 <div class="mt-6 flex items-center gap-6">
   <TransformerGlyph kind="cut" :size="110">read in order</TransformerGlyph>
@@ -31,17 +31,23 @@ built on that idea.
 </div>
 
 <!--
-One session. The arc: last week's attention was a bolt-on to a recurrent model;
-this week it is the entire layer, and the recurrence is gone.
+One session. The arc: attention began as an add-on to a recurrent model, which
+reads one word at a time. In a transformer, attention is the entire layer, and
+the one-word-at-a-time reading is gone.
 
 The two pictures are this deck's first two emblems. On the left, a chain of
 recurrent cells with the links between them cut: that is section 00, "delete the
 recurrence". On the right, one transformer block: a sideways mixing bar, a small
 per-position network above it, and the dashed residual wire around both. Do not
-explain the block yet; say "by the end of section 02 you can draw this
+explain the block yet; say "by the end of section 03 you can draw this
 yourself".
 
-Section 01 is the lecture. Everything else can be compressed if you are running
+The order of the lecture: first the whole architecture, as one picture
+(section 01). Then each part, one at a time: attention (section 02), the block
+around it (section 03), and the decoder's two extras (section 04). Then back out
+to the three kinds of transformer and what each is used for (section 05).
+
+Section 02 is the lecture. Everything else can be compressed if you are running
 late, but a room that leaves without being able to compute one attention output
 by hand has not learned anything they can build on. Budget forty minutes for
 query, key and value, and do not apologise for it.
@@ -51,70 +57,109 @@ on the "Same word, same weights, different neighbour" slide: the same weights
 and the same word, one neighbour changed, and the output vector swaps ends. Set
 it up properly on "The sentence we will use all lecture" so that payoff lands.
 
-Say at the start that this lecture stops at the architecture. How one of these
-is actually trained, at what cost, and what happens when you make it very large
-is next week.
--->
-
----
-layout: interactive
-core: true
-heading: Where we are
-title: Where we are
-aside-width: 15rem
----
-
-<SyllabusTimeline :current-week="7" />
-
-::aside::
-
-Same block as last week, second of three.
-
-Week 6 built the recurrent network and ended on the two things it cannot do.
-Today is the architecture that does both. Next week is what happens when you
-make it very large.
-
-<!--
-The point: this is one continuous story and not three lectures that happen to
-be adjacent. The transformer is not a new idea bolted onto week 6 — it is week
-6's last slide, taken seriously.
-
-On screen: the course timeline, one tile per week, with week 7 highlighted.
-Point at the block that covers weeks 6, 7 and 8 — recurrent networks,
-transformers and large language models. Week 6 is behind us, week 7 is today,
-week 8 is next.
-
-About one minute. Do not open the other blocks; the only thing to land is where
-today sits between last week and next week.
-
-Class cut: about 4 minutes.
+Say at the start that this lecture is about the architecture: what the parts
+are and how data flows through them. Training one at full scale is out of scope
+here.
 -->
 
 ---
 layout: default
-title: "In words: Where we are"
+core: true
+title: Today, in eight parts
 ---
 
-# In words: Where we are
+# Today, in eight parts
 
-<div class="dl-describe">
+The whole machine first, then each part, then the kinds of transformer in use.
 
-- The strip is the course plan, one tile per week. The highlighted tile is
-  week 7, today.
-- Weeks 6, 7 and 8 form one block: recurrent networks, transformers, and large
-  language models (LLMs).
-- Week 6 built the recurrent network. It ended on two things that network
-  cannot do well.
-- Today's architecture, the transformer, solves both of them.
-- Next week takes the same architecture and makes it very large.
+<div class="grid grid-cols-4 gap-x-4 gap-y-2 mt-3">
+<div class="flex flex-col items-center text-center gap-1">
+  <TransformerGlyph kind="cut" :size="64" />
+  <span class="dl-secondary">00 Why a new design</span>
+</div>
+<div class="flex flex-col items-center text-center gap-1">
+  <TransformerGlyph kind="encdec" :size="64" />
+  <span class="dl-secondary">01 The whole architecture</span>
+</div>
+<div class="flex flex-col items-center text-center gap-1">
+  <TransformerGlyph kind="qkv" :size="64" />
+  <span class="dl-secondary">02 Attention: query, key, value</span>
+</div>
+<div class="flex flex-col items-center text-center gap-1">
+  <TransformerGlyph kind="block" :size="64" />
+  <span class="dl-secondary">03 One block</span>
+</div>
+<div class="flex flex-col items-center text-center gap-1">
+  <TransformerGlyph kind="decoder" :size="64" />
+  <span class="dl-secondary">04 Inside the decoder</span>
+</div>
+<div class="flex flex-col items-center text-center gap-1">
+  <TransformerGlyph kind="fork" :size="64" />
+  <span class="dl-secondary">05 Three kinds, and their uses</span>
+</div>
+<div class="flex flex-col items-center text-center gap-1">
+  <TransformerGlyph kind="code" :size="64" />
+  <span class="dl-secondary">06 In PyTorch</span>
+</div>
+<div class="flex flex-col items-center text-center gap-1">
+  <TransformerGlyph kind="block" :size="64" />
+  <span class="dl-secondary">07 Where that leaves us</span>
+</div>
+</div>
 
-This lecture continues last week's story. It is not a fresh start.
+<div v-click class="mt-3 dl-callout">
+
+Section 01 shows the full picture. Sections 02 to 04 open its boxes one by one.
 
 </div>
 
 <!--
-Revision slide for the timeline. Give the room fifteen seconds, or skip it in
-the lecture if time is short — it is here for students reading the deck later.
+The point: the map of today, and the order of the story. The whole
+architecture comes first, as one picture, so every part that follows has a
+place to go. Then sections 02, 03 and 04 zoom into its boxes. Section 05 zooms
+back out to the three kinds of transformer built from those parts, and what
+each kind is used for.
+
+On screen: one glyph per section. The same glyphs return on each section
+divider and on the recap, so point at the shapes. The cut chain (00) is why a
+new design was needed. The two stacks (01) are the whole model. The query dot
+with its weighted lines (02) is attention. The block (03) is attention plus a
+small network, with the residual wire around both. The masked stack (04) is the
+decoder. The fork (05) is the three kinds.
+
+Click: the callout says how the middle of the lecture works. Section 02 is the
+core; budget about forty minutes for it.
+
+About two minutes. Do not explain any glyph yet.
+
+Class cut: about 2 minutes.
+-->
+
+---
+layout: default
+title: "In words: Today, in eight parts"
+---
+
+# In words: Today, in eight parts
+
+<div class="dl-describe">
+
+The slide is the map of the lecture. Each glyph stands for one section, and
+the same glyph returns on that section's divider and on the recap.
+
+1. **00, a cut chain.** Why reading one word at a time had to go.
+2. **01, two stacks.** The whole transformer, seen all at once.
+3. **02 to 04, the parts.** Attention, then the block around it, then the
+   decoder's two extras.
+4. **05, a fork.** The three kinds of transformer, and their jobs.
+5. **06 and 07.** The code, and a recap.
+
+First the whole picture, then each piece, then back out to the uses.
+
+</div>
+
+<!--
+Revision slide. Twenty seconds; skip in the lecture if short on time.
 -->
 
 ---
@@ -127,28 +172,28 @@ index: "00"
 <div class="absolute right-18 top-1/2 -translate-y-1/2"><TransformerGlyph kind="cut" :size="190" /></div>
 
 <!--
-Section 00, about twelve minutes. Do not linger on the divider; the next slide
+Section 00, about ten minutes. Do not linger on the divider; the next slide
 does the work.
 
 The glyph: three recurrent cells whose links are cut, each now with its own
 arrow upward. It is the whole section in one picture — remove the chain, and
 every position can be processed on its own, at the same time.
 
-What this section has to land, in order: last week's two walls, the 2017 move
-that removed the recurrence, and the one-sentence description of a transformer
-(mix across positions, then process each position alone).
+What this section has to land, in order: the two walls a recurrent network
+hits, and the 2017 move that removed the recurrence. The one-sentence
+description of a transformer opens section 01.
 -->
 
 ---
 layout: default
 core: true
-title: Where last week stopped
+title: Two walls in reading one word at a time
 ---
 
-# Where last week stopped
+# Two walls in reading one word at a time
 
-We built a recurrent encoder–decoder and hit two walls (hard limits).
-Attention removed only one of them.
+A recurrent encoder–decoder reads one word at a time. It hits two walls (hard
+limits). Attention removed only one.
 
 <div class="mt-2 flex justify-center">
 <svg viewBox="0 0 680 220" class="dl-diagram" role="img" aria-label="Wall one: the encoder squeezes the source into one vector c, and attention lines fix it. Wall two: a chain of 200 states, each waiting for the one before">
@@ -213,11 +258,16 @@ Two walls, one fix. This lecture removes the chain itself.
 </div>
 
 <!--
-The point: five minutes of recap, and make it a recap of the *argument* rather
-than of the equations. The room needs the last content slide of week 6 in their
-head — the one that says no amount of hardware shortens the chain.
+The point: a short refresher on the design the transformer replaced, told as an
+*argument* rather than as equations. The one sentence to land: no amount of
+hardware shortens a chain where each step waits for the one before.
 
-On screen, left half: last week's encoder–decoder. The encoder reads the source
+A recurrent network reads one word per step and carries a state vector h from
+step to step: h_t is computed from the word at t and from h_(t-1). An
+encoder–decoder uses two of them: one reads the source sentence, the other
+writes the output sentence.
+
+On screen, left half: a recurrent encoder–decoder. The encoder reads the source
 into states h1, h2, h3, and in the plain version the decoder sees only one fixed
 vector c. Right half: the recurrent chain on its own. h_t needs h_(t-1), so a
 200-token input is 200 matrix multiplies, one after another. The batch
@@ -234,24 +284,22 @@ two, because the recurrence was still underneath it.
 Click 3: the callout. Two walls, one fix — and the second wall is what this
 lecture is about.
 
-If anyone is missing week 6: the one sentence they need is that attention means
-"score every position, softmax the scores, take a weighted sum of the values".
-That is all of it, and this lecture re-derives it from scratch anyway.
+The one sentence about attention the room needs here: "score every position,
+softmax the scores, take a weighted sum". Section 02 derives it from scratch.
 
 Class cut: about 2 minutes.
 -->
 
 ---
 layout: default
-title: "In words: Where last week stopped"
+title: "In words: Two walls in reading one word at a time"
 ---
 
-# In words: Where last week stopped
+# In words: Two walls in reading one word at a time
 
 <div class="dl-describe">
 
-The picture shows last week's recurrent encoder–decoder and its two walls
-(hard limits).
+The picture shows a recurrent encoder–decoder and its two walls.
 
 - **Left, wall one.** The encoder read the source into states $\mathbf{h}_1, \mathbf{h}_2, \mathbf{h}_3$.
   The plain decoder saw only one fixed vector, $c$. Everything had to squeeze
@@ -263,7 +311,7 @@ The picture shows last week's recurrent encoder–decoder and its two walls
   tokens means 200 steps in a row.
 - Attention sat on top of this chain, so wall two stayed.
 
-So the goal of this lecture is to remove the chain completely.
+This lecture removes the chain completely.
 
 </div>
 
@@ -280,8 +328,7 @@ title: The move
 
 # The move
 
-Last week's attention was a **passenger** on a recurrent model that did the
-real work.
+Attention began as a **passenger** on a recurrent model that did the real work.
 
 <div class="mt-1 flex justify-center">
 <svg viewBox="0 0 680 200" class="dl-diagram" style="max-width: 34rem" role="img" aria-label="Left: attention sits on top of a recurrent chain. Right: the chain is gone and the words the, river, bank connect directly through attention">
@@ -290,7 +337,7 @@ real work.
       <path class="dl-dg-head" d="M0 0 L7 3.5 L0 7 z" />
     </marker>
   </defs>
-  <text class="dl-dg-small" x="8" y="16">last week — attention on top</text>
+  <text class="dl-dg-small" x="8" y="16">before — attention on top</text>
   <circle class="dl-dg-op" cx="95" cy="48" r="16" />
   <text class="dl-dg-lab is-sm" x="95" y="53" text-anchor="middle">Σ</text>
   <text class="dl-dg-small" x="120" y="52">weighted sum</text>
@@ -342,11 +389,11 @@ delete everything it was bolted to.
 </div>
 
 <!--
-The point: the 2017 paper kept last week's weighted sum and threw away the
+The point: the 2017 paper kept attention's weighted sum and threw away the
 recurrent model it was attached to. No recurrence, no convolution: every layer
 is attention, then a small per-position network.
 
-On screen, left: last week's design. A chain of recurrent states does the work,
+On screen, left: the recurrent design. A chain of recurrent states does the work,
 and attention sits on top as a passenger, reading from every state. The arrows
 between the boxes are the chain that makes every step wait.
 
@@ -377,7 +424,7 @@ title: "In words: The move"
 
 <div class="dl-describe">
 
-- **Left: last week's design.** A recurrent chain does the work. Attention sits
+- **Left: the recurrent design.** A recurrent chain does the work. Attention sits
   on top as a passenger and reads from every state.
 - **Right: the 2017 design**, from *Attention Is All You Need* (Vaswani et al.).
   The chain is gone. Each word connects to every other word through attention only.
@@ -394,6 +441,137 @@ builds on that idea.
 <!--
 Revision slide. Thirty seconds to read; ask the room what "nothing waits" buys
 on a graphics card.
+-->
+
+---
+layout: default
+core: true
+title: "Poll: which wall attention solves"
+---
+
+<div class="grid grid-cols-[1.7fr_1fr] gap-6 items-start">
+<div>
+
+<PollSlide
+  question="Attention on top of a recurrent model: which wall does it remove?"
+  :items="[
+    'The bottleneck — one fixed vector for the whole source',
+    'The lack of parallelism across time',
+    'Both of them',
+    'Neither — it needs the recurrence to work at all',
+  ]"
+/>
+
+</div>
+<div class="mt-10">
+
+<svg viewBox="0 0 260 150" class="dl-diagram" role="img" aria-label="Attention as a weighted sum sitting on top of a recurrent chain of three states">
+  <defs>
+    <marker id="l6s0-poll-head" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+      <path class="dl-dg-head" d="M0 0 L7 3.5 L0 7 z" />
+    </marker>
+  </defs>
+  <circle class="dl-dg-op" cx="130" cy="28" r="14" />
+  <text class="dl-dg-lab is-sm" x="130" y="33" text-anchor="middle">Σ</text>
+  <text class="dl-dg-small" x="152" y="32">attention</text>
+  <path class="dl-dg-line" d="M121 39 L35 92" />
+  <path class="dl-dg-line" d="M130 42 L125 92" />
+  <path class="dl-dg-line" d="M139 39 L215 92" />
+  <rect class="dl-dg-box" x="10" y="94" width="50" height="28" rx="4" />
+  <rect class="dl-dg-box" x="100" y="94" width="50" height="28" rx="4" />
+  <rect class="dl-dg-box" x="190" y="94" width="50" height="28" rx="4" />
+  <path class="dl-dg-arrow" marker-end="url(#l6s0-poll-head)" d="M60 108 H98" />
+  <path class="dl-dg-arrow" marker-end="url(#l6s0-poll-head)" d="M150 108 H188" />
+  <text class="dl-dg-small" x="130" y="142" text-anchor="middle">the recurrent chain underneath</text>
+</svg>
+
+</div>
+</div>
+
+<div v-click class="mt-4 dl-reveal">
+
+The bottleneck only
+
+</div>
+
+<div v-click class="mt-2 dl-secondary">
+
+The recurrent chain was still underneath, so time stayed sequential.
+
+</div>
+
+<!--
+The point: attention and parallelism are two separate moves, and only the second
+needs the recurrence gone.
+
+On screen beside the question: the recurrent set-up in miniature. The circle is
+attention, a weighted sum reading from every state; the boxes and arrows below
+are the recurrent chain it sits on.
+
+Hands up for each before revealing.
+
+Click: the answer — the bottleneck only. Attention replaces the one fixed vector
+with a fresh weighted sum at every step.
+
+Click 2: why. The chain in the sketch is still there, so each state still waits
+for the one before.
+
+Option 3 is the popular wrong answer and it is worth naming why: attention and
+parallelism get taught together so often that students fuse them. They are two
+separate moves, made three years apart. Option 4 is wrong because this lecture
+shows attention working with no recurrence at all.
+
+Class cut: about 4 minutes.
+-->
+
+---
+layout: default
+title: "In words: which wall attention solves"
+---
+
+# In words: which wall attention solves
+
+<div class="dl-describe">
+
+- The poll asks which of the two walls attention removes when it is added on
+  top of a recurrent model.
+- **The answer is the bottleneck only.** Attention replaces the single fixed
+  vector with a fresh weighted sum at every output step.
+- It does not give parallelism. In the sketch, attention (the circle) still sits
+  on top of the recurrent chain. Each state still waits for the one before it.
+- "Both" is the common wrong answer. Attention and parallelism are often taught
+  together, but they are two separate steps.
+
+Today's point: attention does not need the recurrence. Remove the chain, and the
+second wall falls too.
+
+</div>
+
+<!--
+Revision slide for the poll. Fifteen seconds; it closes section 00.
+-->
+
+---
+layout: section
+index: "01"
+---
+
+# The whole architecture first
+
+One stack reads, one stack writes.
+
+<div class="absolute right-18 top-1/2 -translate-y-1/2"><TransformerGlyph kind="encdec" :size="190" /></div>
+
+<!--
+Section 01 shows the whole transformer before any of its parts: the model the
+2017 paper built, an encoder stack that reads the source sentence and a decoder
+stack that writes the translation. The glyph is that shape: two stacks, the
+right one reading the left through a single wire.
+
+About twelve minutes. The aim is a map, not understanding. Every box gets a
+name and a place in the data flow; sections 02 to 04 then open the boxes one by
+one. Say so out loud: "you will not understand every box yet, and that is the
+point of the next three sections".
 -->
 
 ---
@@ -461,7 +639,9 @@ of the lecture is detail.
 
 <!--
 The point: give them this sentence before any mathematics, and write it on the
-board — mix across positions, then think about each position separately.
+board — mix across positions, then think about each position separately. It
+opens the whole-architecture section: every box on the next three slides is one
+of these two steps, or the wiring around them.
 
 On screen: one block working on the three words of the running example, "the
 river bank". Read it from the bottom up.
@@ -514,119 +694,328 @@ position separately.
 
 <!--
 Revision slide. Thirty seconds to read. The one sentence to leave with is the
-last line; everything in sections 01 and 02 fills in one of the two steps.
+last line; sections 02 and 03 each fill in one of the two steps.
 -->
 
 ---
 layout: default
 core: true
-title: "Poll: which wall attention solves"
+title: Two stacks
 ---
 
-<div class="grid grid-cols-[1.7fr_1fr] gap-6 items-start">
-<div>
+# Two stacks
 
-<PollSlide
-  question="Which of last week's two walls does attention, on its own, solve?"
-  :items="[
-    'The bottleneck — one fixed vector for the whole source',
-    'The lack of parallelism across time',
-    'Both of them',
-    'Neither — it needs the recurrence to work at all',
-  ]"
-/>
+The 2017 paper is a **translation** model. One stack reads the source; the
+other writes the target.
 
-</div>
-<div class="mt-10">
-
-<svg viewBox="0 0 260 150" class="dl-diagram" role="img" aria-label="Attention as a weighted sum sitting on top of a recurrent chain of three states">
+<div class="mt-1 flex justify-center">
+<svg viewBox="0 0 620 240" class="dl-diagram is-sm-h" role="img" aria-label="An encoder stack reads the source tokens and outputs one vector per token; a decoder stack with three sub-layers reads the encoder output through cross-attention">
   <defs>
-    <marker id="l6s0-poll-head" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+    <marker id="l6s3-a1" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
       <path class="dl-dg-head" d="M0 0 L7 3.5 L0 7 z" />
     </marker>
   </defs>
-  <circle class="dl-dg-op" cx="130" cy="28" r="14" />
-  <text class="dl-dg-lab is-sm" x="130" y="33" text-anchor="middle">Σ</text>
-  <text class="dl-dg-small" x="152" y="32">attention</text>
-  <path class="dl-dg-line" d="M121 39 L35 92" />
-  <path class="dl-dg-line" d="M130 42 L125 92" />
-  <path class="dl-dg-line" d="M139 39 L215 92" />
-  <rect class="dl-dg-box" x="10" y="94" width="50" height="28" rx="4" />
-  <rect class="dl-dg-box" x="100" y="94" width="50" height="28" rx="4" />
-  <rect class="dl-dg-box" x="190" y="94" width="50" height="28" rx="4" />
-  <path class="dl-dg-arrow" marker-end="url(#l6s0-poll-head)" d="M60 108 H98" />
-  <path class="dl-dg-arrow" marker-end="url(#l6s0-poll-head)" d="M150 108 H188" />
-  <text class="dl-dg-small" x="130" y="142" text-anchor="middle">the recurrent chain underneath</text>
+  <g>
+    <text class="dl-dg-small" x="140" y="14" text-anchor="middle">one vector per source token</text>
+    <rect v-for="k in 3" :key="`eo${k}`" class="dl-dg-box is-accent" :x="88 + (k - 1) * 38" y="22" width="26" height="22" rx="3" />
+    <rect class="dl-dg-fill is-muted is-dashed" x="40" y="70" width="200" height="110" rx="6" />
+    <text class="dl-dg-small" x="52" y="86">encoder, 6 blocks</text>
+    <rect class="dl-dg-box" x="60" y="94" width="160" height="30" rx="4" />
+    <text class="dl-dg-in" x="140" y="114" text-anchor="middle">feed-forward</text>
+    <rect class="dl-dg-box" x="60" y="134" width="160" height="30" rx="4" />
+    <text class="dl-dg-in" x="140" y="154" text-anchor="middle">self-attention, no mask</text>
+    <rect v-for="k in 3" :key="`ei${k}`" class="dl-dg-box" :x="88 + (k - 1) * 38" y="206" width="26" height="22" rx="3" />
+    <text class="dl-dg-small" x="80" y="221" text-anchor="end">source</text>
+    <path class="dl-dg-arrow" marker-end="url(#l6s3-a1)" d="M140 204 V184" />
+    <path class="dl-dg-arrow" marker-end="url(#l6s3-a1)" d="M140 68 V48" />
+  </g>
+  <g v-click>
+    <rect class="dl-dg-fill is-dashed" x="380" y="50" width="210" height="130" rx="6" />
+    <text class="dl-dg-small" x="392" y="66">decoder, 6 blocks</text>
+    <rect class="dl-dg-box" x="398" y="72" width="174" height="28" rx="4" />
+    <text class="dl-dg-in" x="485" y="91" text-anchor="middle">feed-forward</text>
+    <rect class="dl-dg-box is-accent" x="398" y="106" width="174" height="28" rx="4" />
+    <text class="dl-dg-in" x="485" y="125" text-anchor="middle">cross-attention</text>
+    <rect class="dl-dg-box" x="398" y="140" width="174" height="28" rx="4" />
+    <text class="dl-dg-in" x="485" y="159" text-anchor="middle">masked self-attention</text>
+    <rect v-for="k in 3" :key="`di${k}`" class="dl-dg-box" :x="428 + (k - 1) * 38" y="206" width="26" height="22" rx="3" />
+    <text class="dl-dg-small" x="420" y="221" text-anchor="end">target so far</text>
+    <path class="dl-dg-arrow" marker-end="url(#l6s3-a1)" d="M485 204 V184" />
+    <path class="dl-dg-arrow" marker-end="url(#l6s3-a1)" d="M485 48 V26" />
+    <text class="dl-dg-small" x="497" y="22">next word</text>
+  </g>
+  <g v-click>
+    <path class="dl-dg-line" marker-end="url(#l6s3-a1)" d="M192 33 H310 V120 H394" />
+    <text class="dl-dg-small is-good" x="318" y="84">K and V</text>
+  </g>
 </svg>
-
-</div>
 </div>
 
-<div v-click class="mt-4 dl-reveal">
+<div v-click class="mt-1 dl-callout">
 
-The bottleneck only
-
-</div>
-
-<div v-click class="mt-2 dl-secondary">
-
-The recurrent chain was still underneath, so time stayed sequential.
+One vector per source token: the bottleneck is gone. Nothing has to be
+summarised in advance.
 
 </div>
 
 <!--
-The point: attention and parallelism are two separate moves, and only the second
-needs the recurrence gone.
+The point: the 2017 model is two stacks of identical blocks (section 03 builds
+one block in detail). The encoder reads the source once. The decoder writes the target, and it reads the
+encoder only through cross-attention.
 
-On screen beside the question: last week's set-up in miniature. The circle is
-attention, a weighted sum reading from every state; the boxes and arrows below
-are the recurrent chain it sits on.
+On screen: the left stack is the encoder. Its six blocks each have two
+sub-layers, self-attention without a mask and a feed-forward network. Its output,
+at the top, is one vector per source token, not one vector for the sentence.
 
-Hands up for each before revealing.
+Click: the decoder appears. It also has six blocks, but each has three
+sub-layers: masked self-attention over what it has written so far,
+cross-attention, and the feed-forward network. Three sub-layers catches people
+who have only ever seen the paper's figure; count them here.
 
-Click: the answer — the bottleneck only. Attention replaces the one fixed vector
-with a fresh weighted sum at every step.
+Click 2: the wire. The encoder's output vectors become the keys and values of
+every decoder block's cross-attention. It is the only place the two stacks meet.
 
-Click 2: why. The chain in the sketch is still there, so each state still waits
-for the one before.
+Click 3: the callout links back to the two walls of section 00, and it is worth
+pausing on. The recurrent encoder-decoder had to compress the source into one fixed vector,
+because the decoder could only be handed one thing. Here the decoder can attend,
+so the encoder simply hands over everything.
 
-Option 3 is the popular wrong answer and it is worth naming why: attention and
-parallelism get taught together so often that students fuse them. They are two
-separate moves, made three years apart. Option 4 is wrong because this lecture
-shows attention working with no recurrence at all.
+About three minutes.
+
+Class cut: about 2 minutes.
+-->
+
+---
+layout: default
+title: "In words: Two stacks"
+---
+
+# In words: Two stacks
+
+<div class="dl-describe">
+
+The original transformer translates a sentence with two stacks of blocks.
+
+- **The left stack is the encoder.** It reads the source once. Each of its six
+  blocks has self-attention with no mask, then a feed-forward network.
+- **Its output is one vector per source token**, the row at the top. Nothing is
+  squeezed into a single vector.
+- **The right stack is the decoder.** It writes the target, one word at a time.
+  Its six blocks have three sub-layers: masked self-attention, cross-attention,
+  feed-forward.
+- **The wire labelled "K and V" is cross-attention**, the only link between the
+  stacks.
+
+Remember: two stacks, one wire, and no bottleneck.
+
+</div>
+
+<!--
+A description slide for revision. Give the room thirty seconds to read it, or
+skip it in the lecture if short on time.
+-->
+
+---
+layout: interactive
+core: true
+heading: The architecture, step by step
+title: The architecture, step by step
+aside-width: 17rem
+---
+
+<TransformerStack :layers="6" />
+
+::aside::
+
+Press **Walk the architecture** and follow the data: nine steps, no new boxes.
+
+<v-clicks>
+
+- up the encoder **once**
+- then up the decoder **once per word it writes**
+- cross-attention is the only wire between them
+
+</v-clicks>
+
+<div v-click class="mt-2 dl-callout">
+
+The famous figure, in the order the data actually moves.
+
+</div>
+
+<!--
+The point: the paper's figure is hard to read because it shows everything at
+once and gives no clue which arrow comes first. The widget walks it in the order
+the data moves. Several boxes are not explained yet (the mask, the residual
+wires, position): say so, and say which section opens each.
+
+The widget: press Walk the architecture and step through nine stages. Embed the
+source; add position; encoder self-attention; the encoder block repeated N times;
+the decoder starts from the target shifted right by one; masked self-attention;
+cross-attention; the decoder block repeated N times; predict the next token with
+a linear layer and a softmax over the vocabulary.
+
+Click: the encoder runs once, for the whole source sentence.
+
+Click 2: the decoder runs once per word it writes. Step 9 is the one to dwell on.
+The parallelism people credit transformers with is real in the encoder, and real
+when training the decoder. It is gone at generation time, where you are back to
+one token at a time.
+
+Click 3: cross-attention is the only wire between the stacks. Point at it in the
+widget.
+
+Click 4: the callout. That asymmetry between training and generation is the whole
+reason the KV cache exists: see "What generation actually costs" in section 05.
+
+About four minutes.
 
 Class cut: about 4 minutes.
 -->
 
 ---
 layout: default
-title: "In words: which wall attention solves"
+title: "In words: The architecture, step by step"
 ---
 
-# In words: which wall attention solves
+# In words: The architecture, step by step
 
 <div class="dl-describe">
 
-- The poll asks which of last week's two walls attention removes on its own.
-- **The answer is the bottleneck only.** Attention replaces the single fixed
-  vector with a fresh weighted sum at every output step.
-- It does not give parallelism. In the sketch, attention (the circle) still sits
-  on top of the recurrent chain. Each state still waits for the one before it.
-- "Both" is the common wrong answer. Attention and parallelism are often taught
-  together, but they are two separate steps.
+The widget walks the original transformer in nine steps, in the order the data moves.
 
-Today's point: attention does not need the recurrence. Remove the chain, and the
-second wall falls too.
+1. The source tokens are embedded, and a position vector is added to each.
+2. They go up the encoder **once**: self-attention, then feed-forward, six times.
+3. The decoder starts from the words written so far.
+4. It applies masked self-attention, then cross-attention into the encoder output,
+   then feed-forward, six times.
+5. A linear layer and a softmax give a probability for every word in the vocabulary.
+
+Then one word is chosen, appended, and the decoder runs again. The encoder runs
+once; the decoder runs **once per word it writes**.
 
 </div>
 
 <!--
-Revision slide for the poll. Fifteen seconds; it closes section 00.
+A description slide for revision. Thirty seconds; skip in the lecture if short
+on time.
+-->
+
+---
+layout: default
+core: true
+title: The parts, one at a time
+---
+
+# The parts, one at a time
+
+Every box is one of five parts. The next three sections open them in order.
+
+<div class="mt-1 flex justify-center">
+<svg viewBox="0 0 640 250" class="dl-diagram" style="max-width: 38rem" role="img" aria-label="The two-stack transformer with five numbered parts: 1 attention, 2 several heads and position, 3 the feed-forward network, 4 residual and norm wrappers, 5 the decoder's mask and cross-attention">
+  <defs>
+    <marker id="l6s1-parts-head" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+      <path d="M0 0 L7 3.5 L0 7 z" class="dl-dg-head" />
+    </marker>
+  </defs>
+  <rect x="40" y="70" width="200" height="130" rx="8" class="dl-dg-box" />
+  <text class="dl-dg-small" x="50" y="62">encoder</text>
+  <rect x="58" y="88" width="164" height="30" rx="5" class="dl-dg-box" />
+  <text class="dl-dg-in" x="140" y="108" text-anchor="middle">feed-forward</text>
+  <rect x="58" y="150" width="164" height="30" rx="5" class="dl-dg-box is-accent" />
+  <text class="dl-dg-in" x="140" y="170" text-anchor="middle">self-attention</text>
+  <path d="M48 196 V80" class="dl-dg-line" style="stroke-dasharray: 4 3" />
+  <rect x="380" y="40" width="220" height="160" rx="8" class="dl-dg-box" />
+  <text class="dl-dg-small" x="390" y="32">decoder</text>
+  <rect x="398" y="56" width="184" height="28" rx="5" class="dl-dg-box" />
+  <text class="dl-dg-in" x="490" y="75" text-anchor="middle">feed-forward</text>
+  <rect x="398" y="100" width="184" height="28" rx="5" class="dl-dg-box is-accent" />
+  <text class="dl-dg-in" x="490" y="119" text-anchor="middle">cross-attention</text>
+  <rect x="398" y="146" width="184" height="28" rx="5" class="dl-dg-box is-accent" />
+  <text class="dl-dg-in" x="490" y="165" text-anchor="middle">masked self-attention</text>
+  <path d="M240 104 C 310 104, 320 114, 396 114" class="dl-dg-line" marker-end="url(#l6s1-parts-head)" />
+  <g v-click>
+    <circle cx="20" cy="165" r="12" class="dl-dg-op" />
+    <text class="dl-dg-lab is-sm" x="20" y="170" text-anchor="middle">1</text>
+    <circle cx="140" cy="226" r="12" class="dl-dg-op" />
+    <text class="dl-dg-lab is-sm" x="140" y="231" text-anchor="middle">2</text>
+    <text class="dl-dg-small" x="158" y="231">heads + position</text>
+    <circle cx="20" cy="103" r="12" class="dl-dg-op" />
+    <text class="dl-dg-lab is-sm" x="20" y="108" text-anchor="middle">3</text>
+    <circle cx="48" cy="226" r="12" class="dl-dg-op" />
+    <text class="dl-dg-lab is-sm" x="48" y="231" text-anchor="middle">4</text>
+    <text class="dl-dg-small" x="64" y="231">residual</text>
+    <circle cx="620" cy="140" r="12" class="dl-dg-op" />
+    <text class="dl-dg-lab is-sm" x="620" y="145" text-anchor="middle">5</text>
+  </g>
+</svg>
+</div>
+
+<div v-click class="dl-tight">
+
+Parts **1** and **2** → sections 02 and 03. Parts **3** and **4** → section 03. Part **5** → section 04.
+
+</div>
+
+<!--
+The point: the full picture, now with numbers on it, so every part that comes
+next has a place on the map. This is the hinge from the whole architecture to
+the parts.
+
+On screen: the two stacks from "Two stacks", simplified. The accent boxes are
+the three kinds of attention; the plain boxes are the feed-forward networks.
+The dashed line beside the encoder is the residual wire that runs around every
+sub-layer.
+
+Click: five numbered parts appear. 1 is attention itself, the self-attention
+box. 2 is what turns one attention into the real layer: several heads, and the
+position information added to the words at the bottom. 3 is the feed-forward
+network. 4 is the residual wire and the normalisation that wrap every
+sub-layer. 5 is what only the decoder has: the mask on its self-attention and
+the cross-attention that reads the encoder.
+
+Click 2: where each part is opened. Attention and its heads are sections 02 and
+03; the feed-forward network and the wrappers finish the block in section 03;
+the mask and cross-attention are section 04. After section 04, every box on
+this slide has been explained, and section 05 zooms back out.
+
+About two minutes. Come back to this slide at the start of each section if the
+room loses its place.
+
+Class cut: about 2 minutes.
+-->
+
+---
+layout: default
+title: "In words: The parts, one at a time"
+---
+
+# In words: The parts, one at a time
+
+<div class="dl-describe">
+
+The slide redraws the two stacks and numbers their five parts. The accent boxes
+are attention; the plain boxes are feed-forward networks.
+
+1. **Attention:** how one position gathers information from the others.
+2. **Heads and position:** several attentions side by side, and a signal for
+   word order.
+3. **Feed-forward:** the small network applied to each position alone.
+4. **Residual wrappers:** the wire around each sub-layer, plus normalisation.
+5. **Decoder extras:** the mask, and cross-attention into the encoder.
+
+Sections 02 and 03 cover parts 1 to 4. Section 04 covers part 5. Then the whole
+model is explained, box by box.
+
+</div>
+
+<!--
+Revision slide. Twenty seconds; skip in the lecture if short on time.
 -->
 
 ---
 layout: section
-index: "01"
+index: "02"
 ---
 
 # Query, key, value
@@ -636,7 +1025,7 @@ A dictionary lookup, made soft.
 <div class="absolute right-18 top-1/2 -translate-y-1/2"><TransformerGlyph kind="qkv" :size="190" /></div>
 
 <!--
-Section 01 is the lecture. Never cut it; budget about forty minutes. The glyph:
+Section 02 is the lecture. Never cut it; budget about forty minutes. The glyph:
 one query dot sending lines of different weight to three keys. The thickest
 line goes to the key it matches best. That picture is attention as a soft
 lookup, and it comes back on the recap.
@@ -1010,8 +1399,7 @@ title: "In words: The sentence we will use all lecture"
   kind of bank it is.
 - So the meaning of *bank* must come from a neighbour, here *river*. Attention
   is the mechanism that moves it there.
-- The numbers are chosen by hand, so the arithmetic can be done by hand. Real
-  embeddings have no named axes.
+- The numbers are hand-picked so the arithmetic works by hand.
 
 </div>
 
@@ -1062,8 +1450,8 @@ word's key advertises plenty — this is a caricature, and the caricature is doi
 a job.
 
 If asked whether W_Q, W_K, W_V are shared across positions: yes, one set per
-head for the whole sequence. Exactly the weight-sharing argument from weeks 4
-and 5, a third time.
+head for the whole sequence. The same weight-sharing idea as a convolution's
+kernel, reused at every position.
 
 Class cut: about 4 minutes. In the full slides, for self-study, it is followed by "Why a key and a value are different things".
 -->
@@ -1258,7 +1646,7 @@ key $j$ point the same way. $d_k$ is the key width.
 
 <div v-click class="mt-3 dl-callout">
 
-Score, scale, softmax, mix. Steps 1, 3 and 4 are last week's attention. Step 2 is
+Score, scale, softmax, mix. Steps 1, 3 and 4 are the 2014 attention. Step 2 is
 new, and it is one division.
 
 </div>
@@ -1284,8 +1672,9 @@ Click 3: softmax. Positive weights that sum to 1, one per position: 0.16, 0.67,
 
 Click 4: mix. The weighted sum of the values is bank's new vector.
 
-Click 5: say the continuity explicitly. Last week's slide was score, softmax,
-weighted sum, and a student who noticed that should be told they were right —
+Click 5: say the continuity explicitly. The 2014 attention for translation was
+already score, softmax, weighted sum, and a student who knows it should be told
+they are right —
 the only genuinely new thing in this lecture is *where the scores come from*,
 which is now a dot product between two learned projections instead of a small
 MLP (multilayer perceptron).
@@ -1313,7 +1702,7 @@ are the row for *bank* after that step.
 4. **Mix.** Add up the values, each times its weight. The result is *bank*'s new
    vector.
 
-Only step 2 is new compared with last week's attention.
+Only step 2 is new compared with the 2014 attention.
 
 </div>
 
@@ -1543,9 +1932,9 @@ $d_k = 64$ in the 2017 model, so the divisor is **8**.
 </div>
 
 <!--
-The vanishing-gradient story from week 5, in a new costume: something saturates,
-its derivative goes to zero, learning stops. Third time this term. Name the
-pattern.
+The vanishing-gradient story in a new costume: something saturates, its
+derivative goes to zero, learning stops. Name the pattern; the room will meet
+it again.
 
 The picture: softmax weights as bars over the three words. Left, the bank scores
 0, 2, 0 with no scaling — 0.11, 0.79, 0.11, already peaked. Right, the same
@@ -1720,7 +2109,7 @@ it deliberately and point at the grid while you do.
 Clicks 1 to 3: the three bullets — the flat row for "the", bank's row, every row
 summing to 1. Click 4: the callout.
 
-Compare it out loud with last week's picture: an RNN computes h_1, then h_2, then
+Compare it out loud with the walls slide in section 00: an RNN computes h_1, then h_2, then
 h_3, and cannot start h_2 early. This grid is one matrix multiply. A GPU fills it
 in one shot whether the sentence is three words or three thousand.
 
@@ -1749,7 +2138,7 @@ title: "In words: Every query at once"
 - Every row adds up to 1.
 - No cell needs any other cell. So all nine are computed at the same time, in
   one matrix multiply. A recurrent network had to compute its states one after
-  another, so this removes last week's second wall.
+  another, so this removes the second wall from section 00.
 
 </div>
 
@@ -1843,7 +2232,7 @@ output — one new vector per token. d_v is the value width.
 Click 4: the callout — two matrix multiplies and a softmax.
 
 Have the room confirm the T x T — it is the shape that comes back to bite in
-section 02.
+section 03.
 
 Class cut: about 2 minutes. In the full slides, for self-study, it is followed by "Poll: where self-attention's keys come from".
 -->
@@ -1975,7 +2364,7 @@ title: "In words: Where self-attention's keys come from"
 - There is no stored memory from training. Nothing is kept from one sentence to
   the next.
 - That is what *self* means: one sequence gives the queries, the keys and the
-  values. Cross-attention, in section 03, takes them from two different places.
+  values. Cross-attention, in section 04, takes them from two different places.
 
 </div>
 
@@ -1986,7 +2375,7 @@ Twenty seconds; skip in the lecture if short on time.
 
 ---
 layout: section
-index: "02"
+index: "03"
 ---
 
 # From one head to one block
@@ -1996,7 +2385,7 @@ Many heads, one block.
 <div class="absolute right-18 top-1/2 -translate-y-1/2"><TransformerGlyph kind="block" :size="190" /></div>
 
 <!--
-Section 02 turns the single attention computation from section 01 into one
+Section 03 turns the single attention computation from section 02 into one
 complete transformer block: several heads, position information, the
 feed-forward network, and the residual and LayerNorm wrappers that let blocks
 stack. The glyph is the block: a sideways mixing bar, a small per-position
@@ -2058,8 +2447,8 @@ $W_Q$, $W_K$, $W_V$. Each copy is a **head**.
 </div>
 
 <!--
-Derive multi-head attention rather than announcing it, the same way last week
-derived the gates. The need has to be felt before the fix is introduced.
+Derive multi-head attention rather than announcing it. The need has to be felt
+before the fix is introduced.
 
 On screen: the sentence as a row of word boxes, with *it* highlighted. The solid
 arc is one softmax for *it*, and its weight lands on *cat*. Ask the room what
@@ -2337,7 +2726,7 @@ Press **Shuffle the words**, then read the vectors.
 
 <div v-click class="mt-2 dl-callout">
 
-Last week's lecture was about order. We have just thrown it away.
+A recurrent network knew the order, because it read in order. We have just thrown that away.
 
 </div>
 
@@ -2502,7 +2891,7 @@ $$ \operatorname{FFN}(\mathbf{x}) = W_2\,\phi\!\left(W_1\mathbf{x} + \mathbf{b}_
 
 <v-clicks>
 
-- Two linear layers and a non-linearity: lecture 02's MLP (multilayer perceptron)
+- Two linear layers and a non-linearity: an MLP (multilayer perceptron)
 - **Position-wise**: no token sees another
 - Wide in the middle: $d_{\text{ff}} = 4d = 2048$
 
@@ -2554,8 +2943,8 @@ On screen: the equation, and three words of the running example, each going up
 through its own copy of the same network. The copies share their weights. There
 are no arrows between the columns: nothing moves between positions here.
 
-Click: two linear layers with a non-linearity between them — the MLP from
-lecture 02.
+Click: two linear layers with a non-linearity between them — a plain MLP, the
+first network anyone learns.
 
 Click 2: "position-wise" made concrete. It is a Linear layer applied to a
 (B, T, d) tensor, which PyTorch broadcasts over the first two dimensions
@@ -2758,9 +3147,9 @@ planting, because the interpretability literature is written in it: a vector per
 position running the height of the model, with each sub-layer reading from it
 and adding something back.
 
-Click 2: the gradient path. Last week's additive-path argument, third
-appearance — LSTM cell state, ResNet skip, transformer residual. Same idea each
-time: give the gradient a route with no repeated multiplication on it.
+Click 2: the gradient path. The same additive-path idea as an LSTM's cell state
+and a ResNet's skip connection: give the gradient a route with no repeated
+multiplication on it.
 
 Click 3: LayerNorm works on each position's vector across its features.
 
@@ -2852,7 +3241,7 @@ Click 5: add and norm again, around the feed-forward network.
 Click 6: the callout — the shape at the top equals the shape at the bottom.
 
 This is the 2017 wiring, with the norms after the adds. Do not mention pre-LN
-yet; section 04 flips the toggle and the contrast is much sharper if they have
+yet; section 05 flips the toggle and the contrast is much sharper if they have
 not seen it coming.
 
 Class cut: about 4 minutes. In the full slides, for self-study, it is followed by "What a block costs".
@@ -2878,8 +3267,8 @@ The widget draws one transformer block as six steps, read from bottom to top.
 
 The vectors leave the top with the same shape they had at the bottom.
 
-Takeaway: a block is attention plus a small network, each wrapped in add and
-norm. Because the shape is kept, the same block can be stacked again and again.
+Takeaway: attention plus a small network, each wrapped in add and norm. The
+shape is kept, so blocks stack.
 
 </div>
 
@@ -2954,8 +3343,9 @@ sub-layer and a third LayerNorm, so six of them are 25.2 M.
 Click 4: do the last line as arithmetic on the board: 18.9 + 25.2 + 18.9 = 63,
 and the paper says 65 million. The gap is biases and the final norms.
 
-The embedding being 29% of the model here, against 93% in last week's classifier,
-is worth a remark: as models grow, the embedding stops being the story.
+The embedding being 29% of the model here is worth a remark: in a small text
+classifier it can be over 90% of the parameters. As models grow, the embedding
+stops being the story.
 -->
 
 ---
@@ -3097,227 +3487,24 @@ lecture if short on time.
 
 ---
 layout: section
-index: "03"
+index: "04"
 ---
 
-# The original transformer
+# Inside the decoder
 
-One stack reads, one stack writes.
+Two extras: a mask, and a wire into the encoder.
 
-<div class="absolute right-18 top-1/2 -translate-y-1/2"><TransformerGlyph kind="encdec" :size="190" /></div>
+<div class="absolute right-18 top-1/2 -translate-y-1/2"><TransformerGlyph kind="decoder" :size="190" /></div>
 
 <!--
-Section 03 puts the block from section 02 into the model the 2017 paper actually
-built: an encoder stack that reads the source sentence and a decoder stack that
-writes the translation. The glyph is that shape: two stacks, the right one
-reading the left through a single wire.
+Section 04 opens part 5 of the map on "The parts, one at a time": the two
+things only the decoder has. The mask stops each position from reading the
+words after it. Cross-attention lets the decoder read the encoder's output.
+Then the whole 2017 model is put back together, with its real sizes. The glyph
+is a stack under a triangular mask: the mask is the decoder's defining feature.
 
-About fifteen minutes. This section is compressible if you are running late:
-keep the walk through the architecture and the poll on teacher forcing, and say
-the parameter table in one sentence.
--->
-
----
-layout: default
-core: true
-title: Two stacks
----
-
-# Two stacks
-
-The 2017 paper is a **translation** model. One stack reads the source; the
-other writes the target.
-
-<div class="mt-1 flex justify-center">
-<svg viewBox="0 0 620 240" class="dl-diagram is-sm-h" role="img" aria-label="An encoder stack reads the source tokens and outputs one vector per token; a decoder stack with three sub-layers reads the encoder output through cross-attention">
-  <defs>
-    <marker id="l6s3-a1" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
-      <path class="dl-dg-head" d="M0 0 L7 3.5 L0 7 z" />
-    </marker>
-  </defs>
-  <g>
-    <text class="dl-dg-small" x="140" y="14" text-anchor="middle">one vector per source token</text>
-    <rect v-for="k in 3" :key="`eo${k}`" class="dl-dg-box is-accent" :x="88 + (k - 1) * 38" y="22" width="26" height="22" rx="3" />
-    <rect class="dl-dg-fill is-muted is-dashed" x="40" y="70" width="200" height="110" rx="6" />
-    <text class="dl-dg-small" x="52" y="86">encoder, 6 blocks</text>
-    <rect class="dl-dg-box" x="60" y="94" width="160" height="30" rx="4" />
-    <text class="dl-dg-in" x="140" y="114" text-anchor="middle">feed-forward</text>
-    <rect class="dl-dg-box" x="60" y="134" width="160" height="30" rx="4" />
-    <text class="dl-dg-in" x="140" y="154" text-anchor="middle">self-attention, no mask</text>
-    <rect v-for="k in 3" :key="`ei${k}`" class="dl-dg-box" :x="88 + (k - 1) * 38" y="206" width="26" height="22" rx="3" />
-    <text class="dl-dg-small" x="80" y="221" text-anchor="end">source</text>
-    <path class="dl-dg-arrow" marker-end="url(#l6s3-a1)" d="M140 204 V184" />
-    <path class="dl-dg-arrow" marker-end="url(#l6s3-a1)" d="M140 68 V48" />
-  </g>
-  <g v-click>
-    <rect class="dl-dg-fill is-dashed" x="380" y="50" width="210" height="130" rx="6" />
-    <text class="dl-dg-small" x="392" y="66">decoder, 6 blocks</text>
-    <rect class="dl-dg-box" x="398" y="72" width="174" height="28" rx="4" />
-    <text class="dl-dg-in" x="485" y="91" text-anchor="middle">feed-forward</text>
-    <rect class="dl-dg-box is-accent" x="398" y="106" width="174" height="28" rx="4" />
-    <text class="dl-dg-in" x="485" y="125" text-anchor="middle">cross-attention</text>
-    <rect class="dl-dg-box" x="398" y="140" width="174" height="28" rx="4" />
-    <text class="dl-dg-in" x="485" y="159" text-anchor="middle">masked self-attention</text>
-    <rect v-for="k in 3" :key="`di${k}`" class="dl-dg-box" :x="428 + (k - 1) * 38" y="206" width="26" height="22" rx="3" />
-    <text class="dl-dg-small" x="420" y="221" text-anchor="end">target so far</text>
-    <path class="dl-dg-arrow" marker-end="url(#l6s3-a1)" d="M485 204 V184" />
-    <path class="dl-dg-arrow" marker-end="url(#l6s3-a1)" d="M485 48 V26" />
-    <text class="dl-dg-small" x="497" y="22">next word</text>
-  </g>
-  <g v-click>
-    <path class="dl-dg-line" marker-end="url(#l6s3-a1)" d="M192 33 H310 V120 H394" />
-    <text class="dl-dg-small is-good" x="318" y="84">K and V</text>
-  </g>
-</svg>
-</div>
-
-<div v-click class="mt-1 dl-callout">
-
-One vector per source token: last week's bottleneck is gone. Nothing has to be
-summarised in advance.
-
-</div>
-
-<!--
-The point: the 2017 model is two stacks of the blocks from section 02. The
-encoder reads the source once. The decoder writes the target, and it reads the
-encoder only through cross-attention.
-
-On screen: the left stack is the encoder. Its six blocks each have two
-sub-layers, self-attention without a mask and a feed-forward network. Its output,
-at the top, is one vector per source token, not one vector for the sentence.
-
-Click: the decoder appears. It also has six blocks, but each has three
-sub-layers: masked self-attention over what it has written so far,
-cross-attention, and the feed-forward network. Three sub-layers catches people
-who have only ever seen the paper's figure; count them here.
-
-Click 2: the wire. The encoder's output vectors become the keys and values of
-every decoder block's cross-attention. It is the only place the two stacks meet.
-
-Click 3: the callout ties the two lectures together and it is worth pausing on.
-The recurrent encoder-decoder had to compress the source into one fixed vector,
-because the decoder could only be handed one thing. Here the decoder can attend,
-so the encoder simply hands over everything.
-
-About three minutes.
-
-Class cut: about 2 minutes.
--->
-
----
-layout: default
-title: "In words: Two stacks"
----
-
-# In words: Two stacks
-
-<div class="dl-describe">
-
-The original transformer translates a sentence with two stacks of blocks.
-
-- **The left stack is the encoder.** It reads the source once. Each of its six
-  blocks has self-attention with no mask, then a feed-forward network.
-- **Its output is one vector per source token**, the row at the top. Nothing is
-  squeezed into a single vector.
-- **The right stack is the decoder.** It writes the target, one word at a time.
-  Its six blocks have three sub-layers: masked self-attention, cross-attention,
-  feed-forward.
-- **The wire labelled "K and V" is cross-attention**, the only link between the
-  stacks.
-
-Remember: two stacks, one wire, and no bottleneck.
-
-</div>
-
-<!--
-A description slide for revision. Give the room thirty seconds to read it, or
-skip it in the lecture if short on time.
--->
-
----
-layout: interactive
-core: true
-heading: The architecture, step by step
-title: The architecture, step by step
-aside-width: 17rem
----
-
-<TransformerStack :layers="6" />
-
-::aside::
-
-Press **Walk the architecture** and follow the data: nine steps, no new boxes.
-
-<v-clicks>
-
-- up the encoder **once**
-- then up the decoder **once per word it writes**
-- cross-attention is the only wire between them
-
-</v-clicks>
-
-<div v-click class="mt-2 dl-callout">
-
-The famous figure, in the order the data actually moves.
-
-</div>
-
-<!--
-The point: the paper's figure is hard to read because it shows everything at
-once and gives no clue which arrow comes first. The widget walks it in the order
-the data moves. This is the slide the 2025 deck had as a single screenshot.
-
-The widget: press Walk the architecture and step through nine stages. Embed the
-source; add position; encoder self-attention; the encoder block repeated N times;
-the decoder starts from the target shifted right by one; masked self-attention;
-cross-attention; the decoder block repeated N times; predict the next token with
-a linear layer and a softmax over the vocabulary.
-
-Click: the encoder runs once, for the whole source sentence.
-
-Click 2: the decoder runs once per word it writes. Step 9 is the one to dwell on.
-The parallelism people credit transformers with is real in the encoder, and real
-when training the decoder. It is gone at generation time, where you are back to
-one token at a time.
-
-Click 3: cross-attention is the only wire between the stacks. Point at it in the
-widget.
-
-Click 4: the callout. That asymmetry between training and generation is the whole
-reason the KV cache exists: see "What generation actually costs" in section 04.
-
-About four minutes.
-
-Class cut: about 4 minutes.
--->
-
----
-layout: default
-title: "In words: The architecture, step by step"
----
-
-# In words: The architecture, step by step
-
-<div class="dl-describe">
-
-The widget walks the original transformer in nine steps, in the order the data moves.
-
-1. The source tokens are embedded, and a position vector is added to each.
-2. They go up the encoder **once**: self-attention, then feed-forward, six times.
-3. The decoder starts from the words written so far.
-4. It applies masked self-attention, then cross-attention into the encoder output,
-   then feed-forward, six times.
-5. A linear layer and a softmax give a probability for every word in the vocabulary.
-
-Then one word is chosen, appended, and the decoder runs again. The encoder runs
-once; the decoder runs **once per word it writes**.
-
-</div>
-
-<!--
-A description slide for revision. Thirty seconds; skip in the lecture if short
-on time.
+About twelve minutes. Keep the mask widget and the teacher-forcing poll; the
+size table can be one sentence if time is short.
 -->
 
 ---
@@ -3371,14 +3558,14 @@ and the model copies it. The loss falls to nearly zero and nothing is learned.
 What it buys, which is not obvious: because position t is independent of
 everything after t, a whole target sentence trains in one forward pass. Every
 position is a training example, and none can cheat. That is teacher forcing
-from week 5, made parallel. The RNN version had to run T steps to get T training
-signals.
+(feeding the true previous words during training), made parallel. A recurrent
+decoder had to run T steps to get T training signals.
 
 The detail students get wrong: masking does not skip the computation. Every
 score is computed, then the forbidden ones are set to -inf before the softmax.
 It saves no work; it only removes the answer.
 
-Class cut: about 4 minutes. In the full slides, for self-study, it is followed by "Cross-attention is last week's slide", "The model they actually trained" and "Poll: how many decoder passes teacher forcing needs".
+Class cut: about 4 minutes.
 -->
 
 ---
@@ -3412,10 +3599,11 @@ short on time.
 
 ---
 layout: default
-title: Cross-attention is last week's slide
+core: true
+title: "Cross-attention: the decoder reads the encoder"
 ---
 
-# Cross-attention is last week's slide
+# Cross-attention: the decoder reads the encoder
 
 Self-attention takes $Q$, $K$ and $V$ from **one** stack. Cross-attention uses **two**.
 
@@ -3450,7 +3638,7 @@ $$ \operatorname{Attention}(\underbrace{Q}_{\text{decoder}},\; \underbrace{K,\; 
 
 <div v-click class="mt-2 dl-callout">
 
-What is new: a **scaled dot product** score, and no recurrence on either side.
+Compared with 2014: a **scaled dot product** score, and no recurrence on either side.
 
 </div>
 
@@ -3473,12 +3661,12 @@ into weights, and the output is the weighted sum of the values.
 
 Click 2 to Click 4: the three bullets. The decoder asks what it needs for the
 word it is about to write; the encoder answers with one key and value per source
-token; and the recipe is exactly Bahdanau's 2014 alignment. Put last week's
-German-English widget back on screen mentally: "read" attending to "gelesen" five
-words away. That picture is a cross-attention map.
+token; and the recipe is exactly Bahdanau's 2014 alignment, the first attention
+for translation. In a German-English pair, the English word "read" attends to
+the German "gelesen" five words away: that picture is a cross-attention map.
 
-Click 5: what changed since last week is only the score, now a scaled dot
-product, and the missing recurrence on both sides.
+Click 5: compared with that 2014 version, only the score changed, now a scaled
+dot product, and the recurrence is gone on both sides.
 
 After click 5, say it out loud (it is on the next slide in words): the encoder's
 K and V are computed once and reused for every output token. A good check of
@@ -3487,14 +3675,16 @@ queries cannot.
 
 If someone asks whether cross-attention is masked: no. The whole source is
 available from the start; there is nothing to hide.
+
+Class cut: about 2 minutes. In the full slides, for self-study, it is followed by "Poll: how many decoder passes teacher forcing needs" and "The model they actually trained".
 -->
 
 ---
 layout: default
-title: "In words: Cross-attention is last week's slide"
+title: "In words: Cross-attention: the decoder reads the encoder"
 ---
 
-# In words: Cross-attention is last week's slide
+# In words: Cross-attention: the decoder reads the encoder
 
 <div class="dl-describe">
 
@@ -3509,107 +3699,6 @@ Cross-attention is ordinary attention with inputs from two places.
   recurrent.
 
 The encoder's $K$ and $V$ are computed once and reused for every output word.
-
-</div>
-
-<!--
-A description slide for revision. Thirty seconds; skip in the lecture if short
-on time.
--->
-
----
-layout: default
-title: The model they actually trained
----
-
-# The model they actually trained
-
-<div class="grid grid-cols-[1.25fr_1fr] gap-8 items-start">
-<div class="dl-ledger mt-1">
-
-| | base | big |
-| --- | --- | --- |
-| blocks per stack $N$ | 6 | 6 |
-| model width $d_{\text{model}}$ | 512 | 1024 |
-| heads $h$ | 8 | 16 |
-| head width $d_k = d_v$ | 64 | 64 |
-| feed-forward width $d_{\text{ff}}$ | 2048 | 4096 |
-
-</div>
-<div>
-
-<svg viewBox="0 0 260 190" class="dl-diagram" role="img" aria-label="Bars drawn to scale: 65 million versus 213 million parameters, 12 versus 84 hours of training on 8 GPUs">
-  <text class="dl-dg-small" x="0" y="12">parameters, millions</text>
-  <rect class="dl-dg-bar" x="40" y="22" width="52" height="22" />
-  <rect class="dl-dg-bar is-q" x="40" y="50" width="170" height="22" />
-  <text class="dl-dg-small" x="0" y="37">base</text>
-  <text class="dl-dg-small" x="0" y="65">big</text>
-  <text class="dl-dg-small" x="98" y="37">65</text>
-  <text class="dl-dg-small" x="216" y="65">213</text>
-  <text class="dl-dg-small" x="0" y="112">training hours, 8 GPUs</text>
-  <rect class="dl-dg-bar" x="40" y="122" width="24" height="22" />
-  <rect class="dl-dg-bar is-q" x="40" y="150" width="170" height="22" />
-  <text class="dl-dg-small" x="0" y="137">base</text>
-  <text class="dl-dg-small" x="0" y="165">big</text>
-  <text class="dl-dg-small" x="70" y="137">12</text>
-  <text class="dl-dg-small" x="216" y="165">84</text>
-</svg>
-
-</div>
-</div>
-
-<div v-click class="mt-2 dl-callout">
-
-Twelve hours on eight GPUs beat every recurrent translation system of its day.
-
-</div>
-
-<div v-click class="mt-2 dl-secondary">
-
-$d_k = 64$ in both: head width fixed, head **count** growing. Still true today.
-
-</div>
-
-<!--
-The point: the real sizes of the two models in the 2017 paper, and how cheap the
-base model was to train.
-
-On screen: the table gives the sizes, using the symbols from section 02. The bars
-on the right are drawn to scale. Parameters: 65 million for base, 213 million for
-big. Training time on eight GPUs: 12 hours for base, 3.5 days, which is 84 hours,
-for big.
-
-Click: the 12-hour figure is the one to leave them with. Recurrent systems of
-comparable quality took days to weeks to train, because they could not use the
-hardware in parallel. The architecture's advantage was never only accuracy.
-
-Click 2: point at d_k = 64 in both columns. The big model doubles the width by
-doubling the number of heads, not their width. It is still 64 or 128 in models a
-thousand times larger, which is worth noticing: almost nothing else about the
-architecture survived unchanged.
-
-About two minutes.
--->
-
----
-layout: default
-title: "In words: The model they actually trained"
----
-
-# In words: The model they actually trained
-
-<div class="dl-describe">
-
-The 2017 paper trained two sizes of the same architecture, "base" and "big".
-
-- **Both have $N = 6$ blocks per stack and head width $d_k = 64$.**
-- **Big doubles the rest:** width $d_{\text{model}}$ 512 → 1024, heads 8 → 16,
-  feed-forward width 2048 → 4096.
-- **The bars are drawn to scale.** Base has 65 million parameters, big has 213 million.
-- **Base trained in 12 hours on 8 GPUs; big in 84 hours (3.5 days).**
-
-Two things to remember. The model was cheap to train, because it uses the
-hardware in parallel. And it grows by adding heads, not by widening them.
 
 </div>
 
@@ -3684,7 +3773,7 @@ Option 4 is the most instructive wrong answer: it is exactly backwards. A studen
 who picks it has the right two facts attached to the wrong ends. Option 3 mixes
 up the backward pass with the forward passes the question asks about.
 
-Two minutes; this is the single most useful thing in section 03.
+Two minutes; this is the single most useful thing in section 04.
 -->
 
 ---
@@ -3715,26 +3804,131 @@ Training is parallel over the sequence; generation is not.
 A description slide for revision. Thirty seconds; skip in the lecture if short
 on time.
 -->
+
 ---
-layout: section
-index: "04"
+layout: default
+title: The model they actually trained
 ---
 
-# Modern transformers
+# The model they actually trained
 
-What changed since 2017, and what did not.
+<div class="grid grid-cols-[1.25fr_1fr] gap-8 items-start">
+<div class="dl-ledger mt-1">
 
-<div class="absolute right-18 top-1/2 -translate-y-1/2"><TransformerGlyph kind="decoder" :size="190" /></div>
+| | base | big |
+| --- | --- | --- |
+| blocks per stack $N$ | 6 | 6 |
+| model width $d_{\text{model}}$ | 512 | 1024 |
+| heads $h$ | 8 | 16 |
+| head width $d_k = d_v$ | 64 | 64 |
+| feed-forward width $d_{\text{ff}}$ | 2048 | 4096 |
+
+</div>
+<div>
+
+<svg viewBox="0 0 260 190" class="dl-diagram" role="img" aria-label="Bars drawn to scale: 65 million versus 213 million parameters, 12 versus 84 hours of training on 8 GPUs">
+  <text class="dl-dg-small" x="0" y="12">parameters, millions</text>
+  <rect class="dl-dg-bar" x="40" y="22" width="52" height="22" />
+  <rect class="dl-dg-bar is-q" x="40" y="50" width="170" height="22" />
+  <text class="dl-dg-small" x="0" y="37">base</text>
+  <text class="dl-dg-small" x="0" y="65">big</text>
+  <text class="dl-dg-small" x="98" y="37">65</text>
+  <text class="dl-dg-small" x="216" y="65">213</text>
+  <text class="dl-dg-small" x="0" y="112">training hours, 8 GPUs</text>
+  <rect class="dl-dg-bar" x="40" y="122" width="24" height="22" />
+  <rect class="dl-dg-bar is-q" x="40" y="150" width="170" height="22" />
+  <text class="dl-dg-small" x="0" y="137">base</text>
+  <text class="dl-dg-small" x="0" y="165">big</text>
+  <text class="dl-dg-small" x="70" y="137">12</text>
+  <text class="dl-dg-small" x="216" y="165">84</text>
+</svg>
+
+</div>
+</div>
+
+<div v-click class="mt-2 dl-callout">
+
+Twelve hours on eight GPUs beat every recurrent translation system of its day.
+
+</div>
+
+<div v-click class="mt-2 dl-secondary">
+
+$d_k = 64$ in both: head width fixed, head **count** growing. Still true today.
+
+</div>
 
 <!--
-Section 04 has one message: the families, the wiring and the engineering all
-moved, but the attention mechanism from section 01 did not. The glyph is a
-single tall stack under a triangular mask — the decoder-only model that took
-over.
+The point: the real sizes of the two models in the 2017 paper, and how cheap the
+base model was to train.
 
-About fifteen minutes. This section is compressible: if time is short, do "The
-architecture forked three ways", "What generation actually costs" and "What did
-not change", and leave the rest for reading.
+On screen: the table gives the sizes, using the symbols from section 03. The bars
+on the right are drawn to scale. Parameters: 65 million for base, 213 million for
+big. Training time on eight GPUs: 12 hours for base, 3.5 days, which is 84 hours,
+for big.
+
+Click: the 12-hour figure is the one to leave them with. Recurrent systems of
+comparable quality took days to weeks to train, because they could not use the
+hardware in parallel. The architecture's advantage was never only accuracy.
+
+Click 2: point at d_k = 64 in both columns. The big model doubles the width by
+doubling the number of heads, not their width. It is still 64 or 128 in models a
+thousand times larger, which is worth noticing: almost nothing else about the
+architecture survived unchanged.
+
+About two minutes.
+-->
+
+---
+layout: default
+title: "In words: The model they actually trained"
+---
+
+# In words: The model they actually trained
+
+<div class="dl-describe">
+
+The 2017 paper trained two sizes of the same architecture, "base" and "big".
+
+- **Both have $N = 6$ blocks per stack and head width $d_k = 64$.**
+- **Big doubles the rest:** width $d_{\text{model}}$ 512 → 1024, heads 8 → 16,
+  feed-forward width 2048 → 4096.
+- **The bars are drawn to scale.** Base has 65 million parameters, big has 213 million.
+- **Base trained in 12 hours on 8 GPUs; big in 84 hours (3.5 days).**
+
+Two things to remember. The model was cheap to train, because it uses the
+hardware in parallel. And it grows by adding heads, not by widening them.
+
+</div>
+
+<!--
+A description slide for revision. Thirty seconds; skip in the lecture if short
+on time.
+-->
+
+---
+layout: section
+index: "05"
+---
+
+# Three kinds of transformer
+
+The same parts, wired three ways, for different jobs.
+
+<div class="absolute right-18 top-1/2 -translate-y-1/2"><TransformerGlyph kind="fork" :size="190" /></div>
+
+<!--
+Section 05 zooms back out. Every part of the 2017 model is now explained, so
+this section asks what people built from those parts: three kinds of
+transformer, and the jobs each one is used for. Then it shows how a model
+trained today differs from the 2017 block, and what did not change. The glyph
+is one trunk splitting into three stacks: encoder-only (plain), decoder-only
+(accent), and encoder–decoder (the pair).
+
+About twenty minutes. The core is "The architecture forked three ways", "Which
+kind for which job" and "Why decoder-only took over". If time is short, do
+"What generation actually costs" and "What did not change" from the rest, and
+leave the others for reading.
 -->
 
 ---
@@ -3818,6 +4012,126 @@ alone.
 ---
 layout: default
 core: true
+title: Which kind for which job
+---
+
+# Which kind for which job
+
+Pick by the shape of the task: what goes in, what comes out.
+
+<div class="mt-1 flex justify-center">
+<svg viewBox="0 0 690 250" class="dl-diagram" style="max-width: 40rem" role="img" aria-label="Three columns. Encoder-only: a whole review in, one label out, as in sentiment, search embeddings and named entities. Decoder-only: a prompt in, text written word by word, as in chat, code and question answering. Encoder-decoder: a full source in, a different full sequence out, as in translation, summarisation and speech to text.">
+  <defs>
+    <marker id="l6s5-jobs-head" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+      <path d="M0 0 L7 3.5 L0 7 z" class="dl-dg-head" />
+    </marker>
+  </defs>
+  <text class="dl-dg-lab is-sm" x="110" y="18" text-anchor="middle">encoder-only</text>
+  <text class="dl-dg-lab is-sm" x="345" y="18" text-anchor="middle">decoder-only</text>
+  <text class="dl-dg-lab is-sm" x="580" y="18" text-anchor="middle">encoder–decoder</text>
+  <rect x="50" y="34" width="120" height="70" rx="6" class="dl-dg-box" />
+  <text class="dl-dg-in" x="110" y="74" text-anchor="middle">reads all</text>
+  <rect x="285" y="34" width="120" height="70" rx="6" class="dl-dg-box is-accent" />
+  <text class="dl-dg-in" x="345" y="74" text-anchor="middle">writes left → right</text>
+  <rect x="510" y="34" width="62" height="70" rx="6" class="dl-dg-box" />
+  <rect x="588" y="34" width="62" height="70" rx="6" class="dl-dg-box is-accent" />
+  <path d="M572 69 H586" class="dl-dg-line" marker-end="url(#l6s5-jobs-head)" />
+  <g v-click>
+    <text class="dl-dg-small" x="110" y="128" text-anchor="middle">in: a whole review</text>
+    <text class="dl-dg-small" x="110" y="146" text-anchor="middle">out: one label, "positive"</text>
+    <text class="dl-dg-small" x="345" y="128" text-anchor="middle">in: "Write a haiku about"</text>
+    <text class="dl-dg-small" x="345" y="146" text-anchor="middle">out: next word, again and again</text>
+    <text class="dl-dg-small" x="580" y="128" text-anchor="middle">in: "Ich habe es gelesen"</text>
+    <text class="dl-dg-small" x="580" y="146" text-anchor="middle">out: "I have read it"</text>
+  </g>
+  <g v-click>
+    <text class="dl-dg-small is-good" x="110" y="180" text-anchor="middle">sentiment, spam, topic</text>
+    <text class="dl-dg-small is-good" x="110" y="198" text-anchor="middle">search embeddings</text>
+    <text class="dl-dg-small is-good" x="110" y="216" text-anchor="middle">named entities</text>
+    <text class="dl-dg-small is-good" x="345" y="180" text-anchor="middle">chat assistants</text>
+    <text class="dl-dg-small is-good" x="345" y="198" text-anchor="middle">code completion</text>
+    <text class="dl-dg-small is-good" x="345" y="216" text-anchor="middle">question answering</text>
+    <text class="dl-dg-small is-good" x="580" y="180" text-anchor="middle">translation</text>
+    <text class="dl-dg-small is-good" x="580" y="198" text-anchor="middle">summarisation</text>
+    <text class="dl-dg-small is-good" x="580" y="216" text-anchor="middle">speech to text</text>
+    <text class="dl-dg-small" x="110" y="242" text-anchor="middle">BERT</text>
+    <text class="dl-dg-small" x="345" y="242" text-anchor="middle">GPT, Llama</text>
+    <text class="dl-dg-small" x="580" y="242" text-anchor="middle">T5, Whisper</text>
+  </g>
+</svg>
+</div>
+
+<div v-click class="dl-callout">
+
+Label it → encoder. Write it → decoder. Turn it into another sequence → both.
+
+</div>
+
+<!--
+The point: the three kinds are not three levels of quality; they fit three
+shapes of task. Choose by what goes in and what has to come out.
+
+On screen, top row: the three kinds, drawn the way the fork glyph draws them.
+Encoder-only is one plain stack that reads the whole input at once, with no
+mask. Decoder-only is one accent stack under the causal mask, writing left to
+right. Encoder–decoder is the 2017 pair, with the arrow for cross-attention.
+
+Click: one example input and output per kind. Encoder-only reads a whole movie
+review and outputs one label. Decoder-only is given a prompt and keeps
+predicting the next word. Encoder–decoder reads a full German sentence and
+writes a different English sentence.
+
+Click 2: the jobs each kind is used for, with a well-known model of each kind.
+Encoder-only: classification (sentiment, spam, topic), embeddings for search
+and retrieval, and tagging named entities such as people and places; BERT is
+the classic example. Decoder-only: chat assistants, code completion, question
+answering; GPT and Llama. Encoder–decoder: translation, summarisation, speech
+to text; T5, and Whisper for speech.
+
+Click 3: the callout is the rule of thumb. Then add the twist that "Why
+decoder-only took over" explains: in practice, decoder-only models now do many encoder and
+encoder–decoder jobs as well, because any task can be phrased as text in, text
+out.
+
+About three minutes.
+
+Class cut: about 2 minutes.
+-->
+
+---
+layout: default
+title: "In words: Which kind for which job"
+---
+
+# In words: Which kind for which job
+
+<div class="dl-describe">
+
+The three kinds of transformer fit three shapes of task.
+
+- **Encoder-only** reads the whole input at once, with no mask. It suits jobs
+  where the input is complete and one answer comes out: sentiment, spam, topic,
+  search embeddings, named entities. Example: BERT (bidirectional encoder
+  representations from transformers).
+- **Decoder-only** writes left to right, one word at a time. It suits jobs where
+  text comes out: chat, code completion, question answering. Examples: GPT
+  (generative pre-trained transformer), Llama.
+- **Encoder–decoder** reads one full sequence and writes another: translation,
+  summarisation, speech to text. Examples: T5 (text-to-text transfer
+  transformer), Whisper.
+
+Rule of thumb: label it, write it, or turn it into something else.
+
+</div>
+
+<!--
+Revision slide. Thirty seconds; ask the room which kind they would pick for
+"summarise this report".
+-->
+
+---
+layout: default
+core: true
 title: Why decoder-only took over
 ---
 
@@ -3870,8 +4184,8 @@ The design that won was the one whose training data was free.
 
 <!--
 The point: decoder-only did not win because it is the most expressive of the
-three. It won because of what it can train on. Resist teaching next week's
-lecture here; the one sentence they need is the callout.
+three. It won because of what it can train on. Training at large scale is out
+of scope here; the one sentence they need is the callout.
 
 The picture: five words of ordinary text along the bottom. Above each word is
 the word that follows it — that is the target. Five words give four training
@@ -3889,13 +4203,13 @@ as "continue this text".
 
 Click 4: one stack instead of two is simpler to scale and to serve.
 
-Click 5: the callout. Then say that how it is trained, and at what scale, is next week.
+Click 5: the callout.
 
 If someone asks whether encoder-only models are obsolete: no. Retrieval and
 reranking in production are still full of them, and ModernBERT in 2024 exists
 precisely because that niche did not go away.
 
-Class cut: about 2 minutes.
+Class cut: about 2 minutes. In the full slides, for self-study, it is followed by "One wire moved, and deep stacks started training", "What else changed inside the block", "Position, done properly" and "What generation actually costs".
 -->
 
 ---
@@ -3923,7 +4237,6 @@ short on time.
 
 ---
 layout: interactive
-core: true
 heading: One wire moved, and deep stacks started training
 title: One wire moved, and deep stacks started training
 aside-width: 19rem
@@ -3972,8 +4285,6 @@ moving the norm is the fix.
 
 Anyone who has tried to train a deep transformer from scratch and watched it
 diverge in the first hundred steps has met this.
-
-Class cut: about 4 minutes. In the full slides, for self-study, it is followed by "What else changed inside the block", "Position, done properly" and "What generation actually costs".
 -->
 
 ---
@@ -4073,7 +4384,7 @@ table is an engineering refinement around a core that did not change.
 The picture is a modern block, drawn bottom to top in the pre-norm wiring from
 the previous slide. The numbered badges mark where each change in the table
 lives. The box in the middle of the attention layer is the formula from section
-01, and no badge points at it.
+02, and no badge points at it.
 
 Go across the rows at whatever depth the room wants; none of them is essential.
 Why each one happened:
@@ -4511,7 +4822,7 @@ this year.
 
 <!--
 Read the list slowly. This is the summary of the whole lecture and it is
-deliberately the same list as section 01 and section 02.
+deliberately the same list as section 02 and section 03.
 
 The picture is the attention layer drawn as one flow, top to bottom, with a
 numbered badge for each line of the list. The dashed accent line is the
@@ -4554,9 +4865,10 @@ Remember: these six steps are the same in 2017 and today.
 Revision slide that closes the section. Give the room 30 seconds to read it,
 then move on to the PyTorch section.
 -->
+
 ---
 layout: section
-index: "05"
+index: "06"
 ---
 
 # In PyTorch
@@ -4566,7 +4878,7 @@ Everything you computed by hand, as code.
 <div class="absolute right-18 top-1/2 -translate-y-1/2"><TransformerGlyph kind="code" :size="190" /></div>
 
 <!--
-Section 05: the lecture's mechanism turned into PyTorch, so the lab can start
+Section 06: the lecture's mechanism turned into PyTorch, so the lab can start
 from working code. Nothing new is introduced here; every line maps to a slide
 the room has already seen.
 
@@ -4983,7 +5295,7 @@ print(sum(p.numel() for p in encoder.parameters()))     # 18 914 304
 
 <v-clicks>
 
-- `batch_first=True`: the same trap as last week's `nn.LSTM` (long short-term memory)
+- `batch_first=True`: without it, the batch axis is read as time
 - `norm_first=True`: the default is the 2017 wiring, which needs warmup
 - The count matches "What a block costs": **18.9 M**
 
@@ -5011,8 +5323,8 @@ Click 3 (lines 7-8): run it with a padding mask, and count the parameters.
 
 Click 4: back to the whole code. Then the three bullets, one per click.
 
-batch_first: without it PyTorch reads the batch dimension as time, the same
-silent failure as nn.LSTM last week. norm_first: the default is the 2017 post-LN
+batch_first: without it PyTorch reads the batch dimension as time, a silent
+failure shared by the recurrent layers. norm_first: the default is the 2017 post-LN
 wiring, which needs a learning-rate warmup to train deep. The count: 18 914 304
 is the 18.9 M the room computed by hand on "What a block costs", to the number.
 Have them run the print; matching a number derived by hand is the most
@@ -5115,8 +5427,8 @@ head gives 50 257 logits, one per vocabulary entry, at every position.
 Click: the callout. Every other row grows with T once. The scores row grows with
 T twice, and that is the long-context problem.
 
-Lecture 04 and lecture 05 both ended their code section on a shape ledger. Same
-habit, and this one has a punchline.
+A shape ledger is the habit worth keeping at the end of any code section, and
+this one has a punchline.
 
 The check to run before writing any training loop:
     x = torch.randint(0, 50257, (32, 128))
@@ -5224,9 +5536,8 @@ first symptom of bug one.
 </div>
 
 <!--
-The point: this slide is the lab's FAQ, written in advance. It mirrors the
-"Four bugs" slide from last week, and three of these four give no error message
-at all.
+The point: this slide is the lab's FAQ, written in advance. Three of these four
+bugs give no error message at all.
 
 On screen: four cards, one per click. Each card has a small sketch of the
 symptom you would see, and one sentence naming the bug.
@@ -5237,8 +5548,7 @@ next token from its own input. The tell: if next-token loss on natural text
 drops under about 1.0 in the first epoch of a small model, the mask is wrong.
 
 Click 2: batch_first left out. The two boxes show (B, T) being read as (T, B).
-No error. PyTorch reads your batch dimension as time, exactly as nn.LSTM did
-last week.
+No error. PyTorch reads your batch dimension as time.
 
 Click 3: padding mask forgotten. The accent dot is one token; its red lines go
 to the pad tokens. No error. Every short sequence in the batch gets a worse
@@ -5281,9 +5591,10 @@ The point: the symptom tells you which bug you have. Give the room about 30
 seconds to read. Skip in the lecture if short on time — this slide is for
 revision.
 -->
+
 ---
 layout: section
-index: "06"
+index: "07"
 ---
 
 # Where that leaves us
@@ -5293,7 +5604,7 @@ One idea, applied twice per block.
 <div class="absolute right-18 top-1/2 -translate-y-1/2"><TransformerGlyph kind="block" :size="190" /></div>
 
 <!--
-Section 06 lands the whole lecture in one picture: the block glyph, attention
+Section 07 lands the whole lecture in one picture: the block glyph, attention
 mixing sideways and a small network working upward, with the residual wire
 around both. Every earlier section was one part of that drawing.
 
@@ -5312,27 +5623,27 @@ title: Where we got to
 <div class="grid grid-cols-2 gap-x-8 gap-y-2 mt-2 dl-tight">
 <div v-click class="flex items-center gap-3">
   <TransformerGlyph kind="cut" :size="52" />
-  <div><strong>Recurrence deleted:</strong> all positions processed at once.</div>
-</div>
-<div v-click class="flex items-center gap-3">
-  <TransformerGlyph kind="qkv" :size="52" />
-  <div>A <strong>query</strong> meets each <strong>key</strong>; <strong>values</strong> are mixed.</div>
-</div>
-<div v-click class="flex items-center gap-3">
-  <TransformerGlyph kind="heads" :size="52" />
-  <div>Several <strong>heads</strong> ask different questions; <strong>position</strong> is added in.</div>
-</div>
-<div v-click class="flex items-center gap-3">
-  <TransformerGlyph kind="block" :size="52" />
-  <div><strong>Block:</strong> attention, then a per-position network, plus residuals and norms.</div>
+  <div><strong>Why:</strong> no chain, so all positions are processed at once.</div>
 </div>
 <div v-click class="flex items-center gap-3">
   <TransformerGlyph kind="encdec" :size="52" />
-  <div><strong>Original:</strong> two stacks; a mask hides future words.</div>
+  <div><strong>The whole:</strong> an encoder stack, a decoder stack, one wire.</div>
+</div>
+<div v-click class="flex items-center gap-3">
+  <TransformerGlyph kind="qkv" :size="52" />
+  <div><strong>Attention:</strong> a query meets each key; values are mixed.</div>
+</div>
+<div v-click class="flex items-center gap-3">
+  <TransformerGlyph kind="block" :size="52" />
+  <div><strong>Block:</strong> heads and position, a per-position network, residuals and norms.</div>
 </div>
 <div v-click class="flex items-center gap-3">
   <TransformerGlyph kind="decoder" :size="52" />
-  <div><strong>Modern:</strong> decoder-only, new details, same mechanism.</div>
+  <div><strong>Decoder:</strong> a mask hides later words; cross-attention reads the encoder.</div>
+</div>
+<div v-click class="flex items-center gap-3">
+  <TransformerGlyph kind="fork" :size="52" />
+  <div><strong>Three kinds:</strong> label it, write it, or translate it.</div>
 </div>
 <div v-click class="flex items-center gap-3">
   <TransformerGlyph kind="code" :size="52" />
@@ -5348,39 +5659,42 @@ Mix across positions, then think about each position alone.
 
 <!--
 The whole lecture on one slide, one glyph per section, in the order we met
-them. The glyphs are the same ones that sat on each section divider, so point
-at the shape before reading the words.
+them: the whole machine, then its parts, then its uses. The glyphs are the same
+ones that sat on each section divider, so point at the shape before reading the
+words.
 
-Click: the cut chain. The recurrence is gone, so nothing in a layer waits for
-anything else and the whole sequence is processed at once.
+Click: the cut chain. A recurrent network makes every step wait for the one
+before. With the chain gone, the whole sequence is processed at once.
 
-Click 2: the query fan. Attention is a soft dictionary: the query is matched to
+Click 2: the two stacks. The whole architecture: an encoder reads the source
+once, a decoder writes the target, and cross-attention is the only wire between
+them.
+
+Click 3: the query fan. Attention is a soft dictionary: the query is matched to
 every key by a dot product, the scores are scaled and softmaxed, and the values
 are mixed by those weights. A word's meaning is assembled per sentence.
 
-Click 3: the four fans. One softmax answers one question, so we use several
-heads. And because attention ignores order, position is put into the vector.
+Click 4: the block glyph. Several heads ask different questions, position is
+put into the vectors because attention ignores order, the same small network
+then works on each position alone, and a residual and a norm wrap each half so
+the blocks stack.
 
-Click 4: the block glyph. Attention mixes sideways, then the same small network
-works on each position alone. Each half sits inside a residual connection and a
-norm, which is what lets the blocks stack.
+Click 5: the masked stack. The decoder's two extras: the mask stops a position
+from seeing later words, which keeps generation honest and lets training run in
+parallel; cross-attention reads the encoder.
 
-Click 5: the two stacks. The original transformer was an encoder and a decoder.
-The mask stops a position from seeing later words, which keeps generation
-honest and lets training run in parallel.
-
-Click 6: the masked stack. Modern models are decoder-only. They moved the norm,
-rotated the positions and shared the key and value heads, and left the
-mechanism alone.
+Click 6: the fork. Encoder-only models label a whole input, decoder-only models
+write text, encoder–decoder models turn one sequence into another. Decoder-only
+took over because any text is training data.
 
 Click 7: the tensor slab. In PyTorch the mechanism is one call,
 F.scaled_dot_product_attention, and every block maps (B, T, d) to (B, T, d).
 
 Click 8: the callout, the sentence to leave with.
 
-Then hand over: next week takes this block, stacks a hundred of them, trains it
-on next-token prediction over a substantial fraction of the written internet, and
-asks what happens. None of the architecture changes. Everything else does.
+Then close: a large language model is this block, stacked about a hundred times
+and trained on next-token prediction over a large share of the written
+internet. None of the architecture changes. Everything else does.
 
 Class cut: about 2 minutes.
 -->
@@ -5394,13 +5708,14 @@ title: "In words: Where we got to"
 
 <div class="dl-describe">
 
-Each glyph stands for one section of the lecture.
+Each glyph stands for one section, in lecture order: the whole, the parts, the uses.
 
-- A transformer drops the recurrence, so every position is processed at the same time.
-- Attention is a soft lookup. A query is compared with every key, and the values are mixed using those scores.
-- Several heads ask several questions at once. Position is added, because attention ignores word order.
-- A block is attention, then a small network on each position, each with a residual and a norm.
-- The original model had two stacks. Modern models keep only the masked decoder stack.
+- With no recurrence, every position is processed at the same time.
+- The whole model is an encoder stack and a decoder stack, joined by cross-attention.
+- Attention is a soft lookup: a query meets every key, and the values are mixed.
+- A block adds heads, position, a per-position network, and residuals with norms.
+- The decoder adds a mask and cross-attention.
+- Encoder-only labels, decoder-only writes, encoder–decoder translates.
 
 The sentence to remember: mix across positions, then think about each position alone.
 
@@ -5483,7 +5798,8 @@ small decoder-only model on characters, and then break it on purpose.
 Click 5: ask them to predict, before running it, what happens without the
 positional encoding.
 
-The deliberate-breakage exercise carries over from week 5 because it worked.
+Breaking a working model on purpose, one change at a time, teaches more than
+building it.
 
 What each break does, so you can grade it: no mask gives an implausibly low loss
 and gibberish samples; no scaling trains but converges slower and worse, more
@@ -5524,10 +5840,9 @@ back at the deck before the lab. No time needed in the lecture.
 ---
 layout: end
 email: vajira@simula.no
-next: Large Language Models
 ---
 
-# To be continued…
+# Questions?
 
 <div class="mx-auto mt-2" style="width: 150px;">
   <TransformerGlyph kind="decoder" :size="150" />
@@ -5535,8 +5850,8 @@ next: Large Language Models
 
 <!--
 The decoder-only glyph, one last time: the masked stack that every modern
-language model is built from. Next week is what happens when that stack is made
-very large and trained on a great deal of text.
+language model is built from, made very large and trained on a great deal of
+text.
 
 Leave five minutes for questions.
 -->

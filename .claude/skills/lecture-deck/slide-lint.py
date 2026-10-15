@@ -5,7 +5,7 @@
     python3 .claude/skills/lecture-deck/slide-lint.py lecture-07 --only read
     python3 .claude/skills/lecture-deck/slide-lint.py lecture-07 --only dup,click
 
-Four groups of findings, each line prefixed with the slide number:
+Five groups of findings, each line prefixed with the slide number:
 
   read   sentences a student has to work to parse — too long, idioms a
          non-native speaker will miss, acronyms never expanded, rare jargon
@@ -20,6 +20,9 @@ Four groups of findings, each line prefixed with the slide number:
   eq     display equations with a symbol that is never named on the slide
          (inline maths, a legend table, an SVG label), and equations with no
          number beside them — no worked example.
+  alone  references to another lecture, on the slide or in its notes: "last
+         week", "next lecture", "week 6", "lecture 05", "as we saw before". A
+         deck must stand alone, so lectures can be taught in any order.
 
 It reads source only. `npm run check:layout` is the rendered counterpart —
 it finds overlapping text and clicks that change nothing on screen.
@@ -336,6 +339,33 @@ def click_checks(deck):
     return rows
 
 
+# --- standing alone ---------------------------------------------------------
+
+ALONE = re.compile(
+    r"\b(?:last|next|previous|coming|earlier|later|another|other|future|past|following|preceding)"
+    r"\s+(?:week|lecture|class|session|deck|slide\s*set|chapter)s?\b"
+    r"|\bweeks?\s+\d+\b|\blectures?\s+0?\d+\b|\bweeks?\s+ago\b"
+    r"|\b(?:as|what) we (?:saw|did|built|learned|covered)\s+(?:before|earlier|last)\b"
+    r"|\bremember (?:from|when we)\b",
+    re.I)
+
+
+def alone_checks(deck, path):
+    """Every mention of another lecture, visible or in the speaker notes."""
+    rows = []
+    # The end layout prints `next:` as "Next: <title>" — a teaser for another lecture.
+    for n, (layout, _label, _body, fm) in enumerate(_stats.slides_fm(path), start=1):
+        m = re.search(r"(?m)^next:\s*(.+)$", fm)
+        if m:
+            rows.append((n, f"front matter: `next: {m.group(1).strip()}` names another lecture"))
+    for n, (_layout, _label, body) in enumerate(deck, start=1):
+        for m in ALONE.finditer(body):
+            line = body[max(0, body.rfind("\n", 0, m.start()) + 1):body.find("\n", m.end()) % (len(body) + 1)]
+            where = "notes" if body.rfind("<!--", 0, m.start()) > body.rfind("-->", 0, m.start()) else "slide"
+            rows.append((n, f"{where}: “{m.group(0)}” in “{line.strip()[:90]}”"))
+    return rows
+
+
 def main():
     argv = sys.argv[1:]
     only = None
@@ -349,7 +379,7 @@ def main():
         path = Path("decks") / d / "slides.md"
         deck = list(slides(path))
         groups = {"read": read_checks(deck), "dup": dup_checks(deck, path.read_text()), "click": click_checks(deck),
-                  "eq": eq_checks(deck)}
+                  "eq": eq_checks(deck), "alone": alone_checks(deck, path)}
         print(f"\n{d} — {len(deck)} slides")
         for g, rows in groups.items():
             if only and g not in only:
