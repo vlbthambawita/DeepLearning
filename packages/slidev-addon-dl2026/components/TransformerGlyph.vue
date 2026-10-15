@@ -19,12 +19,14 @@
  *   fork     one trunk splitting into three stacks — plain, accent, and a
  *            pair: encoder-only, decoder-only, encoder–decoder
  *   code     a tensor slab with its (B, T, d) sizes: the PyTorch section
+ *   position a word tile plus a sine wave: positional encoding
+ *   train    predicted bars beside the one-hot target bar: the loss
  *
  * Opacity goes through `:style`, never a literal `opacity="…"` attribute —
  * UnoCSS attributify would emit a rule that overrides it (see CONTRIBUTING.md).
  */
 const props = withDefaults(defineProps<{
-  kind: 'cut' | 'qkv' | 'heads' | 'block' | 'encdec' | 'decoder' | 'fork' | 'code'
+  kind: 'cut' | 'qkv' | 'heads' | 'block' | 'encdec' | 'decoder' | 'fork' | 'code' | 'position' | 'train'
   size?: number
   label?: string
 }>(), {
@@ -40,6 +42,10 @@ const QKV = [
 /* heads: where each of four heads points, as a key index 0..2. */
 const HEADS = [0, 2, 1, 2]
 /* decoder: lower-triangular mask, 4×4 — row r may look at columns 0..r. */
+/* position: one period of a sine, sampled for a polyline. */
+const WAVE = Array.from({ length: 25 }, (_, i) => `${10 + i * 3.4},${74 - 14 * Math.sin((i / 24) * 2 * Math.PI)}`).join(' ')
+/* train: a prediction over four words, and the one-hot target. */
+const PRED = [0.2, 0.55, 0.15, 0.1]
 const MASK = Array.from({ length: 16 }, (_, i) => ({ r: Math.floor(i / 4), c: i % 4 }))
 </script>
 
@@ -107,6 +113,19 @@ const MASK = Array.from({ length: 16 }, (_, i) => ({ r: Math.floor(i / 4), c: i 
         <text x="16" y="54" class="dl-tglyph__t is-sm" text-anchor="middle">B</text>
         <text x="65" y="94" class="dl-tglyph__t is-sm" text-anchor="middle">T</text>
         <text x="90" y="20" class="dl-tglyph__t is-sm" text-anchor="middle">d</text>
+      </g>
+      <g v-else-if="props.kind === 'position'">
+        <rect x="10" y="10" width="80" height="26" rx="4" class="dl-tglyph__tile" />
+        <rect v-for="k in 4" :key="k" :x="14 + (k - 1) * 19" y="15" width="15" height="16" rx="2" class="dl-tglyph__cell" />
+        <text x="50" y="54" class="dl-tglyph__t" text-anchor="middle">+</text>
+        <polyline :points="WAVE" class="dl-tglyph__line" style="stroke: var(--dl-accent)" />
+      </g>
+
+      <g v-else-if="props.kind === 'train'">
+        <line x1="6" y1="84" x2="94" y2="84" class="dl-tglyph__line is-thin" />
+        <rect v-for="(p, i) in PRED" :key="`p${i}`" :x="8 + i * 11" :y="84 - p * 100" width="8" :height="p * 100" class="dl-tglyph__tile" />
+        <text x="50" y="58" class="dl-tglyph__t is-sm" text-anchor="middle">vs</text>
+        <rect v-for="i in 4" :key="`t${i}`" :x="58 + (i - 1) * 9" :y="i === 2 ? 20 : 82" width="7" :height="i === 2 ? 64 : 2" class="dl-tglyph__cell" />
       </g>
     </svg>
     <figcaption v-if="$slots.default" class="dl-tglyph__label"><slot /></figcaption>

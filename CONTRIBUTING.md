@@ -71,6 +71,7 @@ Tag-driven, so nothing reaches students until you say so.
 ```bash
 git tag lecture-03-v1 && git push origin lecture-03-v1   # one deck
 git tag site-v1.1.0   && git push origin site-v1.1.0     # the whole site
+git tag transformer-v2-v1 && git push origin transformer-v2-v1   # the transformer-v2 deck
 ```
 
 A per-lecture tag uploads that deck plus a refreshed landing page and leaves
