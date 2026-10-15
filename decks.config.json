@@ -65,6 +65,15 @@
       "source": "old_slides/2025/Teaching - Deep Leaning - 2025 - Lecture 5_6.pdf"
     },
     {
+      "id": "transformer-v2",
+      "title": "Transformer v2: The Illustrated Transformer",
+      "subtitle": "Self-attention by hand, many heads, the decoder and training \u2014 after Jay Alammar\u2019s The Illustrated Transformer",
+      "week": 7,
+      "published": true,
+      "notebook": null,
+      "source": "https://jalammar.github.io/illustrated-transformer/"
+    },
+    {
       "id": "lecture-07",
       "title": "Generative Models and GANs",
       "subtitle": "Autoencoders, VAEs, the adversarial game \u2014 and how diffusion took over",

@@ -1,0 +1,10 @@
+/*
+ * Global styles for this deck.
+ *
+ * Slidev loads a `style.css` sitting next to slides.md as a real stylesheet.
+ * A <style> block inside the markdown would be scoped to a single slide, which
+ * is almost never what you want — see CONTRIBUTING.md.
+ *
+ * If a second lecture wants something you put here, move it to
+ * packages/slidev-theme-dl2026/styles/layout.css instead.
+ */

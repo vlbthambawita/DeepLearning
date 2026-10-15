@@ -16,6 +16,7 @@ on:
   push:
     tags:
       - 'lecture-*-v*'
+      - 'transformer-v2-v*'
       - 'site-v*'
   workflow_dispatch:
     inputs:
@@ -54,7 +55,8 @@ jobs:
             case "$TAG" in
               site-v*)      TARGET="site" ;;
               lecture-*-v*) TARGET="$(printf '%s' "$TAG" | sed -E 's/^(lecture-[0-9]+)-v.*$/\1/')" ;;
-              *)            echo "::error::Tag '$TAG' matches neither lecture-XX-vN nor site-vX.Y.Z"; exit 1 ;;
+              transformer-v2-v*) TARGET="transformer-v2" ;;
+              *)            echo "::error::Tag '$TAG' matches none of lecture-XX-vN, transformer-v2-vN, site-vX.Y.Z"; exit 1 ;;
             esac
           fi
 
